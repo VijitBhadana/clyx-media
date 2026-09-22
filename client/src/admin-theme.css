@@ -1,0 +1,88 @@
+/* Admin CMS palette: #050814 navy, #013AA3 blue, #FFDE59 yellow, #FFFFFF white. */
+.admin-panel,
+.admin-panel [class*="bg-[color:var(--background)]"] {
+  background-color: #050814;
+  color: #FFFFFF;
+}
+
+/* Match the homepage type system: Inter for UI copy, Space Grotesk for headings. */
+.admin-panel { font-family: var(--font-body), Inter, sans-serif; }
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel h4,
+.admin-panel .display { font-family: var(--font-display), "Space Grotesk", sans-serif; }
+
+/* Sidebar group subheadings. */
+.admin-panel aside > div > div > p.text-muted {
+  color: #FFDE59 !important;
+}
+
+.admin-panel .bg-blue { background-color: #013AA3 !important; }
+.admin-panel .text-blue,
+.admin-panel .text-\[\#003AA3\] { color: #013AA3 !important; }
+.admin-panel .bg-yellow { background-color: #FFDE59 !important; }
+.admin-panel .text-yellow { color: #FFDE59 !important; }
+.admin-panel .text-white { color: #FFFFFF !important; }
+.admin-panel .text-dark { color: #050814 !important; }
+.admin-panel .bg-dark { background-color: #050814 !important; }
+
+/* Keep muted surfaces within the same navy/white system. */
+.admin-panel .bg-muted\/5 { background-color: rgba(255,255,255,0.035) !important; }
+.admin-panel .bg-muted\/10 { background-color: rgba(255,255,255,0.08) !important; }
+.admin-panel .bg-muted\/20 { background-color: rgba(255,255,255,0.12) !important; }
+.admin-panel .border-grid { border-color: rgba(255,255,255,0.12) !important; }
+.admin-panel .text-muted { color: rgba(255,255,255,0.62) !important; }
+.admin-panel .text-foreground { color: #FFFFFF !important; }
+
+/* Active navigation and action controls. */
+.admin-panel .hover\\:bg-muted\/10:hover { background-color: rgba(255,255,255,0.08) !important; }
+.admin-panel .hover\\:text-foreground:hover { color: #FFFFFF !important; }
+.admin-panel .text-green-500 { color: #FFDE59 !important; }
+.admin-panel .bg-green-500 { background-color: #FFDE59 !important; }
+.admin-panel .bg-blue\/10 { background-color: rgba(1,58,163,0.22) !important; }
+.admin-panel .bg-yellow\/10 { background-color: rgba(255,222,89,0.16) !important; }
+
+/* Inputs remain legible against the navy canvas. */
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select {
+  background-color: rgba(255,255,255,0.04);
+  color: #FFFFFF;
+  border-color: rgba(255,255,255,0.16);
+}
+.admin-panel input::placeholder,
+.admin-panel textarea::placeholder { color: rgba(255,255,255,0.45); }
+.admin-panel input:focus,
+.admin-panel textarea:focus,
+.admin-panel select:focus {
+  border-color: #FFDE59;
+  box-shadow: 0 0 0 3px rgba(255,222,89,0.16);
+}
+
+.admin-panel .shadow-md,
+.admin-panel .shadow-lg { box-shadow: 0 12px 32px rgba(0,0,0,0.24); }
+
+/* Light mode: preserve the same brand blue/yellow accents on a clean canvas. */
+html:not(.dark) .admin-panel,
+html:not(.dark) .admin-panel [class*="bg-[color:var(--background)]"] {
+  background-color: #F8FAFD;
+  color: #0F172A;
+}
+html:not(.dark) .admin-panel .text-foreground { color: #0F172A !important; }
+html:not(.dark) .admin-panel .text-muted { color: #64748B !important; }
+html:not(.dark) .admin-panel .border-grid { border-color: rgba(15,23,42,0.12) !important; }
+html:not(.dark) .admin-panel .bg-muted\/5 { background-color: rgba(1,58,163,0.045) !important; }
+html:not(.dark) .admin-panel .bg-muted\/10 { background-color: rgba(1,58,163,0.08) !important; }
+html:not(.dark) .admin-panel .bg-muted\/20 { background-color: rgba(1,58,163,0.12) !important; }
+html:not(.dark) .admin-panel input,
+html:not(.dark) .admin-panel textarea,
+html:not(.dark) .admin-panel select {
+  background-color: #FFFFFF;
+  color: #0F172A;
+  border-color: rgba(15,23,42,0.16);
+}
+html:not(.dark) .admin-panel input::placeholder,
+html:not(.dark) .admin-panel textarea::placeholder { color: #64748B; }
+html:not(.dark) .admin-panel .shadow-md,
+html:not(.dark) .admin-panel .shadow-lg { box-shadow: 0 12px 32px rgba(15,23,42,0.12); }

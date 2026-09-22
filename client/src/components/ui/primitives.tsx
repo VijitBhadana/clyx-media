@@ -1,0 +1,5 @@
+import type { ReactNode } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+export function Button({children,variant='primary',className='',href='#'}:{children:ReactNode;variant?:'primary'|'ghost';className?:string;href?:string}){return <a href={href} className={`inline-flex items-center gap-3 px-5 py-3 text-sm font-semibold uppercase tracking-[.08em] ${variant==='primary'?'bg-yellow text-dark hover:bg-white':'border border-current hover:bg-yellow hover:text-dark'} ${className}`}><span>{children}</span><ArrowUpRight size={16}/></a>}
+export function Section({children,id='',className=''}:{children:ReactNode;id?:string;className?:string}){return <section id={id} className={`section-shell py-20 md:py-28 ${className}`}><div className="container">{children}</div></section>}
+export function Label({children,className='',style}:{children:ReactNode;className?:string;style?:React.CSSProperties}){return <p className={`mb-8 text-[10px] font-semibold uppercase tracking-[.18em] text-muted md:text-xs ${className}`} style={style}>{children}</p>}
