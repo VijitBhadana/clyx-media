@@ -92,7 +92,13 @@ function HoverExpandPortfolio({ items, className }: { items: PortfolioImage[]; c
               onClick={() => setActiveImage(index)}
               onHoverStart={() => setActiveImage(index)}
             >
-              <img src={image.src} className="h-full w-full object-cover" alt={image.alt} />
+              <img
+                src={image.src}
+                className="h-full w-full object-cover"
+                alt={image.alt}
+                loading="lazy"
+                decoding="async"
+              />
 
               <div
                 className={cn(
