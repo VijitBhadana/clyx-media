@@ -5,9 +5,9 @@ A modern web application built with React, Vite, and TypeScript.
 ## Tech Stack
 
 - **Frontend:** React, Vite, Tailwind CSS, Framer Motion, GSAP, Radix UI components
-- **Backend:** Node.js, Express, tRPC, Drizzle ORM
-- **Database:** MySQL
 - **Tooling:** TypeScript, Prettier, Vitest
+
+The backend lives in a separate `clyx-media-backend` service and is not part of this repo.
 
 ## Getting Started
 
@@ -43,9 +43,7 @@ This will start the Vite development server. Open the provided `localhost` URL i
 
 - `pnpm run dev`: Starts the local development server.
 - `pnpm run build`: Builds the project for production.
-- `pnpm run start`: Starts the production server (after building).
 - `pnpm run test`: Runs unit tests using Vitest.
-- `pnpm run db:push`: Pushes schema changes to the database using Drizzle.
 - `pnpm run format`: Formats code using Prettier.
 
 ## License

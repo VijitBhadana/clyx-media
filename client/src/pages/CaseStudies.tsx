@@ -111,6 +111,8 @@ function HoverExpand_002({
                 src={item.src}
                 className="absolute inset-0 h-full w-full object-cover"
                 alt={item.alt}
+                loading="lazy"
+                decoding="async"
               />
 
               {/* Dark Overlay Gradient */}

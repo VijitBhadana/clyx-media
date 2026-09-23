@@ -6,6 +6,12 @@ import '../styles/landing-v1.css';
 import '../styles/landing-v1-js-globals.css';
 import '../styles/shared-footer.css';
 
+declare global {
+  interface Window {
+    __clyxLandingScriptsLoaded?: boolean;
+  }
+}
+
 export default function LandingV1() {
   useEffect(() => {
     const progress = document.querySelector('.loader-progress') as HTMLElement | null;
@@ -13,24 +19,24 @@ export default function LandingV1() {
       if (progress) progress.style.width = '100%';
     });
 
-    // Load data.js first
+    // main.js attaches global listeners + an infinite rAF loop with no teardown.
+    // Re-running it on every SPA remount of this route (e.g. navigating away and
+    // back to "/") would stack duplicate listeners/loops and leak memory, so it
+    // is only ever injected once per full page load.
+    if (window.__clyxLandingScriptsLoaded) return;
+    window.__clyxLandingScriptsLoaded = true;
+
     const dataScript = document.createElement('script');
     dataScript.src = '/js/data.js';
     dataScript.async = false;
     document.body.appendChild(dataScript);
 
-    // Load main.js after
     const script = document.createElement('script');
     script.src = '/js/main.js';
     script.async = false;
-    
+
     dataScript.onload = () => {
       document.body.appendChild(script);
-    };
-
-    return () => {
-      if (document.body.contains(script)) document.body.removeChild(script);
-      if (document.body.contains(dataScript)) document.body.removeChild(dataScript);
     };
   }, []);
 

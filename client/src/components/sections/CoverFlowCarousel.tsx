@@ -153,6 +153,8 @@ export default function CoverFlowCarousel({
         <img
           src={items[currentIndex]?.img}
           alt="ambience background"
+          loading="lazy"
+          decoding="async"
           style={{
             width: "100%",
             height: "100%",
@@ -254,6 +256,8 @@ export default function CoverFlowCarousel({
                 <img
                   src={item.img}
                   alt={item.titleLine1}
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     position: "absolute",
                     inset: 0,
