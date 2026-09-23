@@ -29,7 +29,7 @@ export function Footer() {
             <div className="mt-7 flex gap-3">
               <a
                 className="border border-white/30 p-3 hover:border-yellow hover:text-yellow transition-colors"
-                href="https://www.instagram.com/clyxmedia/"
+                href="https://www.instagram.com/d2cwithclyx"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
