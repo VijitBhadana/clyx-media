@@ -38,7 +38,7 @@ export function Footer() {
               </a>
               <a
                 className="border border-white/30 p-3 hover:border-yellow hover:text-yellow transition-colors"
-                href="https://www.linkedin.com/company/clyx-media/"
+                href="https://www.linkedin.com/company/clyxmediax/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="LinkedIn"
