@@ -406,8 +406,8 @@ export default function LandingV1() {
   {/* Shared footer, social icons, WhatsApp button, and consent UI. */}
   <Footer />
   <WhatsAppButton />
-  <CookieBar />
     </div>
+    <CookieBar />
     </>
   );
 }
