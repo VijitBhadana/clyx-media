@@ -10,7 +10,7 @@ const footerRoutes: Record<string, string> = {
   Services: '/services',
   Portfolio: '/portfolio',
   'Case studies': '/case-studies',
-  WhatsApp: 'https://wa.me/919876543210',
+  WhatsApp: 'https://wa.me/919671430111',
   Calendly: '/contact#contact-form',
 };
 
@@ -82,7 +82,7 @@ export function Footer() {
 export function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/919876543210"
+      href="https://wa.me/919671430111"
       aria-label="Chat on WhatsApp"
       className="whatsapp-button fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue text-white shadow-lg hover:bg-yellow hover:text-dark transition-all"
     >

@@ -382,7 +382,7 @@ export default function LandingV1() {
         Let's audit your current Meta/Google ad accounts and creator pipeline. We will map out a 90-day scaling roadmap for your brand.
       </p>
       <div className="cta-actions">
-        <a href="https://wa.me/919876543210" target="_blank" className="btn btn-primary btn-large">Book a Growth Call ↗</a>
+        <a href="https://wa.me/919671430111" target="_blank" className="btn btn-primary btn-large">Book a Growth Call ↗</a>
         <a href="mailto:hello@clyxmedia.com?subject=Growth Consultation - CLYX Media" className="btn cta-btn-founders btn-large">Email Founders</a>
       </div>
     </section>
