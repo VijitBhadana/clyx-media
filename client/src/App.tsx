@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 
-const LandingV1 = lazy(() => import('./pages/LandingV1'));
+const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
@@ -35,7 +35,7 @@ export default function App() {
     <ErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
         <Switch>
-          <Route path="/" component={LandingV1} />
+          <Route path="/" component={Home} />
           <Route path="/admin" component={Admin} />
           <Route path="/admin/" component={Admin} />
           <Route path="/about" component={About} />
