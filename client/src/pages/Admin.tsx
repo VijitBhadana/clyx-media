@@ -108,7 +108,19 @@ interface CreatorItem {
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<SectionTab>('dashboard');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === 'admin' && password === 'admin123') {
+      setIsLoggedIn(true);
+    } else {
+      setLoginError(true);
+    }
+  };
   // Theme support
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -410,6 +422,28 @@ export default function Admin() {
     if (listName === 'careers') setCareers((p) => p.filter((x) => x.id !== id));
     if (listName === 'creators') setCreators((p) => p.filter((x) => x.id !== id));
   };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[color:var(--background)] flex items-center justify-center p-4 text-foreground">
+        <div className="max-w-md w-full bg-card p-8 rounded-xl border border-border shadow-lg">
+          <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Username</label>
+              <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            {loginError && <p className="text-red-500 text-sm">Invalid username or password</p>}
+            <Button type="submit" className="w-full">Login</Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-panel min-h-screen bg-[color:var(--background)] text-foreground flex flex-col font-sans transition-colors duration-200">

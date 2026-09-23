@@ -6,6 +6,7 @@ const footerRoutes: Record<string, string> = {
   About: '/about',
   Creators: '/creators',
   Careers: '/careers',
+  Admin: '/admin',
   Services: '/services',
   Portfolio: '/portfolio',
   'Case studies': '/case-studies',

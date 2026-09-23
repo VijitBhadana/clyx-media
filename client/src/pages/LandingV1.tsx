@@ -35,32 +35,14 @@ export default function LandingV1() {
   }, []);
 
   return (
-    <div className="v1-landing-wrapper bg-[color:var(--background)] text-foreground min-h-screen transition-colors">
-      <div id="loader" role="status" aria-label="Loading CLYX">
-        <div className="loader-mark">CLYX<span>.</span></div>
-        <div className="loader-bar" aria-hidden="true"><span className="loader-progress" /></div>
-      </div>
-      <header className="site-header">
-        <div className="nav-wrap">
-          <a href="/" className="logo">CLYX<span>.</span></a>
-          <nav className="main-nav">
-            <a href="/about">About</a>
-            <a href="/services">Services</a>
-            <a href="/portfolio">Portfolio</a>
-            <a href="/case-studies">Case Studies</a>
-            <a href="/creators">Creators</a>
-            <a href="/blog">Blog</a>
-            <a href="/careers">Careers</a>
-            <a href="/contact">Contact</a>
-          </nav>
-          <div className="nav-actions">
-            <button className="theme-toggle-btn" id="themeToggleBtn">
-              <span id="themeIcon">☀️</span> <span id="themeLabel">Light</span>
-            </button>
-          </div>
+    <>
+      <Header />
+      <div className="v1-landing-wrapper bg-[color:var(--background)] text-foreground min-h-screen transition-colors">
+        <div id="loader" role="status" aria-label="Loading CLYX">
+          <div className="loader-mark">CLYX<span>.</span></div>
+          <div className="loader-bar" aria-hidden="true"><span className="loader-progress" /></div>
         </div>
-      </header>
-      <main>
+        <main>
         {/* Copied from backup_v1 */}
         
     {/*  HERO SECTION  */}
@@ -181,7 +163,7 @@ export default function LandingV1() {
                   </div>
                   <div className="dash-stat-box">
                     <div className="lbl">30-Day Revenue</div>
-                    <div className="val counter" data-target="1.84" data-decimals="2" data-prefix="₹" data-suffix=" Cr">₹1.84 Cr</div>
+                    <div className="val counter" data-target="30" data-prefix="₹" data-suffix=" Lakh">₹30 Lakh</div>
                     <div className="change">↑ +42% MoM</div>
                   </div>
                   <div className="dash-stat-box">
@@ -228,12 +210,12 @@ export default function LandingV1() {
     {/*  KEY STATS COUNTERS (Numbers count from 0)  */}
     <section className="stats-counter-strip">
       <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="45" data-prefix="₹" data-suffix="Cr+">0</div>
+        <div className="counter-number counter" data-target="1" data-prefix="₹" data-suffix="Cr+">0</div>
         <div className="counter-label">Ad Spend Managed</div>
         <div className="counter-detail">Across Meta &amp; Google ad accounts</div>
       </div>
       <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="3.4" data-decimals="1" data-suffix="X">0</div>
+        <div className="counter-number counter" data-target="5" data-suffix="X+">0</div>
         <div className="counter-label">Average ROAS Lift</div>
         <div className="counter-detail">Whitelisted vs Standard brand ads</div>
       </div>
@@ -243,7 +225,7 @@ export default function LandingV1() {
         <div className="counter-detail">Fashion, Beauty, Food, Tech benches</div>
       </div>
       <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="180" data-prefix="₹" data-suffix="Cr+">0</div>
+        <div className="counter-number counter" data-target="10" data-prefix="₹" data-suffix="Cr+">0</div>
         <div className="counter-label">Revenue Generated</div>
         <div className="counter-detail">Delivered for high-growth D2C brands</div>
       </div>
@@ -397,5 +379,6 @@ export default function LandingV1() {
   <WhatsAppButton />
   <CookieBar />
     </div>
+    </>
   );
 }

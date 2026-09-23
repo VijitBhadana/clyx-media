@@ -14,7 +14,7 @@ export const proofStats = [
 ];
 export const logos = ['KULTURE','NOVA','MUTHA','MOTION','HUSH'];
 export const footerColumns = {
-  Company:['About','Creators','Careers'], Work:['Services','Portfolio','Case studies'], Contact:['work@clyxmedia.com','WhatsApp','Calendly']
+  Company:['About','Creators','Careers','Admin'], Work:['Services','Portfolio','Case studies'], Contact:['work@clyxmedia.com','WhatsApp','Calendly']
 };
 
 export const methodologySteps = [
