@@ -131,40 +131,44 @@ function initClyxMedia() {
   }, 2400);
 
   // 7. Counters (Count from 0)
-  const counters = document.querySelectorAll('.counter');
-  if (counters.length) {
-    const observer = new IntersectionObserver((entries, obs) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          startCounting(entry.target);
-          obs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.25 });
-    counters.forEach(c => observer.observe(c));
-
-    function startCounting(el) {
-      const target = parseFloat(el.getAttribute('data-target') || '0');
-      const prefix = el.getAttribute('data-prefix') || '';
-      const suffix = el.getAttribute('data-suffix') || '';
-      const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
-      const duration = 1800;
-      let start = null;
-
-      function step(timestamp) {
-        if (!start) start = timestamp;
-        const p = Math.min((timestamp - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - p, 3);
-        const val = target * ease;
-        el.textContent = `${prefix}${val.toFixed(decimals)}${suffix}`;
-        if (p < 1) requestAnimationFrame(step);
-        else el.textContent = `${prefix}${target.toFixed(decimals)}${suffix}`;
-      }
-      requestAnimationFrame(step);
-    }
+  function formatCounter(el, value) {
+    const prefix = el.getAttribute('data-prefix') || '';
+    const suffix = el.getAttribute('data-suffix') || '';
+    const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    return `${prefix}${value.toFixed(decimals)}${suffix}`;
   }
 
-  // 8. 3D Coverflow Carousel Engine (Album Rake Physics + Middle Centering Rule)
+  function startCounting(el) {
+    const duration = 1800;
+    let start = null;
+
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      // Re-read the target every frame so CMS content arriving mid-animation is not overwritten.
+      const target = parseFloat(el.getAttribute('data-target') || '0');
+      const p = Math.min((timestamp - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = formatCounter(el, p < 1 ? target * ease : target);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const counterObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        startCounting(entry.target);
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.25 });
+
+  // Values that are not numbers (e.g. "Top 1%") carry data-static and are shown as plain text.
+  function observeCounters(root) {
+    (root || document).querySelectorAll('.counter:not([data-static])').forEach(c => counterObserver.observe(c));
+  }
+  observeCounters(document);
+
   const coverflowWrap = document.getElementById('coverflowWrap');
   const viewport = document.getElementById('coverflowViewport');
   const stage = document.getElementById('coverflowStage');
@@ -631,27 +635,31 @@ function initClyxMedia() {
     });
   }
 
+  // Content now comes from the CMS, so anything interpolated into markup is escaped first.
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
   // 10. Founders / Leadership Section
   const teamGrid = document.getElementById('teamGrid');
 
   function renderTeam() {
     if (!teamGrid || !window.CLYX_DATA || !window.CLYX_DATA.team) return;
     teamGrid.innerHTML = window.CLYX_DATA.team.map((m) => `
-      <div class="founder-card" id="founder-${(m.monogram || 'cm').toLowerCase()}">
+      <div class="founder-card" id="founder-${esc((m.monogram || 'cm').toLowerCase())}">
         <div>
           <div class="founder-top">
             <div class="founder-avatar-box">
               <div class="founder-avatar-wrap">
-                <img src="${m.img}" alt="${m.name}" class="founder-avatar-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600'">
+                <img src="${esc(m.img)}" alt="${esc(m.name)}" class="founder-avatar-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600'">
               </div>
               <div>
-                <span class="founder-track-badge">${m.badge || m.title || 'Leadership'}</span>
+                <span class="founder-track-badge">${esc(m.badge || m.title || 'Leadership')}</span>
               </div>
             </div>
           </div>
-          <h3>${m.name}</h3>
-          <p class="role">${m.role || m.title || 'CLYX Leader'}</p>
-          <p class="founder-bio">${m.bio || ''}</p>
+          <h3>${esc(m.name)}</h3>
+          <p class="role">${esc(m.role || m.title || 'CLYX Leader')}</p>
+          <p class="founder-bio">${esc(m.bio || '')}</p>
         </div>
         <div class="founder-footer">
           <span class="founder-firm-tag">CLYX Leadership</span>
@@ -667,10 +675,10 @@ function initClyxMedia() {
     if (tTrack && window.CLYX_DATA && window.CLYX_DATA.testimonials) {
       const cards = window.CLYX_DATA.testimonials.map(t => `
         <div class="testimonial-card">
-          <p class="testimonial-quote">“${t.quote}”</p>
+          <p class="testimonial-quote">“${esc(t.quote)}”</p>
           <div class="testimonial-meta">
-            <div class="author">${t.author}</div>
-            <div class="brand">${t.role ? t.role + ', ' : ''}${t.brand} · <span>${t.metrics || t.metric || '+300% Scale'}</span></div>
+            <div class="author">${esc(t.author)}</div>
+            <div class="brand">${esc([t.role, t.brand].filter(Boolean).join(', '))}${(t.metrics || t.metric) ? ` · <span>${esc(t.metrics || t.metric)}</span>` : ''}</div>
           </div>
         </div>
       `).join('');
@@ -736,41 +744,36 @@ function initClyxMedia() {
         eyebrowEl.textContent = window.CLYX_DATA.hero.eyebrow;
       }
       if (titleEl && (window.CLYX_DATA.hero.line1 || window.CLYX_DATA.hero.line2)) {
-        const line1 = window.CLYX_DATA.hero.line1 || "We turn organic clips";
-        const line2 = window.CLYX_DATA.hero.line2 || "scaled accounts.";
-        titleEl.innerHTML = `<span class="hero-line">${line1}</span><br><span class="hero-line">into <em class="accent">${line2}</em></span>`;
+        const line1 = window.CLYX_DATA.hero.line1;
+        const line2 = window.CLYX_DATA.hero.line2;
+        titleEl.innerHTML = line2
+          ? `<span class="hero-line">${esc(line1)}</span><br><span class="hero-line">into <em class="accent">${esc(line2)}</em></span>`
+          : `<span class="hero-line">${esc(line1)}</span>`;
       }
       if (subEl && window.CLYX_DATA.hero.sub) {
         subEl.textContent = window.CLYX_DATA.hero.sub;
       }
     }
 
-    if (Array.isArray(window.CLYX_DATA.stats) && window.CLYX_DATA.stats.length) {
-      const counterItems = document.querySelectorAll('.stats-counter-strip .counter-item');
-      counterItems.forEach((item, idx) => {
-        const s = window.CLYX_DATA.stats[idx];
-        if (!s) return;
-        const counterEl = item.querySelector('.counter');
-        const labelEl = item.querySelector('.counter-label');
-        const detailEl = item.querySelector('.counter-detail');
-        if (counterEl) {
-          counterEl.setAttribute('data-target', s.target);
-          counterEl.setAttribute('data-prefix', s.prefix || '');
-          counterEl.setAttribute('data-suffix', s.suffix || '');
-          if (s.decimals !== undefined) counterEl.setAttribute('data-decimals', s.decimals);
-          counterEl.textContent = `${s.prefix || ''}${s.target}${s.suffix || ''}`;
-        }
-        if (labelEl && s.label) labelEl.textContent = s.label;
-        if (detailEl && s.detail) detailEl.textContent = s.detail;
-      });
+    const strip = document.querySelector('.stats-counter-strip');
+    if (strip && Array.isArray(window.CLYX_DATA.stats) && window.CLYX_DATA.stats.length) {
+      strip.innerHTML = window.CLYX_DATA.stats.map((s) => {
+        const counterAttrs = s.isNumeric === false
+          ? `data-static="true"`
+          : `data-target="${esc(s.target)}" data-prefix="${esc(s.prefix || '')}" data-suffix="${esc(s.suffix || '')}" data-decimals="${esc(s.decimals || 0)}"`;
+        const initial = s.isNumeric === false ? esc(s.text) : '0';
+        return `<div class="stat-counter-card">
+          <div class="counter-number counter" ${counterAttrs}>${initial}</div>
+          <div class="counter-label">${esc(s.label)}</div>
+          <div class="counter-detail">${esc(s.detail)}</div>
+        </div>`;
+      }).join('');
+      observeCounters(strip);
     }
   }
 
   // Master Content Refresher
   function refreshAllDynamicContent() {
-    if (typeof window.hydrateClyxData === 'function') {
-      window.hydrateClyxData();
-    }
     hydrateHeroAndStats();
     if (typeof window.clyxRefreshCoverflow === 'function') {
       window.clyxRefreshCoverflow();
@@ -783,6 +786,9 @@ function initClyxMedia() {
 
   // Initial render on page load
   refreshAllDynamicContent();
+
+  // The React page calls this whenever fresh content arrives from the backend.
+  window.clyxRefreshAll = refreshAllDynamicContent;
 
   // Listen for storage events across open browser tabs
   window.addEventListener('storage', (e) => {

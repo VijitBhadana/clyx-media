@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import { Label } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
+import { useCollection } from '@/lib/siteContent';
 
 interface CaseStudyItem {
   id: string;
@@ -18,7 +19,7 @@ interface CaseStudyItem {
   accent: string;
 }
 
-const caseStudies: CaseStudyItem[] = [
+const defaultCaseStudies: CaseStudyItem[] = [
   {
     id: 'kulture-skin',
     code: '01',
@@ -196,6 +197,19 @@ function HoverExpand_002({
 }
 
 export default function CaseStudies() {
+  const caseStudies = useCollection<CaseStudyItem>('caseStudies', defaultCaseStudies, (item, i) => ({
+    id: item.id,
+    code: String(i + 1).padStart(2, '0'),
+    brand: item.brand,
+    category: item.category,
+    headline: item.headline,
+    result: item.result,
+    detail: item.detail,
+    src: item.image,
+    alt: `${item.brand} Campaign`,
+    accent: item.accent || '#FFDE59',
+  }));
+
   return (
     <PageShell
       eyebrow="Case studies"

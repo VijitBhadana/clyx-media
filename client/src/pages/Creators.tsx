@@ -3,8 +3,9 @@ import { motion, MotionValue, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import PageShell from '@/components/layout/PageShell';
 import { Label, Section } from '@/components/ui/primitives';
+import { useCollection } from '@/lib/siteContent';
 
-const creatorImages = [
+const defaultCreatorImages = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80',
@@ -52,6 +53,12 @@ const Column = ({ images, y }: ColumnProps) => {
 };
 
 export function ParallaxCreatorGallery() {
+  const creatorImages = useCollection<string>('creators', defaultCreatorImages, item => item.image).filter(Boolean);
+  // Always fill four columns: repeat the images when there are few, split them evenly when there are many.
+  const source = creatorImages.length ? creatorImages : defaultCreatorImages;
+  const filled = Array.from({ length: Math.max(12, source.length) }, (_, i) => source[i % source.length]);
+  const perColumn = Math.ceil(filled.length / 4);
+  const columns = [0, 1, 2, 3].map(k => filled.slice(k * perColumn, (k + 1) * perColumn));
   const gallery = useRef<HTMLDivElement>(null);
   const [dimension, setDimension] = useState({ width: 0, height: 0 });
 
@@ -97,10 +104,10 @@ export function ParallaxCreatorGallery() {
         ref={gallery}
         className="relative box-border flex h-[140vh] md:h-[160vh] gap-[2vw] overflow-hidden bg-transparent p-[2vw]"
       >
-        <Column images={[creatorImages[0], creatorImages[1], creatorImages[2]]} y={y} />
-        <Column images={[creatorImages[3], creatorImages[4], creatorImages[5]]} y={y2} />
-        <Column images={[creatorImages[6], creatorImages[7], creatorImages[8]]} y={y3} />
-        <Column images={[creatorImages[9], creatorImages[10], creatorImages[11]]} y={y4} />
+        <Column images={columns[0]} y={y} />
+        <Column images={columns[1]} y={y2} />
+        <Column images={columns[2]} y={y3} />
+        <Column images={columns[3]} y={y4} />
       </div>
     </div>
   );

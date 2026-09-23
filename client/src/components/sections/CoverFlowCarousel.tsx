@@ -98,6 +98,10 @@ export default function CoverFlowCarousel({
   const touchStartX = useRef(0);
   const total = items.length;
 
+  useEffect(() => {
+    if (currentIndex >= total) setCurrentIndex(0);
+  }, [currentIndex, total]);
+
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % total);
   }, [total]);

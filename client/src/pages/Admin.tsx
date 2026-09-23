@@ -25,6 +25,10 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { adminToken, ADMIN_LOGOUT_EVENT } from '@/lib/api';
+import { trpc } from '@/lib/trpc';
+import { useAdminContent, useSaveBlock, useServerList } from '@/admin/useAdminData';
+import { ImageUploadButton } from '@/admin/ImageUploadButton';
 import '../admin-theme.css';
 
 type SectionTab =
@@ -45,6 +49,7 @@ interface CampaignItem {
   roas: string;
   spend: string;
   status: 'Active' | 'Scaling' | 'Optimizing' | 'Completed';
+  img?: string;
   hidden: boolean;
 }
 
@@ -63,6 +68,7 @@ interface CaseStudyItem {
   category: string;
   headline: string;
   result: string;
+  image?: string;
   hidden: boolean;
 }
 
@@ -78,6 +84,7 @@ interface TeamItem {
   name: string;
   role: string;
   bio: string;
+  img?: string;
   hidden: boolean;
 }
 
@@ -103,24 +110,37 @@ interface CreatorItem {
   handle: string;
   platform: string;
   reach: string;
+  image?: string;
   hidden: boolean;
 }
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<SectionTab>('dashboard');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!adminToken.get());
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState(false);
+  const login = trpc.auth.login.useMutation();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin123') {
+    try {
+      const { token } = await login.mutateAsync({ username, password });
+      adminToken.set(token);
+      setLoginError(false);
       setIsLoggedIn(true);
-    } else {
+    } catch {
       setLoginError(true);
     }
   };
+
+  // The saved login expired or was rejected by the backend: back to the login form.
+  useEffect(() => {
+    const onLogout = () => setIsLoggedIn(false);
+    window.addEventListener(ADMIN_LOGOUT_EVENT, onLogout);
+    return () => window.removeEventListener(ADMIN_LOGOUT_EVENT, onLogout);
+  }, []);
+
   // Theme support
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -143,234 +163,48 @@ export default function Admin() {
     }
   };
 
+  // All content lives in the backend database; every add / edit / hide / delete below is saved there.
+  const { content, refetch } = useAdminContent(isLoggedIn);
+  const saveBlock = useSaveBlock(refetch);
+
   // 1. Case Studies
-  const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([
-    {
-      id: 'cs-1',
-      brand: 'Kulture Skin',
-      category: 'Beauty / Creator commerce',
-      headline: 'From organic proof to paid growth.',
-      result: '3.4x ROAS',
-      hidden: false,
-    },
-    {
-      id: 'cs-2',
-      brand: 'Nova Nutrition',
-      category: 'Food / Performance',
-      headline: 'More signal. Less spend.',
-      result: '42% lower CPA',
-      hidden: false,
-    },
-    {
-      id: 'cs-3',
-      brand: 'Mutha Beauty',
-      category: 'Fashion / Social',
-      headline: 'Make the feed feel like the brand.',
-      result: '10M+ impressions',
-      hidden: false,
-    },
-    {
-      id: 'cs-4',
-      brand: 'Orbit Labs',
-      category: 'Tech / Conversion CRO',
-      headline: 'Speed is a creative feature.',
-      result: '+28% CVR lift',
-      hidden: false,
-    },
-  ]);
+  const [caseStudies, setCaseStudies] = useServerList<CaseStudyItem>('caseStudies', content, refetch, 'start');
 
   // 2. Headlines & Stats
-  const [stats, setStats] = useState<StatItem[]>([
-    { id: 'st-1', value: '3.8x', label: 'Average ROAS across scaling accounts', hidden: false },
-    { id: 'st-2', value: '42%', label: 'Lower average customer acquisition cost', hidden: false },
-    { id: 'st-3', value: '10M+', label: 'Paid video impressions generated', hidden: false },
-  ]);
+  const [stats, setStats] = useServerList<StatItem>('stats', content, refetch);
 
-  const [heroHeadline, setHeroHeadline] = useState(
-    'We turn organic clips into scaled accounts.'
-  );
-  const [heroSubtext, setHeroSubtext] = useState(
-    'CLYX turns creator content into paid media that moves at scale. Creative instincts, performance discipline.'
-  );
+  const [heroHeadline, setHeroHeadline] = useState('');
+  const [heroSubtext, setHeroSubtext] = useState('');
+  useEffect(() => {
+    const hero = content?.blocks?.hero;
+    if (!hero) return;
+    setHeroHeadline(hero.headline ?? '');
+    setHeroSubtext(hero.sub ?? '');
+  }, [content]);
+
+  const saveHero = () => {
+    const hero = content?.blocks?.hero;
+    if (hero && hero.headline === heroHeadline && hero.sub === heroSubtext) return;
+    saveBlock('hero', { headline: heroHeadline, sub: heroSubtext });
+  };
 
   // 3. Team
-  const [team, setTeam] = useState<TeamItem[]>([
-    {
-      id: 'tm-1',
-      name: 'Arjun Chaudhary',
-      role: 'Founder & CEO',
-      bio: 'Leads the CLYX team and sets the strategic direction across performance, creative, and growth.',
-      hidden: false,
-    },
-    {
-      id: 'tm-2',
-      name: 'Sanya Malhotra',
-      role: 'Head of Creator Strategy & UGC',
-      bio: 'Directs 200+ creator relationships and content production frameworks that convert.',
-      hidden: false,
-    },
-    {
-      id: 'tm-3',
-      name: 'Karan Johar',
-      role: 'Head of Conversion Tech & CRO',
-      bio: 'Builds fast, conversion-first digital experiences where every interaction earns its place.',
-      hidden: false,
-    },
-  ]);
+  const [team, setTeam] = useServerList<TeamItem>('team', content, refetch);
 
   // 4. Testimonials
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([
-    {
-      id: 'ts-1',
-      name: 'Rhea Kapoor',
-      role: 'Founder, Kulture Skin',
-      quote: 'CLYX gave us a creative system that finally kept pace with our media spend.',
-      hidden: false,
-    },
-    {
-      id: 'ts-2',
-      name: 'Aditya Mehta',
-      role: 'Co-founder, Nova Nutrition',
-      quote: 'They found the hooks we could not see, then scaled the winners without losing the brand.',
-      hidden: false,
-    },
-    {
-      id: 'ts-3',
-      name: 'Maya Shah',
-      role: 'Founder, Mutha Beauty',
-      quote: 'The team feels like an extension of our own. Fast, sharp, and relentlessly focused on growth.',
-      hidden: false,
-    },
-  ]);
+  const [testimonials, setTestimonials] = useServerList<TestimonialItem>('testimonials', content, refetch);
 
   // 5. Careers
-  const [careers, setCareers] = useState<CareerItem[]>([
-    {
-      id: 'cr-1',
-      title: 'Performance Marketing Lead',
-      type: 'Full-time / Remote',
-      detail: 'Own the decisions that turn winning creative into efficient growth.',
-      hidden: false,
-    },
-    {
-      id: 'cr-2',
-      title: 'Creator Partnerships Manager',
-      type: 'Full-time / Mumbai or Remote',
-      detail: 'Build the relationships and systems behind our creator network.',
-      hidden: false,
-    },
-    {
-      id: 'cr-3',
-      title: 'Conversion Designer',
-      type: 'Contract / Remote',
-      detail: 'Shape the pages, offers, and interactions that turn attention into action.',
-      hidden: false,
-    },
-  ]);
+  const [careers, setCareers] = useServerList<CareerItem>('careers', content, refetch);
 
   // 6. Creators
-  const [creators, setCreators] = useState<CreatorItem[]>([
-    {
-      id: 'c-1',
-      name: 'Aarav Mehta',
-      handle: '@aarav.creates',
-      platform: 'Instagram',
-      reach: '420K',
-      hidden: false,
-    },
-    {
-      id: 'c-2',
-      name: 'Zoya Sengupta',
-      handle: '@zoyafits',
-      platform: 'TikTok',
-      reach: '890K',
-      hidden: false,
-    },
-    {
-      id: 'c-3',
-      name: 'Devansh K.',
-      handle: '@dev.unboxed',
-      platform: 'YouTube',
-      reach: '310K',
-      hidden: false,
-    },
-  ]);
+  const [creators, setCreators] = useServerList<CreatorItem>('creators', content, refetch);
 
   // Campaigns
-  const [campaigns, setCampaigns] = useState<CampaignItem[]>([
-    {
-      id: 'cmp-1',
-      client: 'Kulture Skin',
-      category: 'Creator UGC & Paid Meta',
-      roas: '3.4x',
-      spend: '$45,000 / mo',
-      status: 'Scaling',
-      hidden: false,
-    },
-    {
-      id: 'cmp-2',
-      client: 'Nova Nutrition',
-      category: 'TikTok Hook Scaling',
-      roas: '4.2x',
-      spend: '$70,000 / mo',
-      status: 'Active',
-      hidden: false,
-    },
-    {
-      id: 'cmp-3',
-      client: 'Mutha Beauty',
-      category: 'Whitelisted Influencer Ads',
-      roas: '2.9x',
-      spend: '$30,000 / mo',
-      status: 'Scaling',
-      hidden: false,
-    },
-    {
-      id: 'cmp-4',
-      client: 'Orbit Labs',
-      category: 'CRO Landing Sprint',
-      roas: '3.1x',
-      spend: '$20,000 / mo',
-      status: 'Optimizing',
-      hidden: false,
-    },
-  ]);
+  const [campaigns, setCampaigns] = useServerList<CampaignItem>('campaigns', content, refetch, 'start');
 
   // Blog Posts
-  const [posts, setPosts] = useState<BlogPostItem[]>([
-    {
-      id: 'post-1',
-      title: 'Why the best creator ads do not feel like ads',
-      tag: 'Creator economy',
-      date: '12.09.25',
-      readTime: '4 min read',
-      hidden: false,
-    },
-    {
-      id: 'post-2',
-      title: 'The performance creative loop, explained',
-      tag: 'Performance',
-      date: '04.09.25',
-      readTime: '6 min read',
-      hidden: false,
-    },
-    {
-      id: 'post-3',
-      title: 'From scroll-stopping hook to scalable system',
-      tag: 'Growth',
-      date: '28.08.25',
-      readTime: '5 min read',
-      hidden: false,
-    },
-    {
-      id: 'post-4',
-      title: 'The page is part of the ad',
-      tag: 'CRO',
-      date: '19.08.25',
-      readTime: '3 min read',
-      hidden: false,
-    },
-  ]);
+  const [posts, setPosts] = useServerList<BlogPostItem>('blog', content, refetch, 'start');
 
   // Active editing state for in-place edit modals/forms
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -755,6 +589,9 @@ export default function Admin() {
                     </div>
 
                     <div className="flex items-center justify-end gap-2 border-t border-grid pt-4">
+                      <ImageUploadButton
+                        onUploaded={(url) => setCampaigns((p) => p.map((x) => (x.id === cmp.id ? { ...x, img: url } : x)))}
+                      />
                       <Button
                         variant="outline"
                         size="sm"
@@ -861,6 +698,10 @@ export default function Admin() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      <ImageUploadButton
+                        iconSize={13}
+                        onUploaded={(url) => setCaseStudies((p) => p.map((x) => (x.id === cs.id ? { ...x, image: url } : x)))}
+                      />
                       <Button
                         variant="outline"
                         size="sm"
@@ -923,6 +764,7 @@ export default function Admin() {
                     <Input
                       value={heroHeadline}
                       onChange={(e) => setHeroHeadline(e.target.value)}
+                      onBlur={saveHero}
                       className="mt-1"
                     />
                   </div>
@@ -931,6 +773,7 @@ export default function Admin() {
                     <Textarea
                       value={heroSubtext}
                       onChange={(e) => setHeroSubtext(e.target.value)}
+                      onBlur={saveHero}
                       rows={3}
                       className="mt-1"
                     />
@@ -1164,6 +1007,10 @@ export default function Admin() {
                     </div>
 
                     <div className="flex items-center justify-end gap-2 border-t border-grid pt-4">
+                      <ImageUploadButton
+                        className="rounded-full text-xs h-8 gap-1"
+                        onUploaded={(url) => setTeam((p) => p.map((x) => (x.id === m.id ? { ...x, img: url } : x)))}
+                      />
                       <Button
                         variant="outline"
                         size="sm"
@@ -1412,6 +1259,11 @@ export default function Admin() {
                     </div>
 
                     <div className="flex items-center justify-end gap-2 border-t border-grid pt-3">
+                      <ImageUploadButton
+                        variant="ghost"
+                        className="text-xs h-7 px-2 gap-1"
+                        onUploaded={(url) => setCreators((p) => p.map((x) => (x.id === cr.id ? { ...x, image: url } : x)))}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"

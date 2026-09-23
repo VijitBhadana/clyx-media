@@ -1,12 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/layout/Header';
 import { Footer, WhatsAppButton, CookieBar } from '../components/layout/Footer';
-import CoverFlowCarousel from '../components/sections/CoverFlowCarousel';
+import CoverFlowCarousel, { clyxCampaigns, type CampaignItem } from '../components/sections/CoverFlowCarousel';
+import { useCollection, useSiteContent } from '@/lib/siteContent';
 import '../styles/landing-v1.css';
 import '../styles/landing-v1-js-globals.css';
 import '../styles/shared-footer.css';
 
 export default function LandingV1() {
+  // Hero, stats, team and testimonials are rendered by the legacy /js scripts from window.CLYX_DATA.
+  // CMS content is copied into CLYX_DATA before main.js starts, and again whenever it changes.
+  const { data: siteContent } = useSiteContent();
+  const contentRef = useRef(siteContent);
+  contentRef.current = siteContent;
+  const appliedRef = useRef<typeof siteContent>(undefined);
+  const [scriptsReady, setScriptsReady] = useState(false);
+
+  const campaigns = useCollection<CampaignItem>('campaigns', clyxCampaigns, (item) => ({
+    tag: item.category ? `#${String(item.category).toUpperCase()}` : '',
+    titleLine1: item.client,
+    titleLine2: item.roas,
+    desc: item.desc,
+    img: item.img,
+    ctaText: item.ctaText,
+    ctaUrl: item.ctaUrl,
+  }));
+
+  useEffect(() => {
+    if (!scriptsReady || !siteContent || siteContent === appliedRef.current) return;
+    appliedRef.current = siteContent;
+    (window as any).clyxApplyRemoteContent?.(siteContent);
+    (window as any).clyxRefreshAll?.();
+  }, [scriptsReady, siteContent]);
+
   useEffect(() => {
     const progress = document.querySelector('.loader-progress') as HTMLElement | null;
     requestAnimationFrame(() => {
@@ -25,8 +51,11 @@ export default function LandingV1() {
     script.async = false;
     
     dataScript.onload = () => {
+      appliedRef.current = contentRef.current;
+      (window as any).clyxApplyRemoteContent?.(contentRef.current);
       document.body.appendChild(script);
     };
+    script.onload = () => setScriptsReady(true);
 
     return () => {
       if (document.body.contains(script)) document.body.removeChild(script);
@@ -308,7 +337,7 @@ export default function LandingV1() {
     </section>
 
     {/* Campaigns section: the rest of the original homepage remains unchanged. */}
-    <CoverFlowCarousel id="portfolio" sectionLabel="FEATURED CAMPAIGNS" />
+    <CoverFlowCarousel id="portfolio" sectionLabel="FEATURED CAMPAIGNS" items={campaigns} />
 
     {/*  ABOUT / LEADERSHIP SECTION  */}
     <section className="section team" id="about">

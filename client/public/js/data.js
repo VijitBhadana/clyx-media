@@ -211,28 +211,47 @@ const CLYX_DATA = {
   ]
 };
 
-// Hydrate CLYX_DATA dynamically from localStorage if custom admin edits exist
-function hydrateClyxData() {
-  try {
-    const saved = localStorage.getItem('clyx_live_data');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed) {
-        if (Array.isArray(parsed.portfolio) && parsed.portfolio.length) CLYX_DATA.portfolio = parsed.portfolio;
-        if (Array.isArray(parsed.team) && parsed.team.length) CLYX_DATA.team = parsed.team;
-        if (Array.isArray(parsed.testimonials) && parsed.testimonials.length) CLYX_DATA.testimonials = parsed.testimonials;
-        if (Array.isArray(parsed.blog) && parsed.blog.length) CLYX_DATA.blog = parsed.blog;
-        if (Array.isArray(parsed.careers) && parsed.careers.length) CLYX_DATA.careers = parsed.careers;
-        if (parsed.hero) CLYX_DATA.hero = { ...CLYX_DATA.hero, ...parsed.hero };
-        if (Array.isArray(parsed.stats) && parsed.stats.length) CLYX_DATA.stats = parsed.stats;
-      }
-    }
-  } catch (err) {
-    console.warn("Could not hydrate CLYX_DATA from localStorage:", err);
-  }
+// Maps content from the backend (GET /api/public/content) onto CLYX_DATA, the shape main.js renders.
+// Called by the React landing page before main.js starts and again whenever fresh content arrives.
+function parseStatValue(raw) {
+  const text = String(raw == null ? '' : raw).trim();
+  const m = text.match(/^([^\d.]*)(\d+(?:\.\d+)?)(.*)$/);
+  if (!m) return { isNumeric: false, text };
+  return { isNumeric: true, target: parseFloat(m[2]), decimals: (m[2].split('.')[1] || '').length, prefix: m[1], suffix: m[3] };
 }
 
-hydrateClyxData();
-window.CLYX_DATA = CLYX_DATA;
-window.hydrateClyxData = hydrateClyxData;
+function initialsOf(name) {
+  return String(name || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || 'CM';
+}
 
+window.clyxApplyRemoteContent = function (remote) {
+  if (!remote) return;
+  const blocks = remote.blocks || {};
+  const lists = remote.collections || {};
+
+  if (blocks.hero) {
+    // "We turn organic clips into scaled accounts." -> line1 / line2 around the word "into"
+    const parts = String(blocks.hero.headline || '').split(/\s+into\s+/i);
+    CLYX_DATA.hero = {
+      ...CLYX_DATA.hero,
+      line1: parts[0] || CLYX_DATA.hero.line1,
+      line2: parts.length > 1 ? parts.slice(1).join(' into ') : '',
+      sub: blocks.hero.sub || CLYX_DATA.hero.sub,
+    };
+  }
+  if (Array.isArray(lists.stats)) {
+    CLYX_DATA.stats = lists.stats.map((s) => ({ ...parseStatValue(s.value), label: s.label, detail: s.detail }));
+  }
+  if (Array.isArray(lists.team)) {
+    CLYX_DATA.team = lists.team.map((m) => ({
+      name: m.name, role: m.role, bio: m.bio, img: m.img, badge: m.badge, monogram: initialsOf(m.name),
+    }));
+  }
+  if (Array.isArray(lists.testimonials)) {
+    CLYX_DATA.testimonials = lists.testimonials.map((t) => ({
+      quote: t.quote, author: t.name, role: t.role, brand: t.brand, metrics: t.metrics,
+    }));
+  }
+};
+
+window.CLYX_DATA = CLYX_DATA;
