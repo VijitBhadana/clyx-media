@@ -1,6 +1,6 @@
 .v1-landing-wrapper {
 /* ==========================================================================
-   CLYX MEDIA â€” MAIN DESIGN SYSTEM & STYLESHEET
+   CLYX MEDIA Ã¢â‚¬â€ MAIN DESIGN SYSTEM & STYLESHEET
    Production Stylesheet
    ========================================================================== */
 :root {
@@ -83,7 +83,7 @@ html:not(.dark) .v1-landing-wrapper .hero-title em.accent {
   -webkit-user-select: text;
 }
 
-/* NO hover background highlight â€” only triggers on mouse drag selection */
+/* NO hover background highlight Ã¢â‚¬â€ only triggers on mouse drag selection */
 html:not(.dark) .v1-landing-wrapper .hero-title em.accent:hover {
   background: transparent !important;
   box-shadow: none !important;
@@ -1733,4 +1733,9 @@ html:not(.dark) .v1-landing-wrapper .coverflow-wrap span {
 html:not(.dark) .v1-landing-wrapper .founder-card .role,
 html:not(.dark) .v1-landing-wrapper .founder-advisory-link {
     color: var(--clyx-blue) !important;
+}
+/* FORCE BLUE ACCENT IN LIGHT MODE */
+html:not(.dark) .v1-landing-wrapper .hero-title em.accent,
+html:not(.dark) .hero-title em.accent {
+    color: #013AA3 !important;
 }
