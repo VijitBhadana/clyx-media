@@ -84,9 +84,9 @@ export function WhatsAppButton() {
     <a
       href="https://wa.me/919671430111"
       aria-label="Chat on WhatsApp"
-      className="whatsapp-button fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue text-white shadow-lg hover:bg-yellow hover:text-dark transition-all"
+      className="whatsapp-button group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue text-white shadow-lg hover:bg-yellow hover:text-dark transition-all"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 fill-current">
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 !text-white group-hover:!text-dark fill-current">
         <path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.9-1.3A9.5 9.5 0 1 0 12 2.5Zm0 17.3c-1.5 0-2.9-.4-4.1-1.2l-.3-.2-2.9.8.8-2.8-.2-.3a7.8 7.8 0 1 1 6.7 3.7Zm4.3-5.8c-.2-.1-1.3-.7-1.5-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.1-.2 0-.3.1-.4l.4-.5c.1-.1.1-.3 0-.4l-.6-1.4c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.1 1.5 2.4 3.7 3.3 1.4.6 1.9.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3Z" />
       </svg>
     </a>
