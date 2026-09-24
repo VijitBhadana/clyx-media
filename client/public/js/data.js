@@ -104,28 +104,22 @@ const CLYX_DATA = {
 
   team: [
     {
-      name: "Arjun Verma",
-      role: "Managing Partner & Growth Lead",
-      bio: "Ex-D2C Performance Lead. Scaled ₹80Cr+ in Meta ad spend across 40+ brands.",
+      name: "Arjun Chaudhary",
+      role: "Founder & CEO",
       img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
-      monogram: "AV",
-      badge: "₹80Cr+ Scaled"
+      monogram: "AC"
     },
     {
-      name: "Sanya Malhotra",
-      role: "Head of Creator Strategy & UGC",
-      bio: "Directs 200+ creator relationships and content production frameworks that convert.",
+      name: "Dikshita",
+      role: "Social Media Manager",
       img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop",
-      monogram: "SM",
-      badge: "200+ Creators"
+      monogram: "DK"
     },
     {
-      name: "Karan Johar",
-      role: "Head of Conversion Tech & CRO",
-      bio: "Full-stack engineer specialized in Next.js, sub-second Shopify stores, and A/B funnels.",
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
-      monogram: "KJ",
-      badge: "0.4s Sub-Second Web"
+      name: "Manvi",
+      role: "Graphic Designer",
+      img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop",
+      monogram: "MV"
     }
   ],
 

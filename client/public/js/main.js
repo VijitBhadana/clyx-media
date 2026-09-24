@@ -644,29 +644,21 @@ function initClyxMedia() {
 
   function renderTeam() {
     if (!teamGrid || !window.CLYX_DATA || !window.CLYX_DATA.team) return;
-    teamGrid.innerHTML = window.CLYX_DATA.team.map((m) => `
-      <div class="founder-card" id="founder-${esc((m.monogram || 'cm').toLowerCase())}">
-        <div>
-          <div class="founder-top">
-            <div class="founder-avatar-box">
-              <div class="founder-avatar-wrap">
-                <img src="${esc(m.img)}" alt="${esc(m.name)}" class="founder-avatar-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600'">
-              </div>
-              <div>
-                <span class="founder-track-badge">${esc(m.badge || m.title || 'Leadership')}</span>
-              </div>
-            </div>
-          </div>
-          <h3>${esc(m.name)}</h3>
-          <p class="role">${esc(m.role || m.title || 'CLYX Leader')}</p>
-          <p class="founder-bio">${esc(m.bio || '')}</p>
-        </div>
-        <div class="founder-footer">
-          <span class="founder-firm-tag">CLYX Leadership</span>
-          <a href="#contact" class="founder-advisory-link">Direct Advisory ↗</a>
+    const cards = window.CLYX_DATA.team.map((m) => `
+      <div class="team-pill">
+        <img src="${esc(m.img)}" alt="${esc(m.name)}" class="team-pill-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600'">
+        <div class="team-pill-info">
+          <h3 class="team-pill-name">${esc(m.name)}</h3>
+          <p class="team-pill-role">${esc(m.role || 'CLYX Team')}</p>
         </div>
       </div>
     `).join('');
+    // Duplicate for seamless infinite scroll
+    teamGrid.innerHTML = `
+      <div class="team-marquee-track">
+        ${cards}${cards}
+      </div>
+    `;
   }
 
   // 11. Testimonials Rendering

@@ -1,6 +1,6 @@
 .v1-landing-wrapper {
 /* ==========================================================================
-   CLYX MEDIA ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â MAIN DESIGN SYSTEM & STYLESHEET
+   CLYX MEDIA ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â MAIN DESIGN SYSTEM & STYLESHEET
    Production Stylesheet
    ========================================================================== */
 :root {
@@ -83,7 +83,7 @@ html:not(.dark) .v1-landing-wrapper .hero-title em.accent {
   -webkit-user-select: text;
 }
 
-/* NO hover background highlight ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only triggers on mouse drag selection */
+/* NO hover background highlight ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â only triggers on mouse drag selection */
 html:not(.dark) .v1-landing-wrapper .hero-title em.accent:hover {
   background: transparent !important;
   box-shadow: none !important;
@@ -1751,4 +1751,87 @@ html:not(.dark) .v1-landing-wrapper #portfolio h3,
 html:not(.dark) .v1-landing-wrapper #portfolio span.text-\[\#FFDE59\],
 html:not(.dark) .v1-landing-wrapper #portfolio span.text-yellow {
     color: #FFDE59 !important;
+}
+/* ============================================================
+   TEAM MARQUEE STRIP
+   ============================================================ */
+#teamGrid {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.team-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: team-scroll 28s linear infinite;
+}
+
+.team-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes team-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.team-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px 10px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  flex-shrink: 0;
+  cursor: default;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-pill:hover {
+  border-color: var(--clyx-yellow);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+}
+
+html:not(.dark) .v1-landing-wrapper .team-pill:hover {
+  border-color: var(--clyx-blue);
+  box-shadow: 0 4px 18px rgba(1,58,163,0.12);
+}
+
+.team-pill-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.team-pill-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-pill-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.team-pill-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  color: var(--clyx-yellow);
+}
+
+html:not(.dark) .v1-landing-wrapper .team-pill-role {
+  color: var(--clyx-blue) !important;
 }
