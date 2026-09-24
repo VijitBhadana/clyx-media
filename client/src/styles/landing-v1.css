@@ -1,6 +1,6 @@
 .v1-landing-wrapper {
 /* ==========================================================================
-   CLYX MEDIA Ã¢â‚¬â€ MAIN DESIGN SYSTEM & STYLESHEET
+   CLYX MEDIA ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â MAIN DESIGN SYSTEM & STYLESHEET
    Production Stylesheet
    ========================================================================== */
 :root {
@@ -83,7 +83,7 @@ html:not(.dark) .v1-landing-wrapper .hero-title em.accent {
   -webkit-user-select: text;
 }
 
-/* NO hover background highlight Ã¢â‚¬â€ only triggers on mouse drag selection */
+/* NO hover background highlight ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only triggers on mouse drag selection */
 html:not(.dark) .v1-landing-wrapper .hero-title em.accent:hover {
   background: transparent !important;
   box-shadow: none !important;
@@ -1738,4 +1738,17 @@ html:not(.dark) .v1-landing-wrapper .founder-advisory-link {
 html:not(.dark) .v1-landing-wrapper .hero-title em.accent,
 html:not(.dark) .hero-title em.accent {
     color: #013AA3 !important;
+}
+/* FIX CAMPAIGNS CAROUSEL IN LIGHT MODE (using #portfolio since .coverflow-wrap is missing) */
+html:not(.dark) .v1-landing-wrapper #portfolio h2,
+html:not(.dark) .v1-landing-wrapper #portfolio p,
+html:not(.dark) .v1-landing-wrapper #portfolio .text-white,
+html:not(.dark) .v1-landing-wrapper #portfolio .text-white\/80 {
+    color: #F8FAFC !important;
+}
+
+html:not(.dark) .v1-landing-wrapper #portfolio h3,
+html:not(.dark) .v1-landing-wrapper #portfolio span.text-\[\#FFDE59\],
+html:not(.dark) .v1-landing-wrapper #portfolio span.text-yellow {
+    color: #FFDE59 !important;
 }
