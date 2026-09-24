@@ -122,11 +122,14 @@ function initClyxMedia() {
   }
 
   // 6. Live Oscillating Chart Bars
+  // Each bar wobbles around its own starting height, so the weekly shape (Mon low -> Sat high) stays readable
+  // instead of every bar drifting towards the same value.
   setInterval(() => {
     document.querySelectorAll('.chart-bar').forEach(bar => {
-      const current = parseInt(bar.style.height || '70', 10);
-      const next = Math.max(25, Math.min(95, current + (Math.random() * 10 - 5)));
-      bar.style.height = `${next}%`;
+      if (!bar.dataset.base) bar.dataset.base = parseInt(bar.style.height || '70', 10);
+      const base = Number(bar.dataset.base);
+      const next = Math.max(20, Math.min(98, base + (Math.random() * 12 - 6)));
+      bar.style.height = `${next.toFixed(1)}%`;
     });
   }, 2400);
 

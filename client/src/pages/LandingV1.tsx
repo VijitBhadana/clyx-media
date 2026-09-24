@@ -146,13 +146,14 @@ export default function LandingV1() {
 
     {/*  3D KINETIC MACBOOK PERSPECTIVE SCROLL (Hacker Villa Inspo)  */}
     <section className="kinetic-section" id="engine">
+      {/* The heading scrolls away normally; only the laptop is pinned, so it can use the full viewport height. */}
+      <div className="kinetic-header">
+        <p className="eyebrow" style={{ marginBottom: "8px" }}>Live Scaling Architecture ↓</p>
+        <h2>The engine behind <span className="kinetic-accent">₹45Cr+ in revenue</span>.</h2>
+        <p>Real-time creator whitelisting paired with algorithmic Meta &amp; Google scaling.</p>
+      </div>
+
       <div className="kinetic-sticky-wrap">
-        
-        <div className="kinetic-header">
-          <p className="eyebrow" style={{ marginBottom: "8px" }}>Live Scaling Architecture ↓</p>
-          <h2>The engine behind <span className="kinetic-accent">₹45Cr+ in revenue</span>.</h2>
-          <p>Real-time creator whitelisting paired with algorithmic Meta &amp; Google scaling.</p>
-        </div>
 
         <div className="macbook-container">
           
