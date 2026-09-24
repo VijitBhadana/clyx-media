@@ -66,44 +66,64 @@ export default function Header() {
 
   const allNav = ['Home', ...navLinks.filter(l => l.toLowerCase() !== 'home')];
   const currentActiveNav = routeToNav[location] || 'Home';
+  const isHome = location === '/';
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-grid bg-[color:var(--background)]/92 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] transition-colors duration-200">
-      <div className="container flex h-[76px] items-center justify-between">
+    <header className={`fixed top-0 z-50 w-full border-b border-grid transition-colors duration-200 ${isHome ? 'bg-[#050814] text-white border-transparent' : 'bg-[color:var(--background)]/92 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)]'}`}>
+      <div className={`container flex ${isHome ? 'h-[60px]' : 'h-[76px]'} items-center justify-between`}>
         {/* Brand Logo */}
-        <a href="/" className="display text-2xl font-bold tracking-[-.08em] text-foreground shrink-0">
+        <a href="/" className={`display text-2xl font-bold tracking-[-.08em] shrink-0 ${isHome ? 'text-white' : 'text-foreground'}`}>
           CLYX<span className="text-yellow">.</span>
         </a>
 
-        {/* Center Desktop Navigation with Animated Background Hover Pill */}
+        {/* Center Desktop Navigation */}
         <nav className="hidden items-center lg:flex">
-          <div className="flex items-center rounded-full border border-grid bg-black/[0.03] dark:bg-white/[0.04] p-1 backdrop-blur-md shadow-xs">
-            <AnimatedBackground
-              defaultValue={currentActiveNav}
-              className="rounded-full bg-black/10 dark:bg-white/15 shadow-xs"
-              transition={{
-                type: 'spring',
-                bounce: 0.18,
-                duration: 0.28,
-              }}
-              enableHover
-            >
+          {isHome ? (
+            <div className="flex items-center gap-6">
               {allNav.map(x => (
                 <a
                   key={x}
                   data-id={x}
                   href={hrefFor(x)}
-                  className={`inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
+                  className={`text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
                     currentActiveNav === x
-                      ? 'text-foreground font-bold'
-                      : 'text-muted hover:text-foreground'
+                      ? 'text-yellow'
+                      : 'text-white/70 hover:text-white'
                   }`}
                 >
                   {x}
                 </a>
               ))}
-            </AnimatedBackground>
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center rounded-full border border-grid bg-black/[0.03] dark:bg-white/[0.04] p-1 backdrop-blur-md shadow-xs">
+              <AnimatedBackground
+                defaultValue={currentActiveNav}
+                className="rounded-full bg-black/10 dark:bg-white/15 shadow-xs"
+                transition={{
+                  type: 'spring',
+                  bounce: 0.18,
+                  duration: 0.28,
+                }}
+                enableHover
+              >
+                {allNav.map(x => (
+                  <a
+                    key={x}
+                    data-id={x}
+                    href={hrefFor(x)}
+                    className={`inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
+                      currentActiveNav === x
+                        ? 'text-foreground font-bold'
+                        : 'text-muted hover:text-foreground'
+                    }`}
+                  >
+                    {x}
+                  </a>
+                ))}
+              </AnimatedBackground>
+            </div>
+          )}
         </nav>
 
         {/* Right Action Icons & Button */}
@@ -111,7 +131,11 @@ export default function Header() {
           <button
             aria-label="Toggle theme"
             onClick={toggle}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-grid bg-black/[0.03] dark:bg-white/[0.04] text-muted hover:text-foreground transition-colors"
+            className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+              isHome 
+                ? 'border-white/10 bg-white/5 text-white/70 hover:text-white' 
+                : 'border-grid bg-black/[0.03] dark:bg-white/[0.04] text-muted hover:text-foreground'
+            }`}
           >
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
@@ -120,7 +144,7 @@ export default function Header() {
 
         {/* Mobile Hamburger Button */}
         <button
-          className="min-h-11 min-w-11 p-2 lg:hidden text-foreground flex items-center justify-center"
+          className={`min-h-11 min-w-11 p-2 lg:hidden flex items-center justify-center ${isHome ? 'text-white' : 'text-foreground'}`}
           onClick={() => setOpen(!open)}
           aria-label="Open menu"
           aria-expanded={open}
@@ -131,7 +155,7 @@ export default function Header() {
 
       {/* Mobile Drawer Menu */}
       {open && (
-        <div className="max-h-[calc(100svh-76px)] overflow-y-auto border-t border-grid bg-[color:var(--background)]/98 backdrop-blur-2xl px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:hidden shadow-2xl">
+        <div className="max-h-[calc(100svh-60px)] overflow-y-auto border-t border-grid bg-[color:var(--background)]/98 backdrop-blur-2xl px-6 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:hidden shadow-2xl">
           {allNav.map(x => (
             <a
               onClick={() => setOpen(false)}

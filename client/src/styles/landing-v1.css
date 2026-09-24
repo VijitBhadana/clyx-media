@@ -1,6 +1,6 @@
 .v1-landing-wrapper {
 /* ==========================================================================
-   CLYX MEDIA — MAIN DESIGN SYSTEM & STYLESHEET
+   CLYX MEDIA â€” MAIN DESIGN SYSTEM & STYLESHEET
    Production Stylesheet
    ========================================================================== */
 :root {
@@ -83,7 +83,7 @@ html:not(.dark) .v1-landing-wrapper .hero-title em.accent {
   -webkit-user-select: text;
 }
 
-/* NO hover background highlight — only triggers on mouse drag selection */
+/* NO hover background highlight â€” only triggers on mouse drag selection */
 html:not(.dark) .v1-landing-wrapper .hero-title em.accent:hover {
   background: transparent !important;
   box-shadow: none !important;
@@ -145,10 +145,10 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 .hero-title em { font-style: normal !important; color: inherit; }
 .hero-title .hero-line { display: inline-block; white-space: nowrap; }
 @media (max-width: 600px) { .hero-title .hero-line { white-space: normal; } }
-.hero-title em.accent { font-style: normal !important; color: var(--clyx-blue); transition: color 0.2s ease; display: inline-block; cursor: text; padding: 0 4px; margin: 0; border-radius: 4px; background: transparent !important; box-shadow: none !important; user-select: text; -webkit-user-select: text; }
+.hero-title em.accent { font-style: normal !important; color: var(--clyx-yellow); transition: color 0.2s ease; display: inline-block; cursor: text; padding: 0 4px; margin: 0; border-radius: 4px; background: transparent !important; box-shadow: none !important; user-select: text; -webkit-user-select: text; }
 .hero-title em.accent:hover { background: transparent !important; box-shadow: none !important; }
-.hero-title em.accent::selection { background: #FFDE59 !important; color: #013AA3 !important; }
-.hero-title em.accent::-moz-selection { background: #FFDE59 !important; color: #013AA3 !important; }
+.hero-title em.accent::selection { background: #FFDE59 !important; color: #050814 !important; }
+.hero-title em.accent::-moz-selection { background: #FFDE59 !important; color: #050814 !important; }
 .hero-sub { font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 36px; }
 .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
@@ -1721,4 +1721,16 @@ html:not(.dark) .v1-landing-wrapper .cookie-bar-actions #cookieEssential:hover {
   color: var(--clyx-blue) !important;
 }
 
+}
+
+/* OVERRIDES ADDED BY AI FOR LIGHT MODE FIXES */
+html:not(.dark) .v1-landing-wrapper .coverflow-wrap h2,
+html:not(.dark) .v1-landing-wrapper .coverflow-wrap p,
+html:not(.dark) .v1-landing-wrapper .coverflow-wrap span {
+    color: #F8FAFC !important;
+}
+
+html:not(.dark) .v1-landing-wrapper .founder-card .role,
+html:not(.dark) .v1-landing-wrapper .founder-advisory-link {
+    color: var(--clyx-blue) !important;
 }
