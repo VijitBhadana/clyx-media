@@ -135,7 +135,7 @@ html:not(.dark) .v1-landing-wrapper .theme-toggle-btn { background: rgba(1, 58, 
 html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 
 /* Hero */
-.hero { position: relative; min-height: 88vh; display: flex; align-items: center; padding: 80px 48px 90px; max-width: 1400px; margin: 0 auto; overflow: hidden; }
+.hero { position: relative; min-height: 88vh; display: flex; align-items: center; padding: 140px 48px 90px; max-width: 1400px; margin: 0 auto; overflow: hidden; }
 .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: var(--mesh-opacity); }
 .blob-1 { top: -10%; right: -5%; width: 550px; height: 550px; background: var(--clyx-blue); }
@@ -145,10 +145,10 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 .hero-title em { font-style: normal !important; color: inherit; }
 .hero-title .hero-line { display: inline-block; white-space: nowrap; }
 @media (max-width: 600px) { .hero-title .hero-line { white-space: normal; } }
-.hero-title em.accent { font-style: normal !important; color: var(--clyx-yellow); transition: color 0.2s ease; display: inline-block; cursor: text; padding: 0 4px; margin: 0; border-radius: 4px; background: transparent !important; box-shadow: none !important; user-select: text; -webkit-user-select: text; }
+.hero-title em.accent { font-style: normal !important; color: var(--clyx-blue); transition: color 0.2s ease; display: inline-block; cursor: text; padding: 0 4px; margin: 0; border-radius: 4px; background: transparent !important; box-shadow: none !important; user-select: text; -webkit-user-select: text; }
 .hero-title em.accent:hover { background: transparent !important; box-shadow: none !important; }
-.hero-title em.accent::selection { background: #FFDE59 !important; color: #050814 !important; }
-.hero-title em.accent::-moz-selection { background: #FFDE59 !important; color: #050814 !important; }
+.hero-title em.accent::selection { background: #FFDE59 !important; color: #013AA3 !important; }
+.hero-title em.accent::-moz-selection { background: #FFDE59 !important; color: #013AA3 !important; }
 .hero-sub { font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 36px; }
 .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
@@ -891,7 +891,7 @@ html:not(.dark) .v1-landing-wrapper .site-footer a[href*="wa.me"] { color: var(-
 }
 
 @media (max-width: 1100px) {
-  .hero { flex-direction: column; text-align: center; padding-top: 40px; }
+  .hero { flex-direction: column; text-align: center; padding-top: 120px; }
   .hero-inner { max-width: 100%; margin-bottom: 50px; }
   .hero-cta { justify-content: center; }
   .clip-stack { position: relative; right: auto; top: auto; transform: none; margin: 0 auto; }
