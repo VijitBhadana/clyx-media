@@ -69,10 +69,14 @@ export default function Header() {
   const isHome = location === '/';
 
   return (
-    <header className={`fixed top-0 z-50 w-full border-b border-grid transition-colors duration-200 ${isHome ? 'bg-[#050814] text-white border-transparent' : 'bg-[color:var(--background)]/92 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)]'}`}>
+    <header className={`fixed top-0 z-50 w-full border-b border-grid transition-colors duration-200 ${
+      isHome 
+        ? 'bg-white dark:bg-[#050814]' 
+        : 'bg-[color:var(--background)]/92 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)]'
+    }`}>
       <div className={`container flex ${isHome ? 'h-[60px]' : 'h-[76px]'} items-center justify-between`}>
         {/* Brand Logo */}
-        <a href="/" className={`display text-2xl font-bold tracking-[-.08em] shrink-0 ${isHome ? 'text-white' : 'text-foreground'}`}>
+        <a href="/" className="display text-2xl font-bold tracking-[-.08em] text-foreground shrink-0">
           CLYX<span className="text-yellow">.</span>
         </a>
 
@@ -87,8 +91,8 @@ export default function Header() {
                   href={hrefFor(x)}
                   className={`text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
                     currentActiveNav === x
-                      ? 'text-yellow'
-                      : 'text-white/70 hover:text-white'
+                      ? 'text-blue dark:text-yellow font-bold'
+                      : 'text-muted hover:text-foreground'
                   }`}
                 >
                   {x}
@@ -131,11 +135,7 @@ export default function Header() {
           <button
             aria-label="Toggle theme"
             onClick={toggle}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
-              isHome 
-                ? 'border-white/10 bg-white/5 text-white/70 hover:text-white' 
-                : 'border-grid bg-black/[0.03] dark:bg-white/[0.04] text-muted hover:text-foreground'
-            }`}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-grid bg-black/[0.03] dark:bg-white/[0.04] text-muted hover:text-foreground transition-colors"
           >
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
@@ -144,7 +144,7 @@ export default function Header() {
 
         {/* Mobile Hamburger Button */}
         <button
-          className={`min-h-11 min-w-11 p-2 lg:hidden flex items-center justify-center ${isHome ? 'text-white' : 'text-foreground'}`}
+          className="min-h-11 min-w-11 p-2 lg:hidden text-foreground flex items-center justify-center"
           onClick={() => setOpen(!open)}
           aria-label="Open menu"
           aria-expanded={open}
