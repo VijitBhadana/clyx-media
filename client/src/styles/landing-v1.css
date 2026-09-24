@@ -179,10 +179,13 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 
 /* 3D Macbook Scroll */
 .kinetic-section { position: relative; min-height: 160vh; padding-top: 40px; }
-.kinetic-sticky-wrap { position: sticky; top: 70px; height: calc(100vh - 70px); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; perspective: 1200px; }
+.kinetic-sticky-wrap { position: sticky; top: 70px; height: calc(100vh - 70px); display: flex; flex-direction: column; align-items: center; justify-content: center; justify-content: safe center; overflow: hidden; perspective: 1200px; }
+/* The laptop shrinks with the viewport height so the heading above it never gets pushed under the fixed header
+   on shorter screens (e.g. laptops at 100% zoom). `safe center` falls back to top alignment if it still overflows. */
 .kinetic-header { text-align: center; margin-bottom: 24px; z-index: 5; }
 .kinetic-header h2 { font-size: clamp(2rem, 4vw, 3.4rem); font-weight: 800; letter-spacing: -0.04em; }
 .kinetic-header p { font-size: 1.05rem; color: var(--text-secondary); margin-top: 8px; }
+.kinetic-accent { color: var(--clyx-yellow); }
 .macbook-container {
   position: relative;
   width: 880px;
@@ -207,7 +210,7 @@ html:not(.dark) .v1-landing-wrapper .macbook-screen-lid {
   background: #060913;
   border-radius: 12px;
   overflow: hidden;
-  height: 440px;
+  height: clamp(300px, calc(100vh - 340px), 440px);
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -225,7 +228,7 @@ html:not(.dark) .v1-landing-wrapper .macbook-display { background: #0A0F24; }
 .dash-stat-box .change { font-size: 0.68rem; color: #22c55e; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 .dash-chart-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
 .dash-chart-head { display: flex; justify-content: space-between; align-items: center; }
-.chart-bars-wrap { display: flex; align-items: flex-end; gap: 12px; height: 115px; padding-top: 14px; }
+.chart-bars-wrap { display: flex; align-items: flex-end; gap: 12px; height: clamp(56px, calc(100vh - 581px), 115px); padding-top: 14px; }
 .chart-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
 .chart-bar { width: 100%; background: linear-gradient(to top, var(--clyx-blue), var(--clyx-yellow)); border-radius: 6px 6px 0 0; transition: height 0.6s ease; position: relative; }
 .chart-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #FFF; border-radius: 6px 6px 0 0; }
@@ -344,7 +347,6 @@ html:not(.dark) .v1-landing-wrapper .service-icon { background: rgba(1, 58, 163,
 .how-step { display: flex; gap: 24px; align-items: center; padding: 24px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-subtle); transition: all var(--transition-fast); }
 .how-step:hover { border-color: var(--clyx-yellow); transform: translateX(6px); }
 .how-num { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--clyx-yellow); }
-html:not(.dark) .v1-landing-wrapper .how-num { color: var(--clyx-blue); }
 .how-step h4 { font-size: 1.15rem; margin-bottom: 4px; }
 
 /* Methodology motion: the three steps fly in from the right one after another and settle in place.
@@ -950,7 +952,7 @@ html:not(.dark) .v1-landing-wrapper .site-footer a[href*="wa.me"] { color: var(-
 }
 @media (max-width: 900px) {
   .macbook-container { width: 100%; }
-  .macbook-display { height: 380px; }
+  .macbook-display { height: clamp(300px, calc(100vh - 340px), 380px); }
   .dash-stats-row { grid-template-columns: repeat(2, 1fr); }
   .floating-badge { display: none; }
   .blog-grid, .careers-grid { grid-template-columns: 1fr; }
@@ -1891,4 +1893,34 @@ html:not(.dark) .v1-landing-wrapper .team-pill:hover {
 
 html:not(.dark) .v1-landing-wrapper .team-pill-role {
   color: var(--clyx-blue) !important;
+}
+
+/* Light mode: blue instead of yellow for the hero, services, methodology and testimonials eyebrows, the methodology
+   step numbers, the "₹45Cr+ in revenue" accent, the KPI numbers and the testimonial role/brand line.
+   Must live outside the .v1-landing-wrapper block above: html:not(.dark) selectors nested in it never match. */
+html:not(.dark) .v1-landing-wrapper #hero .eyebrow,
+html:not(.dark) .v1-landing-wrapper #services .eyebrow,
+html:not(.dark) .v1-landing-wrapper #how .eyebrow,
+html:not(.dark) .v1-landing-wrapper .how-num,
+html:not(.dark) .v1-landing-wrapper .kinetic-accent,
+html:not(.dark) .v1-landing-wrapper .counter-number,
+html:not(.dark) .v1-landing-wrapper #testimonials .eyebrow,
+html:not(.dark) .v1-landing-wrapper .testimonial-meta .brand {
+  color: var(--clyx-blue);
+}
+
+/* Service cards, light mode: soft baby-blue tint and glow (baby blue = #89CFF0), blue icons. */
+html:not(.dark) .v1-landing-wrapper .service-icon {
+  background: rgba(1, 58, 163, 0.08);
+  color: var(--clyx-blue);
+}
+html:not(.dark) .v1-landing-wrapper .service-card {
+  background: linear-gradient(160deg, #E6F4FD 0%, #F4FAFF 100%);
+  border-color: rgba(137, 207, 240, 0.55);
+  box-shadow: 0 16px 36px -16px rgba(137, 207, 240, 0.75), 0 2px 8px rgba(137, 207, 240, 0.2);
+}
+html:not(.dark) .v1-landing-wrapper .service-card:hover {
+  background: linear-gradient(160deg, #DCEFFC 0%, #EEF7FF 100%);
+  border-color: rgba(137, 207, 240, 0.9);
+  box-shadow: 0 24px 48px -16px rgba(137, 207, 240, 0.9), 0 4px 12px rgba(137, 207, 240, 0.3);
 }

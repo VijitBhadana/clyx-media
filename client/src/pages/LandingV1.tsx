@@ -150,7 +150,7 @@ export default function LandingV1() {
         
         <div className="kinetic-header">
           <p className="eyebrow" style={{ marginBottom: "8px" }}>Live Scaling Architecture ↓</p>
-          <h2>The engine behind <span style={{ color: "var(--clyx-yellow)" }}>₹45Cr+ in revenue</span>.</h2>
+          <h2>The engine behind <span className="kinetic-accent">₹45Cr+ in revenue</span>.</h2>
           <p>Real-time creator whitelisting paired with algorithmic Meta &amp; Google scaling.</p>
         </div>
 

@@ -301,3 +301,50 @@ button:active,a:active{transform:scale(.97)}
 @media (max-width:767px){
   .cookie-consent { padding-bottom:calc(1.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* Services page: each service is its own card. Light mode uses the baby-blue card style from the homepage;
+   dark mode picks up the inner-page glass article style above. */
+.service-row-card {
+  padding: 28px 32px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #E6F4FD 0%, #F4FAFF 100%);
+  border: 1px solid rgba(137, 207, 240, 0.55);
+  box-shadow: 0 16px 36px -16px rgba(137, 207, 240, 0.75), 0 2px 8px rgba(137, 207, 240, 0.2);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out), background 0.3s var(--ease-out);
+}
+.service-row-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(137, 207, 240, 0.9);
+  box-shadow: 0 24px 48px -16px rgba(137, 207, 240, 0.9), 0 4px 12px rgba(137, 207, 240, 0.3);
+}
+.dark .service-row-card:hover { box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6); }
+.service-row-index {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(1, 58, 163, 0.08);
+  color: #013AA3;
+  font-size: 1rem;
+}
+.dark .service-row-index { background: rgba(255, 222, 89, 0.1); color: #FFDE59; }
+.service-row-arrow { color: #013AA3; transition: transform 0.3s var(--ease-out); }
+.dark .service-row-arrow { color: #FFDE59; }
+.service-row-card:hover .service-row-arrow { transform: translate(3px, -3px); }
+.service-row-index svg { transition: transform 0.3s var(--ease-out); }
+.service-row-card:hover .service-row-index svg { transform: scale(1.1) rotate(-6deg); }
+@media (max-width: 767px) { .service-row-card { padding: 22px 20px; } }
+/* Services page cards slide in from alternating sides (odd from the left, even from the right). */
+.direction-reveal.service-row-reveal { transition-duration: 0.8s; transition-delay: 0ms; }
+.direction-reveal.service-row-reveal.from-left { transform: translateX(-120px); }
+.direction-reveal.service-row-reveal.from-right { transform: translateX(120px); }
+.direction-reveal.service-row-reveal.is-visible { transform: translateX(0); }
+@media (max-width: 767px) {
+  .direction-reveal.service-row-reveal.from-left { transform: translateX(-60px); }
+  .direction-reveal.service-row-reveal.from-right { transform: translateX(60px); }
+  .direction-reveal.service-row-reveal.is-visible { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .direction-reveal.service-row-reveal { opacity: 1; transform: none; transition: none; }
+}

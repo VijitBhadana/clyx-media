@@ -3,7 +3,8 @@ import { Megaphone, TrendingUp, Share2, Clapperboard, Code2, ShoppingCart, type 
 import { services } from '../../data/home';
 
 // Each service gets a matching pictogram plus its own idle motion (see .sc-icon--* in landing-v1.css).
-const ICONS: Record<string, { Icon: LucideIcon; motion: string }> = {
+// Also used by the Services page.
+export const ICONS: Record<string, { Icon: LucideIcon; motion: string }> = {
   'Influencer Marketing': { Icon: Megaphone, motion: 'ring' },
   'Performance Marketing': { Icon: TrendingUp, motion: 'climb' },
   'Social Media Management': { Icon: Share2, motion: 'pulse' },
