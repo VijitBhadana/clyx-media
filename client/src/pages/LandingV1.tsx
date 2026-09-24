@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/layout/Header';
 import { Footer, WhatsAppButton, CookieBar } from '../components/layout/Footer';
 import CoverFlowCarousel, { clyxCampaigns, type CampaignItem } from '../components/sections/CoverFlowCarousel';
+import ServiceGrid from '../components/sections/ServiceGrid';
+import HowSteps from '../components/sections/HowSteps';
+import StatsCounterStrip from '../components/sections/StatsCounterStrip';
 import { useCollection, useSiteContent } from '@/lib/siteContent';
 import '../styles/landing-v1.css';
 import '../styles/landing-v1-js-globals.css';
@@ -237,28 +240,7 @@ export default function LandingV1() {
     </section>
 
     {/*  KEY STATS COUNTERS (Numbers count from 0)  */}
-    <section className="stats-counter-strip">
-      <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="1" data-prefix="₹" data-suffix="Cr+">0</div>
-        <div className="counter-label">Ad Spend Managed</div>
-        <div className="counter-detail">Across Meta &amp; Google ad accounts</div>
-      </div>
-      <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="5" data-suffix="X+">0</div>
-        <div className="counter-label">Average ROAS Lift</div>
-        <div className="counter-detail">Whitelisted vs Standard brand ads</div>
-      </div>
-      <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="250" data-suffix="+">0</div>
-        <div className="counter-label">Active Creators</div>
-        <div className="counter-detail">Fashion, Beauty, Food, Tech benches</div>
-      </div>
-      <div className="stat-counter-card">
-        <div className="counter-number counter" data-target="10" data-prefix="₹" data-suffix="Cr+">0</div>
-        <div className="counter-label">Revenue Generated</div>
-        <div className="counter-detail">Delivered for high-growth D2C brands</div>
-      </div>
-    </section>
+    <StatsCounterStrip />
 
     {/*  SERVICES  */}
     <section className="section services" id="services">
@@ -266,38 +248,7 @@ export default function LandingV1() {
         <p className="eyebrow">What We Run</p>
         <h2>Six disciplines. One growth engine.</h2>
       </div>
-      <div className="service-grid">
-        <article className="service-card">
-          <div className="service-icon">↗</div>
-          <h3>Influencer Marketing</h3>
-          <p>We build and manage a creator bench matched to your category, then negotiate content + usage rights for paid.</p>
-        </article>
-        <article className="service-card">
-          <div className="service-icon">▲</div>
-          <h3>Performance Marketing</h3>
-          <p>Meta &amp; Google campaigns run on data, not guesses — we scale spend behind what's already converting.</p>
-        </article>
-        <article className="service-card">
-          <div className="service-icon">◆</div>
-          <h3>Social Media Management</h3>
-          <p>Monthly content calendars, channel management, and organic strategy that builds a real audience.</p>
-        </article>
-        <article className="service-card">
-          <div className="service-icon">●</div>
-          <h3>UGC Videos</h3>
-          <p>Product photography, video direction, and AI-assisted design assets built for the feed, not a boardroom.</p>
-        </article>
-        <article className="service-card">
-          <div className="service-icon">■</div>
-          <h3>Website Development</h3>
-          <p>UI/UX-first, conversion-built sites — coded fast, priced for what they return in revenue.</p>
-        </article>
-        <article className="service-card">
-          <div className="service-icon">◈</div>
-          <h3>Shopify Store CRO</h3>
-          <p>Storefronts built around checkout speed, merchandising, and the metrics that actually move revenue.</p>
-        </article>
-      </div>
+      <ServiceGrid />
     </section>
 
     {/*  WHITELISTING EXPLAINER  */}
@@ -310,29 +261,7 @@ export default function LandingV1() {
             Instead of paying for a single influencer post that disappears in 24 hours, we run the creator's own organic content as a paid ad through their handle — it reads as a genuine recommendation, not a sponsored pitch, earning instant trust. From there, performance analytics decide which hooks get scaled.
           </p>
         </div>
-        <div className="how-steps">
-          <div className="how-step">
-            <span className="how-num">01</span>
-            <div>
-              <h4>Creator Posts Organically</h4>
-              <p>Real handles. Authentic audience trust. Genuine reaction.</p>
-            </div>
-          </div>
-          <div className="how-step">
-            <span className="how-num">02</span>
-            <div>
-              <h4>We Whitelist Top Clips</h4>
-              <p>Direct ads running through the creator's account with dark-post permissions.</p>
-            </div>
-          </div>
-          <div className="how-step">
-            <span className="how-num">03</span>
-            <div>
-              <h4>Data Decides The Scale</h4>
-              <p>Spend follows verified conversion rates and ROAS, not intuition.</p>
-            </div>
-          </div>
-        </div>
+        <HowSteps />
       </div>
     </section>
 

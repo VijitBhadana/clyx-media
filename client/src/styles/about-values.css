@@ -1,0 +1,163 @@
+/* About page: yellow "How we work" band. Theme-independent: always yellow with dark ink. */
+
+.values-band {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Faint dot grid, fading out towards the bottom. */
+.values-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(5, 5, 5, 0.14) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+  pointer-events: none;
+}
+/* Soft white glow in the top-right corner. */
+.values-band::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 520px;
+  height: 520px;
+  right: -160px;
+  top: -220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.values-inner { padding-block: 56px; }
+@media (min-width: 768px) { .values-inner { padding-block: 72px; } }
+
+/* ---------- Header ---------- */
+.values-head {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+@media (min-width: 768px) {
+  .values-head { grid-template-columns: 1fr 1fr; align-items: end; gap: 48px; margin-bottom: 40px; }
+}
+.values-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(5, 5, 5, 0.16);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.values-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #050505;
+}
+.values-title {
+  margin: 0;
+  font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+  font-weight: 700;
+}
+.values-intro {
+  margin: 0;
+  max-width: 420px;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(5, 5, 5, 0.68);
+}
+@media (min-width: 768px) { .values-intro { justify-self: end; } }
+
+/* ---------- Cards ---------- */
+.values-grid {
+  display: grid;
+  gap: 18px;
+}
+@media (min-width: 768px) { .values-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; } }
+.values-grid > .scroll-reveal { height: 100%; }
+
+.values-card {
+  position: relative;
+  height: 100%;
+  padding: 22px 24px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(5, 5, 5, 0.1);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 18px 40px -26px rgba(5, 5, 5, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.35s var(--ease-out), color 0.35s var(--ease-out), transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+}
+/* Hover flips the card to black ink with yellow type. */
+.values-card:hover {
+  background: #050505;
+  color: #FFDE59;
+  transform: translateY(-6px);
+  box-shadow: 0 28px 50px -24px rgba(5, 5, 5, 0.6);
+}
+.values-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.values-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: #050505;
+  color: #FFDE59;
+  transition: background 0.35s var(--ease-out), color 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+}
+.values-card:hover .values-icon {
+  background: #FFDE59;
+  color: #050505;
+  transform: rotate(-8deg);
+}
+.values-num {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(5, 5, 5, 0.3);
+  transition: -webkit-text-stroke-color 0.35s var(--ease-out);
+}
+.values-card:hover .values-num { -webkit-text-stroke-color: rgba(255, 222, 89, 0.55); }
+.values-tag {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.values-card-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.6vw, 2.2rem);
+  font-weight: 700;
+}
+.values-card-text {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(5, 5, 5, 0.7);
+  transition: color 0.35s var(--ease-out);
+}
+.values-card:hover .values-card-text { color: rgba(255, 255, 255, 0.72); }
+
+@media (prefers-reduced-motion: reduce) {
+  .values-card, .values-icon { transition: none; }
+  .values-card:hover { transform: none; }
+  .values-card:hover .values-icon { transform: none; }
+}
