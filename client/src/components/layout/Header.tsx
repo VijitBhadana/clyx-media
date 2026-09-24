@@ -69,12 +69,8 @@ export default function Header() {
   const isHome = location === '/';
 
   return (
-    <header className={`fixed top-0 z-50 w-full border-b border-grid transition-colors duration-200 ${
-      isHome 
-        ? 'bg-white dark:bg-[#050814]' 
-        : 'bg-[color:var(--background)]/92 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)]'
-    }`}>
-      <div className={`container flex ${isHome ? 'h-[60px]' : 'h-[76px]'} items-center justify-between`}>
+    <header className="fixed top-0 z-50 w-full border-b border-grid transition-colors duration-200 bg-white dark:bg-[#050814]">
+      <div className="container flex h-[60px] items-center justify-between">
         {/* Brand Logo */}
         <a href="/" className="display text-2xl font-bold tracking-[-.08em] text-foreground shrink-0">
           CLYX<span className="text-yellow">.</span>
@@ -82,52 +78,22 @@ export default function Header() {
 
         {/* Center Desktop Navigation */}
         <nav className="hidden items-center lg:flex">
-          {isHome ? (
-            <div className="flex items-center gap-6">
-              {allNav.map(x => (
-                <a
-                  key={x}
-                  data-id={x}
-                  href={hrefFor(x)}
-                  className={`text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
-                    currentActiveNav === x
-                      ? 'text-blue dark:text-yellow font-bold'
-                      : 'text-muted hover:text-foreground'
-                  }`}
-                >
-                  {x}
-                </a>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center rounded-full border border-grid bg-black/[0.03] dark:bg-white/[0.04] p-1 backdrop-blur-md shadow-xs">
-              <AnimatedBackground
-                defaultValue={currentActiveNav}
-                className="rounded-full bg-black/10 dark:bg-white/15 shadow-xs"
-                transition={{
-                  type: 'spring',
-                  bounce: 0.18,
-                  duration: 0.28,
-                }}
-                enableHover
+          <div className="flex items-center gap-6">
+            {allNav.map(x => (
+              <a
+                key={x}
+                data-id={x}
+                href={hrefFor(x)}
+                className={`text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
+                  currentActiveNav === x
+                    ? 'text-blue dark:text-yellow font-bold'
+                    : 'text-muted hover:text-foreground'
+                }`}
               >
-                {allNav.map(x => (
-                  <a
-                    key={x}
-                    data-id={x}
-                    href={hrefFor(x)}
-                    className={`inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-[.09em] transition-colors duration-200 ${
-                      currentActiveNav === x
-                        ? 'text-foreground font-bold'
-                        : 'text-muted hover:text-foreground'
-                    }`}
-                  >
-                    {x}
-                  </a>
-                ))}
-              </AnimatedBackground>
-            </div>
-          )}
+                {x}
+              </a>
+            ))}
+          </div>
         </nav>
 
         {/* Right Action Icons & Button */}
