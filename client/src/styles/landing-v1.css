@@ -148,6 +148,11 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 .hero-title em { font-style: normal !important; color: inherit; }
 .hero-title .hero-line { display: inline-block; white-space: nowrap; }
 @media (max-width: 600px) { .hero-title .hero-line { white-space: normal; } }
+/* Phones: the two large hero buttons stack full-width instead of wrapping their labels onto two lines. */
+@media (max-width: 480px) {
+  .hero-cta { flex-direction: column; align-items: stretch; gap: 12px; width: 100%; max-width: 340px; margin-inline: auto; }
+  .hero-cta .btn-large { padding: 16px 24px; font-size: 1rem; white-space: nowrap; }
+}
 .hero-title em.accent { font-style: normal !important; color: var(--clyx-yellow); transition: color 0.2s ease; display: inline-block; cursor: text; padding: 0 4px; margin: 0; border-radius: 4px; background: transparent !important; box-shadow: none !important; user-select: text; -webkit-user-select: text; }
 .hero-title em.accent:hover { background: transparent !important; box-shadow: none !important; }
 .hero-title em.accent::selection { background: #FFDE59 !important; color: #050814 !important; }
@@ -159,6 +164,7 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 .hero-title em.accent.is-typing .tw-caret { opacity: 1; }
 .hero-sub { font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 36px; }
 .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.hero-cta .btn { border-radius: 9999px; }
 
 /* Parallax Clip Stack */
 .clip-stack { position: absolute; right: max(20px, calc((100% - 1400px) / 2 + 20px)); top: 50%; transform: translateY(-50%); width: 500px; height: 540px; perspective: 1200px; z-index: 1; }
@@ -205,9 +211,9 @@ html:not(.dark) .v1-landing-wrapper .eyebrow { color: var(--clyx-blue); }
 /* Scale the whole laptop (not just the chart) to fit short viewports; zoom, unlike transform, also shrinks its layout box. */
 /* Desktop: leave room for the floating badges that stick out 115px on each side. */
 @media (min-width: 901px) { .macbook-container { max-width: calc(100vw - 280px); } }
-@media (min-width: 901px) and (max-height: 725px) { .macbook-container { zoom: 0.9; } }
-@media (min-width: 901px) and (max-height: 664px) { .macbook-container { zoom: 0.8; } }
-@media (min-width: 901px) and (max-height: 602px) { .macbook-container { zoom: 0.7; } }
+@media (min-width: 901px) and (max-height: 765px) { .macbook-container { zoom: 0.9; } }
+@media (min-width: 901px) and (max-height: 704px) { .macbook-container { zoom: 0.8; } }
+@media (min-width: 901px) and (max-height: 642px) { .macbook-container { zoom: 0.7; } }
 /* Desktop: everything inside the laptop screen (type, cards, spacing, chart) is drawn 20% larger. */
 @media (min-width: 901px) { .dash-nav, .dash-body { zoom: 1.2; } }
 @media (max-width: 900px) and (max-height: 939px) { .macbook-container { zoom: 0.84; } }
@@ -229,7 +235,7 @@ html:not(.dark) .v1-landing-wrapper .macbook-screen-lid {
   background: #060913;
   border-radius: 12px;
   overflow: hidden;
-  height: 560px;
+  height: 600px;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -249,11 +255,24 @@ html:not(.dark) .v1-landing-wrapper .macbook-display { background: #0A0F24; }
 .dash-chart-head { display: flex; justify-content: space-between; align-items: center; }
 /* Day labels sit below the bar area (absolutely positioned), so each bar's % height uses the full plot height
    instead of the tallest bars all getting capped at the same size. */
-.chart-bars-wrap { display: flex; align-items: flex-end; gap: 14px; height: 170px; padding-top: 14px; padding-bottom: 22px; }
+.chart-bars-wrap { position: relative; display: flex; align-items: flex-end; gap: 14px; height: 238px; padding-top: 14px; padding-bottom: 22px; }
 .chart-bar-group { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
-.chart-bar { width: 100%; background: linear-gradient(to top, var(--clyx-blue), var(--clyx-yellow)); border-radius: 6px 6px 0 0; transition: height 0.6s ease; position: relative; }
+.chart-bar { width: 62%; background: linear-gradient(to top, var(--clyx-blue), var(--clyx-yellow)); border-radius: 6px 6px 0 0; transition: height 0.9s cubic-bezier(0.45, 0, 0.25, 1); position: relative; }
 .chart-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #FFF; border-radius: 6px 6px 0 0; }
 .chart-label { position: absolute; top: calc(100% + 6px); font-size: 0.7rem; color: #64748B; }
+/* Trace line over the bar tops, with dashed high / low levels like a trading chart. */
+.chart-trace { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
+.trace-halo { fill: none; stroke: rgba(5, 8, 20, 0.65); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
+.trace-line { fill: none; stroke: #22c55e; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.6)); }
+.trace-dots circle { fill: #0b1020; stroke: #22c55e; stroke-width: 2; }
+.trace-dots circle.is-hi { fill: #22c55e; stroke: #FFF; }
+.trace-dots circle.is-lo { fill: #ef4444; stroke: #FFF; }
+.trace-level { stroke-width: 1; stroke-dasharray: 4 4; }
+.trace-level-hi { stroke: rgba(34, 197, 94, 0.75); }
+.trace-level-lo { stroke: rgba(239, 68, 68, 0.75); }
+.trace-tag text { font-size: 10px; font-weight: 700; fill: #FFF; dominant-baseline: central; text-anchor: middle; }
+.trace-tag-hi rect { fill: #16a34a; }
+.trace-tag-lo rect { fill: #dc2626; }
 .macbook-base { height: 14px; background: #1e293b; border-radius: 0 0 16px 16px; position: relative; box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5); }
 html:not(.dark) .v1-landing-wrapper .macbook-base { background: #CBD5E1; }
 .macbook-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 6px; background: #0f172a; border-radius: 0 0 6px 6px; }
@@ -291,6 +310,7 @@ html:not(.dark) .v1-landing-wrapper .macbook-base { background: #CBD5E1; }
 
 /* Channels Strip: intro copy on the left, a 3x2 grid of channel tiles on the right. */
 .channel-strip { padding: 32px 48px; max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 48px; align-items: center; }
+.channel-intro { --font-display: 'Urbanist', sans-serif; --font-body: 'Urbanist', sans-serif; font-family: var(--font-body); }
 .channel-intro .eyebrow { margin-bottom: 12px; }
 .channel-intro h2 { font-size: clamp(1.6rem, 2.6vw, 2.3rem); letter-spacing: -0.03em; }
 .channel-intro p:not(.eyebrow) { margin-top: 14px; font-size: 0.95rem; line-height: 1.65; max-width: 460px; }
@@ -1027,7 +1047,7 @@ html:not(.dark) .v1-landing-wrapper .site-footer a[href*="wa.me"] { color: var(-
 @media (max-width: 900px) {
   .macbook-container { width: 100%; }
   .macbook-display { height: auto; }
-  .chart-bars-wrap { height: 140px; }
+  .chart-bars-wrap { height: 190px; }
   .dash-stats-row { grid-template-columns: repeat(2, 1fr); }
   .floating-badge { display: none; }
   .blog-grid, .careers-grid { grid-template-columns: 1fr; }

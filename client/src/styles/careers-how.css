@@ -1,0 +1,115 @@
+/* Careers "How we work": dotted backdrop, culture chips, and a brief → result track.
+   Motion replays each time the block scrolls into view (.is-visible from useScrollReveal). */
+.how-work { position: relative; overflow: hidden; isolation: isolate; }
+.how-work > .container { position: relative; z-index: 1; }
+
+/* Dotted grid fading out from the right, with a soft yellow glow behind the copy. */
+.how-work-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 30%, rgba(255, 222, 89, 0.07), transparent 34%),
+    radial-gradient(rgba(1, 58, 163, 0.18) 1px, transparent 1.4px) 0 0 / 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 80% at 85% 45%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 60% 80% at 85% 45%, #000 20%, transparent 75%);
+}
+.dark .how-work-grid {
+  background:
+    radial-gradient(circle at 78% 30%, rgba(255, 222, 89, 0.08), transparent 34%),
+    radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1.4px) 0 0 / 22px 22px;
+}
+
+/* Heading uses Urbanist bold to match the Careers hero title. */
+.how-work .how-work-title { font-family: 'Urbanist', sans-serif; font-weight: 700; letter-spacing: -.035em; }
+
+/* Blue highlight: words rise in one by one out of a soft blur. */
+.how-work .how-hl-word { display: inline-block; }
+.how-work .split-intro:not(.is-visible) .how-hl-word { opacity: 0; }
+.how-work .is-visible .how-hl-word { animation: how-hl-word-in .7s var(--ease-out) backwards; animation-delay: calc(.1s + var(--i) * 120ms); }
+@keyframes how-hl-word-in { from { opacity: 0; transform: translateY(.45em); filter: blur(6px); } }
+
+/* Culture chips under the heading. */
+.how-points { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; list-style: none; padding: 0; }
+.how-points li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  transition: border-color .25s ease, transform .25s ease;
+}
+.how-points li svg { color: #013AA3; flex: none; }
+.how-points li:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.dark .how-points li { color: rgba(255, 255, 255, 0.82); background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.1); }
+.dark .how-points li svg { color: #FFDE59; }
+.dark .how-points li:hover { border-color: rgba(255, 222, 89, 0.35); }
+
+/* Brief → result track: a line that fills left to right, with each stop lighting up as it passes. */
+.how-flow { position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); margin-top: 36px; padding: 0; list-style: none; }
+.how-flow::before, .how-flow::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: calc(50% / var(--n));
+  right: calc(50% / var(--n));
+  height: 2px;
+  border-radius: 2px;
+}
+.how-flow::before { background: var(--border-subtle); }
+.how-flow::after { background: linear-gradient(90deg, #013AA3, #FFDE59); transform: scaleX(0); transform-origin: left; }
+.how-flow li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
+}
+.how-flow-dot {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--background);
+  border: 2px solid var(--border-strong);
+  transition: border-color .3s ease, background .3s ease, box-shadow .3s ease;
+}
+.how-flow li:last-child { color: #013AA3; }
+.dark .how-flow li:last-child { color: #FFDE59; }
+
+.how-work .is-visible .how-flow::after { animation: how-flow-fill 1.4s cubic-bezier(.65, 0, .35, 1) .3s forwards; }
+.how-work .is-visible .how-flow-dot {
+  border-color: #013AA3;
+  background: #013AA3;
+  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.18);
+  transition-delay: calc(.3s + var(--i) * 1.4s / (var(--n) - 1));
+}
+.how-work .is-visible .how-flow li:last-child .how-flow-dot { border-color: #FFDE59; background: #FFDE59; box-shadow: 0 0 0 5px rgba(255, 222, 89, 0.22); }
+@keyframes how-flow-fill { to { transform: scaleX(1); } }
+
+/* Chips rise in one after another. */
+.how-work .split-intro:not(.is-visible) .how-points li { opacity: 0; transform: translateY(10px); }
+.how-work .is-visible .how-points li { animation: how-chip-in .6s var(--ease-out) backwards; animation-delay: calc(.25s + var(--i) * 110ms); }
+@keyframes how-chip-in { from { opacity: 0; transform: translateY(10px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .how-work .split-intro:not(.is-visible) .how-points li { opacity: 1; transform: none; }
+  .how-work .is-visible .how-points li { animation: none; }
+  .how-work .split-intro:not(.is-visible) .how-hl-word { opacity: 1; }
+  .how-work .is-visible .how-hl-word { animation: none; }
+  .how-work .how-flow::after { transform: none; animation: none !important; }
+  .how-work .how-flow-dot { transition: none !important; }
+}

@@ -190,6 +190,14 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'date', label: 'Date', placeholder: '12.09.25' },
       { key: 'readTime', label: 'Read time', placeholder: '4 min read' },
       { key: 'style', label: 'Card colour', type: 'select', options: ['yellow', 'blue', 'soft'], default: 'yellow' },
+      { key: 'excerpt', label: 'Intro (under the article title)', type: 'textarea', wide: true },
+      {
+        key: 'body',
+        label: 'Article text',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet, "> " a quote. Leave empty to keep the built-in text.',
+      },
     ],
   },
   careers: {

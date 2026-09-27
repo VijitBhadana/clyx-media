@@ -1,6 +1,7 @@
 import { Instagram, Linkedin, ArrowUpRight, ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
+import BrandLogo from '@/components/ui/BrandLogo';
 import '@/styles/site-footer.css';
 
 // Opens off-site links in a new tab.
@@ -52,17 +53,19 @@ export function Footer() {
 
         <div className="cf-main">
           <div className="cf-brand">
-            <a href="/" className="cf-logo" aria-label="CLYX home">
-              {c.logoText}<span>.</span>
-            </a>
-            <p className="cf-tagline">{c.footerTagline}</p>
-            <div className="cf-socials">
-              {socials.map(({ label, href, Icon }) => (
-                <a key={label} className="cf-social" href={safeHref(href)} target="_blank" rel="noreferrer" aria-label={label}>
-                  <Icon size={17} />
-                </a>
-              ))}
+            <div className="cf-brand-row">
+              <a href="/" className="cf-logo" aria-label="CLYX Media home">
+                <BrandLogo size={48} />
+              </a>
+              <div className="cf-socials">
+                {socials.map(({ label, href, Icon }) => (
+                  <a key={label} className="cf-social" href={safeHref(href)} target="_blank" rel="noreferrer" aria-label={label}>
+                    <Icon size={17} />
+                  </a>
+                ))}
+              </div>
             </div>
+            <p className="cf-tagline">{c.footerTagline}</p>
           </div>
 
           {columns.map(({ title, links }, i) => (
@@ -112,9 +115,9 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noreferrer"
       aria-label="Chat on WhatsApp"
-      className="whatsapp-button group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue text-white shadow-lg hover:bg-yellow hover:text-dark transition-all"
+      className="whatsapp-button group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1EBE5A] hover:scale-105 transition-all"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 !text-white group-hover:!text-dark fill-current">
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 !text-white fill-current">
         <path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.9-1.3A9.5 9.5 0 1 0 12 2.5Zm0 17.3c-1.5 0-2.9-.4-4.1-1.2l-.3-.2-2.9.8.8-2.8-.2-.3a7.8 7.8 0 1 1 6.7 3.7Zm4.3-5.8c-.2-.1-1.3-.7-1.5-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.1-.2 0-.3.1-.4l.4-.5c.1-.1.1-.3 0-.4l-.6-1.4c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.1 1.5 2.4 3.7 3.3 1.4.6 1.9.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3Z" />
       </svg>
     </a>
@@ -133,7 +136,7 @@ export function CookieBar() {
   };
   if (!visible) return null;
   return (
-    <div className="cookie-consent fixed bottom-4 right-4 max-w-md z-40 rounded-2xl border border-grid bg-[color:var(--background)]/90 p-5 shadow-2xl backdrop-blur-xl transition-all">
+    <div className="cookie-consent fixed bottom-4 left-4 right-4 sm:left-auto max-w-md z-40 rounded-2xl border border-grid bg-[color:var(--background)]/90 p-5 shadow-2xl backdrop-blur-xl transition-all">
       <p className="text-sm font-semibold tracking-tight text-foreground">
         {c.cookieTitle}
       </p>

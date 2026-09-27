@@ -62,6 +62,8 @@
 
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
+/* Lock horizontal scroll site-wide; clip (not hidden) so position:sticky keeps working. */
+html, body { max-width:100%; overflow-x:clip; }
 html, body, #root { background:var(--background); color:var(--foreground); }
 body { margin:0; font-family:var(--font-body); }
 ::selection { background:var(--clyx-yellow); color:#050505; }
@@ -82,6 +84,7 @@ body { margin:0; font-family:var(--font-body); }
 @keyframes cookie-in { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
 /* Header theme toggle: the new sun/moon icon drops and spins in. */
 @keyframes nav-icon-in { from { opacity:0; transform:translateY(-14px) rotate(-90deg); } to { opacity:1; transform:none; } }
+@keyframes carousel-progress { from { transform:scaleX(0); } to { transform:scaleX(1); } }
 button,a { transition:transform .18s var(--ease-out), background .18s var(--ease-out), color .18s var(--ease-out), border-color .18s var(--ease-out); }
 button, a.inline-flex { border-radius: 12px !important; }
 .whatsapp-button { border-radius: 50% !important; }
@@ -104,6 +107,8 @@ button:active,a:active{transform:scale(.97)}
 .bg-blue { background:#013AA3; }
 .bg-yellow { background:#FFDE59; }
 .text-blue { color:#013AA3; }
+/* Circular brand mark (BrandLogo). */
+.clyx-logo { display:block; flex:none; border-radius:50%; }
 .text-yellow { color:#FFDE59; }
 .bg-dark { background:#050505; }
 .text-dark { color:#050505; }
@@ -157,6 +162,131 @@ button:active,a:active{transform:scale(.97)}
   background: rgba(255,255,255,0.07);
   border-color: rgba(255,222,89,0.28);
 }
+/* Creators intro feature: a glass card on a stage that washes from white to baby blue while in view.
+   It stays light in dark mode too, so the text overrides below keep it readable. */
+.creator-feature {
+  position: relative;
+  /* clip, not hidden: hidden would make this a scroll container and stop the glass card from pinning. */
+  overflow: clip;
+  isolation: isolate;
+  padding: 24px;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  transition: background-color .7s var(--ease-out);
+}
+.creator-feature.is-active { background-color: #A2D2FF; }
+@media (max-width:767px){ .creator-feature { padding: 12px; } }
+/* Soft blue blobs behind the card give the glass blur something to catch; hidden while the stage is white. */
+.creator-feature-orb { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(40px); opacity: 0; transition: opacity .7s var(--ease-out); }
+.creator-feature-orb-a { width: 34rem; height: 34rem; top: -12rem; left: -8rem; background: radial-gradient(circle, rgba(125,190,255,0.7), transparent 65%); }
+.creator-feature-orb-b { width: 38rem; height: 38rem; bottom: -16rem; right: -10rem; background: radial-gradient(circle, rgba(1,58,163,0.3), transparent 65%); }
+.creator-feature.is-active .creator-feature-orb { opacity: 1; }
+/* The spacer after the card is how long it stays pinned while the headline slides away. (A spacer, not padding:
+   a sticky element cannot move into its parent's padding.) */
+.creator-feature-track::after { content: ''; display: block; height: 200vh; }
+.creator-feature-glass {
+  position: sticky;
+  overflow: hidden;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow: 0 24px 60px -28px rgba(1,58,163,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  /* Fills the screen below the header (pinned 84px from the top) with a 24px gap underneath. */
+  min-height: calc(100vh - 108px);
+  min-height: calc(100svh - 108px);
+  display: flex;
+  align-items: center;
+  container-type: inline-size;
+}
+@media (max-width:767px){ .creator-feature-glass { min-height: calc(100svh - 100px); } .creator-feature-track::after { height: 170vh; } }
+/* "See our / Best UGC / Content": centred uppercase lines sized to the card width. */
+.cf-title {
+  width: 100%;
+  margin: 0;
+  padding-block: min(7cqw, 6vh);
+  font-family: 'Plus Jakarta Sans', 'Space Grotesk', sans-serif;
+  /* Capped by the screen height too, so the pinned card always fits below the header. */
+  font-size: min(14.8cqw, 23vh);
+  font-weight: 800;
+  line-height: .98;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cf-line { display: block; width: fit-content; margin-inline: auto; will-change: transform, opacity; }
+.cf-line + .cf-line { margin-top: .12em; }
+/* The inner span rises in with the blue; the outer one is moved by scroll. */
+.cf-line-in {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30%);
+  transition: opacity .8s var(--ease-out), transform .8s var(--ease-out);
+}
+.cf-line-1 { color: #03002E; }
+.cf-line-2 { color: #FFFFFF; }
+.cf-line-3 { color: #03002E; }
+.cf-line-2 .cf-line-in { transition-delay: .12s; }
+.cf-line-3 .cf-line-in { transition-delay: .24s; }
+.creator-feature.is-active .cf-line-in { opacity: 1; transform: none; }
+/* Creator video cards: rise in over the headline once it has left. */
+.cf-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2cqw;
+  pointer-events: none;
+}
+.cf-card {
+  position: relative;
+  flex: none;
+  width: 17cqw;
+  height: 90%;
+  margin: 0;
+  overflow: hidden;
+  border: 5px solid #FFFFFF;
+  border-radius: 22px;
+  background: #0B1230;
+  box-shadow: 0 26px 50px -24px rgba(3, 0, 46, 0.55);
+  will-change: transform, opacity;
+}
+.cf-card + .cf-card { margin-left: -1.4cqw; }
+.cf-card-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cf-see-more {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 10;
+  translate: -50% 0;
+  padding: 14px 34px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: #013AA3;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  box-shadow: 0 16px 30px -14px rgba(3, 0, 46, 0.45);
+  transition: background-color .25s var(--ease-out), color .25s var(--ease-out);
+}
+.cf-see-more:hover { background: #013AA3; color: #FFFFFF; }
+@media (max-width:767px){
+  /* Two rows of three on phones. */
+  .cf-cards { flex-wrap: wrap; align-content: center; gap: 10px 0; padding: 0 3cqw 56px; }
+  .cf-card { width: 31cqw; height: 40%; border-width: 3px; border-radius: 14px; }
+  .cf-card + .cf-card { margin-left: -1.5cqw; }
+  .cf-card:nth-child(4) { margin-left: 0; }
+  .cf-see-more { padding: 12px 26px; font-size: .85rem; }
+}
+.creator-feature .text-muted { color: #475569; }
+.dark .creator-feature [class*="text-blue"] { color: #013AA3 !important; }
+@media (prefers-reduced-motion: reduce) {
+  .creator-feature, .creator-feature-orb, .cf-line-in { transition: none; }
+}
 .inner-page-shell .blog-soft-card {
   background: #DDE8F7;
   border: 1px solid rgba(1,58,163,0.12);
@@ -174,6 +304,11 @@ button:active,a:active{transform:scale(.97)}
 .blog-card:hover::after { transform: translateX(120%); }
 .blog-card .blog-card-arrow { transition: transform .35s var(--ease-out); }
 .blog-card:hover .blog-card-arrow { transform: translate(3px,-3px) scale(1.15); }
+/* Card text rises in once its Reveal wrapper is visible: date row, then tag, then title. */
+.blog-card .blog-card-text { opacity: 0; transform: translateY(18px); filter: blur(4px); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out), filter .6s var(--ease-out); transition-delay: calc(var(--card-delay, 0ms) + 250ms); }
+.blog-card p.blog-card-text { transition-delay: calc(var(--card-delay, 0ms) + 380ms); }
+.blog-card h2.blog-card-text { transition-delay: calc(var(--card-delay, 0ms) + 510ms); }
+.scroll-reveal.is-visible .blog-card-text { opacity: 1; transform: none; filter: none; }
 /* Blog dispatch band: grid, glows, perk chips. */
 .dispatch-band { position: relative; overflow: hidden; isolation: isolate; }
 .dispatch-band::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 70% 90% at 70% 50%, #000 30%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 70% 90% at 70% 50%, #000 30%, transparent 100%); }
@@ -201,6 +336,7 @@ button:active,a:active{transform:scale(.97)}
 @media (prefers-reduced-motion: reduce) {
   .blog-card, .blog-card::after, .blog-card .blog-card-arrow { transition: none; }
   .blog-card:hover, .blog-card:hover .blog-card-arrow { transform: none; }
+  .blog-card .blog-card-text { opacity: 1; transform: none; filter: none; transition: none; }
 }
 .dark .inner-page-shell .page-content-reveal .border-grid {
   border-color: rgba(255,255,255,0.12);
@@ -371,16 +507,17 @@ button:active,a:active{transform:scale(.97)}
   padding: 28px;
   border-radius: 24px;
   overflow: hidden;
-  background: linear-gradient(160deg, #FFFFFF 0%, #F1F5FC 100%);
-  border: 1px solid rgba(1, 58, 163, 0.12);
+  background: linear-gradient(160deg, #FFFFFF 0%, #EDF2FC 100%);
+  border: 1.5px solid rgba(1, 58, 163, 0.28);
+  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.04), 0 14px 32px -16px rgba(1, 58, 163, 0.28);
   transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
 }
 .value-tile:hover {
   transform: translateY(-4px);
-  border-color: rgba(1, 58, 163, 0.3);
-  box-shadow: 0 24px 48px -24px rgba(1, 58, 163, 0.35);
+  border-color: rgba(1, 58, 163, 0.45);
+  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.06), 0 24px 48px -20px rgba(1, 58, 163, 0.4);
 }
-.dark .value-tile { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.1); }
+.dark .value-tile { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: none; }
 .dark .value-tile:hover { border-color: rgba(255, 222, 89, 0.35); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6); }
 .value-tile::after {
   content: '';
@@ -428,26 +565,48 @@ button:active,a:active{transform:scale(.97)}
 @media (prefers-reduced-motion: reduce) {
   .values-flow-head, .values-flow-card { transition: none; }
 }
+/* Careers values heading: Urbanist bold instead of the display font. */
+.display.vf-heading { font-family: 'Urbanist', sans-serif; font-weight: 700; letter-spacing: -.03em; }
+/* Values heading highlight (FlowHighlight): letters rise and sharpen out of per-word masks.
+   Everything resets off-screen so it replays on return. */
+.vf-highlight { position: relative; display: inline-block; }
+.vf-word { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: top; padding: .08em .04em .22em; margin: -.08em -.04em -.22em; }
+.vf-ch { display: inline-block; opacity: 0; transform: translateY(110%) rotate(8deg); filter: blur(6px); transition: opacity .6s var(--ease-out), transform .75s var(--ease-out), filter .6s var(--ease-out); }
+.vf-highlight.is-in .vf-ch { opacity: 1; transform: none; filter: blur(0); transition-delay: calc(150ms + var(--i) * 40ms); }
+@media (prefers-reduced-motion: reduce) {
+  .vf-ch { transform: none; filter: none; transition: opacity .6s ease; }
+  .vf-highlight.is-in .vf-ch { transition-delay: 0s; }
+}
 /* The arrows carry the rhythm here, so the values section needs less padding than a standard section. */
 .section-shell.values-section { padding-block: 3rem; }
 @media (min-width: 768px) { .section-shell.values-section { padding-block: 3.5rem; } }
+
+/* Careers role cards: on desktop the first row slides in from the left and the next from the right, one card
+   after another (--d is set per card). Entrance uses `transform`; the hover lift uses Tailwind's separate `translate`. */
+.role-card { opacity:0; transition:opacity .6s var(--ease-out) var(--d, 0ms), transform .8s cubic-bezier(.2,.8,.2,1) var(--d, 0ms), translate .3s var(--ease-out), border-color .3s var(--ease-out), box-shadow .3s var(--ease-out); }
+.role-cards.is-in .role-card { opacity:1; transform:none; }
+@media (min-width:1024px) {
+  .role-card.from-left { transform:translateX(-140px); }
+  .role-card.from-right { transform:translateX(140px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .role-card { opacity:1; transform:none !important; transition:translate .3s, border-color .3s, box-shadow .3s; }
+}
 
 /* Careers open-roles heading highlight (see AnimatedHighlight in Careers.tsx). */
 .roles-highlight { position:relative; display:inline-block; }
 .rh-mask { display:inline-block; overflow:hidden; vertical-align:bottom; padding-bottom:.12em; margin-bottom:-.12em; }
 .rh-word { display:inline-block; transform:translateY(110%); transition:transform .7s cubic-bezier(.2,.8,.2,1); transition-delay:calc(var(--i, 0) * 90ms); }
 .roles-highlight.is-in .rh-word { transform:none; }
-.rh-underline { position:absolute; left:0; bottom:-.16em; width:100%; height:.24em; overflow:visible; }
-.rh-underline path { fill:none; stroke:#FFDE59; stroke-width:3; stroke-linecap:round; vector-effect:non-scaling-stroke; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .8s cubic-bezier(.65,0,.35,1) .45s; }
-.roles-highlight.is-in .rh-underline path { stroke-dashoffset:0; }
 @media (prefers-reduced-motion: reduce) {
   .rh-word { transform:none; transition:none; }
-  .rh-underline path { stroke-dashoffset:0; transition:none; }
 }
 
 /* RevealWords (ScrollMotion.tsx): each word slides up out of its own mask and sharpens into place.
    The mask is padded (and pulled back with negative margins) so ascenders and descenders aren't clipped. */
-.reveal-word { display: inline-block; overflow: hidden; vertical-align: top; padding: .08em .04em .22em; margin: -.08em -.04em -.22em; }
-.reveal-word > span { display: inline-block; opacity: 0; transform: translateY(105%) rotate(5deg); filter: blur(6px); animation: reveal-word-up .9s var(--ease-out) forwards; }
+.reveal-word { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: top; padding: .08em .04em .22em; margin: -.08em -.04em -.22em; }
+.reveal-word > span { display: inline-block; opacity: 0; transform: translateY(110%) rotate(8deg); filter: blur(6px); animation: reveal-word-up .75s var(--ease-out) forwards; }
 @keyframes reveal-word-up { to { opacity: 1; transform: none; filter: blur(0); } }
-@media (prefers-reduced-motion: reduce) { .reveal-word > span { opacity: 1; transform: none; filter: none; animation: none; } }
+/* Reduced motion keeps a plain fade so the heading still visibly arrives, without the movement. */
+@media (prefers-reduced-motion: reduce) { .reveal-word > span { transform: none; filter: none; animation: reveal-word-fade .6s ease forwards; } }
+@keyframes reveal-word-fade { to { opacity: 1; } }

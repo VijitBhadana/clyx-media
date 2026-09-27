@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { HeartHandshake, Sparkles, Zap, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults } from '@/lib/pageContent';
@@ -16,17 +17,6 @@ export default function CreatorTypes({ content: c = pageDefaults('creators') }: 
   }));
   return (
     <section className="ct-band bg-blue text-white">
-      {/* Polished-gold gradient shared by the card icons. userSpaceOnUse (the 24px icon grid) so straight strokes still render. */}
-      <svg width="0" height="0" className="absolute" aria-hidden="true">
-        <defs>
-          <linearGradient id="ct-gold" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22">
-            <stop offset="0%" stopColor="#FFF6C9" />
-            <stop offset="35%" stopColor="#FFDE59" />
-            <stop offset="70%" stopColor="#D99A00" />
-            <stop offset="100%" stopColor="#FFE680" />
-          </linearGradient>
-        </defs>
-      </svg>
       <div className="container ct-inner">
         <Reveal className="ct-head">
           <div>
@@ -46,13 +36,22 @@ export default function CreatorTypes({ content: c = pageDefaults('creators') }: 
         <div className="ct-grid">
           {types.map(({ Icon, tag, title, text }, i) => (
             <Reveal key={i} delay={i * 140}>
-              <article className="ct-card">
+              <article className={`ct-card${i === 0 ? ' is-yellow' : ''}`} style={{ '--card-delay': `${i * 140}ms` } as React.CSSProperties}>
                 <span className="ct-num display" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
                 <div className="ct-card-top">
-                  <span className="ct-icon"><Icon size={24} strokeWidth={2.1} stroke="url(#ct-gold)" /></span>
+                  <span className="ct-icon"><Icon size={24} strokeWidth={2.1} /></span>
                   {tag && <p className="ct-tag">{tag}</p>}
                 </div>
-                <h3 className="display ct-card-title">{title}</h3>
+                <h3 className="display ct-card-title" aria-label={title}>
+                  {(title || '').split(' ').map((word, w) => (
+                    <Fragment key={w}>
+                      {w > 0 && ' '}
+                      <span className="ct-word" aria-hidden="true">
+                        <span style={{ '--w': w } as React.CSSProperties}>{word}</span>
+                      </span>
+                    </Fragment>
+                  ))}
+                </h3>
                 <p className="ct-card-text">{text}</p>
               </article>
             </Reveal>

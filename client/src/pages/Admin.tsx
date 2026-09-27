@@ -11,6 +11,7 @@ import PageEditor from '@/admin/PageEditor';
 import MediaLibrary from '@/admin/MediaLibrary';
 import { PAGE_ICONS } from '@/admin/nav';
 import { Confirm } from '@/admin/ui';
+import BrandLogo from '@/components/ui/BrandLogo';
 import '../admin-theme.css';
 
 type View = { kind: 'dashboard' } | { kind: 'media' } | { kind: 'page'; id: PageId };
@@ -129,8 +130,8 @@ function Console({ theme, onToggleTheme, onLogout }: { theme: Theme; onToggleThe
     <div className={`adm-shell${menuOpen ? ' menu-open' : ''}`}>
       <aside className="adm-sidebar">
         <div className="adm-brand">
-          <a href="/" target="_blank" rel="noreferrer" className="adm-logo">
-            CLYX<span>.</span>
+          <a href="/" target="_blank" rel="noreferrer" className="adm-logo" aria-label="CLYX Media site">
+            <BrandLogo size={42} />
           </a>
           <span className="adm-brand-tag">Admin</span>
           <button type="button" className="adm-icon-btn adm-sidebar-close" onClick={() => setMenuOpen(false)} aria-label="Close menu">

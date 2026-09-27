@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Megaphone, TrendingUp, Share2, Clapperboard, Code2, ShoppingCart, type LucideIcon } from 'lucide-react';
 import { services } from '../../data/home';
+import { hasRevealed, revealThresholds } from '@/lib/reveal';
 
 // Each service gets a matching pictogram plus its own idle motion (see .sc-icon--* in landing-v1.css).
 // Also used by the Services page.
@@ -26,11 +27,11 @@ function ServiceCard({ title, text, index }: { title: string; text: string; inde
       return;
     }
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
+      if (hasRevealed(entry, 0.2)) {
         setVisible(true);
         observer.disconnect();
       }
-    }, { threshold: 0.2, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: revealThresholds(0.2), rootMargin: '0px 0px -6% 0px' });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);

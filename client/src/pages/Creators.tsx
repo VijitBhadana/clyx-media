@@ -1,26 +1,32 @@
-import { ArrowUpRight } from 'lucide-react';
-import { motion, MotionValue, useScroll, useTransform } from 'framer-motion';
+import { motion, MotionValue, useInView, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import PageShell from '@/components/layout/PageShell';
 import CreatorTypes from '@/components/sections/CreatorTypes';
-import { Label, Section } from '@/components/ui/primitives';
+import CreatorsHeroArt from '@/components/sections/CreatorsHeroArt';
 import { useCollection } from '@/lib/siteContent';
-import { Lines } from '@/components/ui/Lines';
-import { pageDefaults, safeHref, usePageContent } from '@/lib/pageContent';
+import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageContent';
 
 const defaultCreatorImages = [
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/8392ef01-517a-417a-a19d-7396fc756362.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/cf3317b5-03ff-4b9e-a882-3c073f9ca1ad.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/850cec7a-f3b6-4876-81d1-164884c50320.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/3dded1ef-3fb0-4bfd-a931-d7f107a51a05.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/69f632c0-f844-4fa4-9507-32293bdd0650.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/9807268d-3228-44c1-bb23-9cb318dc7643.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/804c4bf4-1fcc-4c74-90ee-a60bcec5c1e6.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/ba22219d-7aee-45a5-87e0-59534c9439c0.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/39a7a90b-5803-4a54-b133-bfa5f593e1c2.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/86eec45f-2c6e-4f2d-9627-2c298610eda1.webp',
+];
+
+// Stock photos for the intro video cards that have no poster set; the Creators list only feeds the gallery.
+const defaultFeaturePosters = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80',
 ];
 
 type ColumnProps = {
@@ -51,11 +57,14 @@ const Column = ({ images, y }: ColumnProps) => {
 
 export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }: { content?: Record<string, string> }) {
   const creatorImages = useCollection<string>('creators', defaultCreatorImages, item => item.image).filter(Boolean);
-  // Always fill four columns: repeat the images when there are few, split them evenly when there are many.
+  // Each photo shows once: split them across the four columns as evenly as possible, earlier columns taking the extras.
   const source = creatorImages.length ? creatorImages : defaultCreatorImages;
-  const filled = Array.from({ length: Math.max(12, source.length) }, (_, i) => source[i % source.length]);
-  const perColumn = Math.ceil(filled.length / 4);
-  const columns = [0, 1, 2, 3].map(k => filled.slice(k * perColumn, (k + 1) * perColumn));
+  const base = Math.floor(source.length / 4);
+  const extra = source.length % 4;
+  const columns = [0, 1, 2, 3].map(k => {
+    const start = k * base + Math.min(k, extra);
+    return source.slice(start, start + base + (k < extra ? 1 : 0));
+  });
   const gallery = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
@@ -92,7 +101,7 @@ export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }
 
   return (
     <div className="w-full bg-[color:var(--background)] text-foreground transition-colors overflow-hidden border-b border-grid">
-      <div className="flex flex-col items-center justify-center pt-16 pb-8 text-center">
+      <div className="flex flex-col items-center justify-center px-5 pt-16 pb-8 text-center md:px-8">
         <span className="text-xs font-mono uppercase tracking-[0.25em] text-blue dark:text-yellow">
           {c.galleryEyebrow}
         </span>
@@ -113,10 +122,136 @@ export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }
   );
 }
 
+// How far the pinned glass card sits from the top of the screen (clears the floating header).
+const FEATURE_PIN_TOP = 84;
+// Pinned-scroll timeline (0 → 1): the headline slides away over exactly the stretch in which the six video cards rise
+// one by one, so the last card lands as the lines vanish; then "See more".
+const LINES_OUT: [number, number] = [0, 0.78];
+const CARDS_IN: [number, number] = [0, 0.78];
+const BUTTON_IN: [number, number] = [0.8, 0.9];
+const FEATURE_CARDS = 6;
+// Resting tilt of each card, like a hand-laid row of phone screens.
+const CARD_TILT = [-3, 2.5, -1.5, 2, -2.5, 3];
+
+/** One headline line: slides off to the left or right and fades as `progress` runs across [from, to]. */
+function ExitLine({ progress, from, to, toLeft, className, children }: { progress: MotionValue<number>; from: number; to: number; toLeft?: boolean; className: string; children: string }) {
+  const x = useTransform(progress, [from, to], ['0vw', toLeft ? '-110vw' : '110vw']);
+  const opacity = useTransform(progress, [from, from + (to - from) * 0.6, to], [1, 0.5, 0]);
+  return (
+    <motion.span className={`cf-line ${className}`} style={{ x, opacity }}>
+      <span className="cf-line-in">{children}</span>
+    </motion.span>
+  );
+}
+
+type FeatureCard = { video: string; poster: string };
+
+/** A creator video card that rises from below the stage in its slot of the timeline; the video plays only while shown. */
+function RiseCard({ progress, i, card }: { progress: MotionValue<number>; i: number; card: FeatureCard }) {
+  // Each card rises over 1.4 steps and starts one step after the previous, so the last one ends exactly at CARDS_IN[1].
+  const step = (CARDS_IN[1] - CARDS_IN[0]) / (FEATURE_CARDS - 1 + 1.4);
+  const start = CARDS_IN[0] + i * step;
+  const end = start + step * 1.4;
+  const tilt = CARD_TILT[i % CARD_TILT.length];
+  const y = useTransform(progress, [start, end], ['115%', '0%']);
+  const rotate = useTransform(progress, [start, end], [tilt * 4, tilt]);
+  const opacity = useTransform(progress, [start, start + step * 0.5], [0, 1]);
+  const video = useRef<HTMLVideoElement>(null);
+  const shown = useInView(video, { amount: 0.3 });
+
+  useEffect(() => {
+    const el = video.current;
+    if (!el) return;
+    if (shown) el.play().catch(() => {});
+    else el.pause();
+  }, [shown]);
+
+  return (
+    <motion.figure className="cf-card" style={{ y, rotate, opacity, zIndex: i + 1 }}>
+      {card.poster && <img src={card.poster} alt="" loading="lazy" decoding="async" className="cf-card-media" />}
+      {card.video && <video ref={video} className="cf-card-media" src={card.video} poster={card.poster || undefined} muted loop playsInline preload="metadata" />}
+    </motion.figure>
+  );
+}
+
+/**
+ * Intro Feature: a stage that washes from white to baby blue while it is in view; the headline rises in with the blue.
+ * The glass card then pins below the header and, as soon as the visitor keeps scrolling, all three lines slide off together
+ * (line 1 right, line 2 left, line 3 right) and fade out while creator video cards rise from the bottom one by one, and a
+ * "See more" button lands in the middle before the page scrolls on. Cards without a poster use the stock photos.
+ */
+function FeatureStage({ content: c }: { content: Record<string, string> }) {
+  const feature = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  // Blue only while the section crosses a line 40% down the screen: on page load it sits below that line, so it starts white.
+  const featureInView = useInView(feature, { margin: '-40% 0px -60% 0px' });
+  // 0 when the card pins, 1 when the pinned stretch (the track's spacer) has been scrolled through.
+  const progress = useMotionValue(0);
+  const buttonY = useTransform(progress, BUTTON_IN, [40, 0]);
+  const buttonOpacity = useTransform(progress, BUTTON_IN, [0, 1]);
+  // Not clickable while it is still invisible under the cards.
+  const buttonEvents = useTransform(progress, (v) => (v > BUTTON_IN[0] + 0.02 ? 'auto' : 'none'));
+  const cards: FeatureCard[] = Array.from({ length: FEATURE_CARDS }, (_, i) => ({
+    video: c[`featureVideo${i + 1}`] || '',
+    poster: c[`featurePoster${i + 1}`] || defaultFeaturePosters[i % defaultFeaturePosters.length],
+  }));
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const el = track.current;
+      const card = el?.firstElementChild as HTMLElement | null;
+      if (!el || !card) return;
+      const pinned = Math.max(1, el.offsetHeight - card.offsetHeight);
+      const scrolled = FEATURE_PIN_TOP - el.getBoundingClientRect().top;
+      progress.set(Math.min(1, Math.max(0, scrolled / pinned)));
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [progress]);
+
+  return (
+    <div ref={feature} className={`creator-feature${featureInView ? ' is-active' : ''}`}>
+      <div className="creator-feature-orb creator-feature-orb-a" aria-hidden="true" />
+      <div className="creator-feature-orb creator-feature-orb-b" aria-hidden="true" />
+      <div ref={track} className="creator-feature-track">
+        <section className="section-shell creator-feature-glass" style={{ top: FEATURE_PIN_TOP }}>
+          <h2 className="cf-title">
+            <ExitLine progress={progress} from={LINES_OUT[0]} to={LINES_OUT[1]} className="cf-line-1">{c.featureLine1}</ExitLine>
+            <ExitLine progress={progress} from={LINES_OUT[0]} to={LINES_OUT[1]} toLeft className="cf-line-2">{c.featureLine2}</ExitLine>
+            <ExitLine progress={progress} from={LINES_OUT[0]} to={LINES_OUT[1]} className="cf-line-3">{c.featureLine3}</ExitLine>
+          </h2>
+          <div className="cf-cards">
+            {cards.map((card, i) => <RiseCard key={i} progress={progress} i={i} card={card} />)}
+          </div>
+          {c.featureSeeMore && (
+            <motion.a
+              href={safeHref(c.featureSeeMoreUrl || '/portfolio')}
+              className="cf-see-more"
+              style={{ y: buttonY, opacity: buttonOpacity, pointerEvents: buttonEvents }}
+            >
+              {c.featureSeeMore}
+            </motion.a>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export default function Creators() {
   const c = usePageContent('creators');
   return (
     <PageShell
+      heroClass="is-beige"
       eyebrow={c.heroEyebrow}
       title={
         <>
@@ -125,40 +260,10 @@ export default function Creators() {
           <span className="text-yellow">{c.heroHighlight}</span>
         </>
       }
-      intro={c.heroIntro}
+      intro=""
+      aside={<CreatorsHeroArt left={splitLines(c.heroCloudLeft)} right={splitLines(c.heroCloudRight)} />}
     >
-      {/* Intro Feature */}
-      <Section>
-        <div className="grid gap-12 md:grid-cols-[1.1fr_.9fr] md:items-center">
-          <div className="relative aspect-[4/3] overflow-hidden bg-yellow p-8 text-dark rounded-3xl">
-            {c.featureImage && (
-              <>
-                <img src={c.featureImage} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#FFDE59] via-[#FFDE59]/40 to-transparent" />
-              </>
-            )}
-            <p className="relative font-mono text-xs font-bold tracking-widest text-dark/70">{c.featureTag}</p>
-            <h2 className="display absolute bottom-8 left-8 right-8 text-4xl sm:text-6xl md:text-7xl font-bold leading-[0.92]">
-              <Lines text={c.featureCardTitle} />
-            </h2>
-          </div>
-          <div>
-            <Label>{c.featureLabel}</Label>
-            <h2 className="display text-4xl sm:text-5xl md:text-6xl font-bold">
-              {c.featureTitle}
-              <br />
-              <span className="text-blue dark:text-yellow">{c.featureHighlight}</span>
-            </h2>
-            <p className="mt-6 text-sm sm:text-base leading-7 text-muted">{c.featureText}</p>
-            <a
-              href={safeHref(c.featureButtonUrl || '/contact')}
-              className="mt-8 inline-flex items-center gap-3 bg-blue px-6 py-4 text-sm font-semibold uppercase tracking-[.1em] text-white hover:bg-yellow hover:text-dark transition-colors rounded-full"
-            >
-              {c.featureButton} <ArrowUpRight size={16} />
-            </a>
-          </div>
-        </div>
-      </Section>
+      <FeatureStage content={c} />
 
       {/* Skiper30 Parallax_002 Gallery */}
       <ParallaxCreatorGallery content={c} />

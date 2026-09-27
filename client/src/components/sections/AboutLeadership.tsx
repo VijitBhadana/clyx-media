@@ -97,7 +97,6 @@ export default function AboutLeadership({
                     <div className="lead-member-info">
                       <h3>{m.name}</h3>
                       <p className="lead-member-role">{m.role}</p>
-                      {m.bio && <p className="lead-member-bio">{m.bio}</p>}
                     </div>
                   </div>
                 </Reveal>

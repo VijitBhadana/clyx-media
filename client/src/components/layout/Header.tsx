@@ -2,6 +2,7 @@ import { useEffect, useState, type MouseEvent } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 // The page a menu link points at, e.g. "/about" for "/about#team". Used to highlight the current page.
 const pathOf = (href: string) => (href.startsWith('/') ? href.split(/[?#]/)[0] || '/' : null);
@@ -65,7 +66,9 @@ export default function Header() {
   const showPill = (e: MouseEvent<HTMLAnchorElement>) => setPill({ left: e.currentTarget.offsetLeft, width: e.currentTarget.offsetWidth });
 
   const nav = parseLinks(c.navLinks);
-  const activeHref = nav.find(item => pathOf(item.href) === location)?.href;
+  // A sub-page such as /blog/some-article keeps its section (Blog) highlighted.
+  const activeHref = (nav.find(item => pathOf(item.href) === location)
+    ?? nav.find(item => pathOf(item.href) !== '/' && location.startsWith(`${pathOf(item.href)}/`)))?.href;
   const ctaHref = safeHref(c.headerCtaUrl || '/contact');
   const linkTarget = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noreferrer' } : {});
 
@@ -74,14 +77,13 @@ export default function Header() {
       <div
         className={`clyx-nav-bar relative flex w-full items-center justify-between border-grid transition-all duration-500 ease-[cubic-bezier(.23,1,.32,1)] ${
           scrolled
-            ? 'is-floating mt-3 h-[58px] max-w-[1200px] mx-3 md:mx-6 rounded-2xl border bg-white/70 shadow-[0_10px_40px_-12px_rgba(1,58,163,0.25)] backdrop-blur-xl backdrop-saturate-150 dark:bg-[#0a1024]/70 dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]'
+            ? 'is-floating mt-3 h-[58px] max-w-[1200px] mx-3 md:mx-6 rounded-[29px] border bg-white/70 shadow-[0_10px_40px_-12px_rgba(1,58,163,0.25)] backdrop-blur-xl backdrop-saturate-150 dark:bg-[#0a1024]/70 dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]'
             : 'mt-0 h-[68px] max-w-full mx-0 rounded-none border-b bg-white/80 backdrop-blur-md dark:bg-[#050814]/80'
         }`}
       >
         {/* Brand Logo */}
-        <a href="/" className="clyx-nav-plain group display relative text-[26px] font-bold tracking-[-.08em] text-foreground shrink-0">
-          {c.logoText}
-          <span className="inline-block text-yellow transition-transform duration-300 group-hover:scale-150 group-hover:-translate-y-0.5">.</span>
+        <a href="/" className="clyx-nav-plain group relative shrink-0" aria-label="CLYX Media home">
+          <BrandLogo size={scrolled ? 40 : 46} className="transition-all duration-500 ease-[cubic-bezier(.23,1,.32,1)] group-hover:scale-105" />
         </a>
 
         {/* Center Desktop Navigation */}

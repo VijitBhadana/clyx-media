@@ -3,6 +3,7 @@ import { ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
 import { pageDefaults, safeHref, useServices, type ServiceContent } from '@/lib/pageContent';
+import BrandLogo from '@/components/ui/BrandLogo';
 import '../../styles/service-book.css';
 
 // Scroll-driven flip book for the homepage services (see service-book.css).
@@ -35,7 +36,7 @@ function Cover({ c, items }: { c: Copy; items: Service[] }) {
     <div className="sb-cover">
       <span className="sb-cover-frame" aria-hidden="true" />
       <span className="sb-cover-ribbon" aria-hidden="true" />
-      <header className="sb-cover-kicker"><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
+      <header className="sb-cover-kicker"><BrandLogo size={48} className="sb-cover-logo" /><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
       <div className="sb-cover-title">
         <span className="sb-cover-clyx">CLYX<span className="sb-cover-dot">.</span></span>
         <span className="sb-cover-media">Media</span>

@@ -1,161 +1,233 @@
-/* Case Studies "recurring pattern" band: brand yellow with keep / cut / try-next cards. Same in light and dark mode. */
-.cp-band.bg-yellow {
-  --cp-ink: #050505;
+/* Case Studies "recurring pattern": a brand-blue panel with the heading on the left and the
+   keep / cut / try-next loop on the right. The panel looks the same in light and dark mode.
+   `bg-blue` only opts the section out of the dark-mode frosted-section style; the section itself stays transparent. */
+.cp-section.bg-blue {
+  background: transparent;
+}
+.cp-section {
   --cp-blue: #013AA3;
+  --cp-yellow: #FFDE59;
+  --cp-ink: #050505;
   --cp-ease: cubic-bezier(.23, 1, .32, 1);
 
+  padding-block: 24px 56px;
+}
+
+.cp-panel {
   position: relative;
+  display: grid;
+  gap: 36px;
+  padding: 32px 22px;
   overflow: hidden;
   isolation: isolate;
-  color: var(--cp-ink);
+  border-radius: 28px;
+  color: #FFFFFF;
   background:
-    radial-gradient(45% 60% at 100% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
-    radial-gradient(35% 55% at 0% 100%, rgba(255, 170, 40, 0.28), transparent 70%),
-    #FFDE59;
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 222, 89, 0.16), transparent 62%),
+    linear-gradient(150deg, #0247C4 0%, var(--cp-blue) 45%, #002366 100%);
+  box-shadow: 0 30px 60px -34px rgba(1, 35, 102, 0.7);
 }
-/* Faint horizontal scan lines, fading out toward the edges. */
-.cp-band::before {
+/* Faint grid, fading out toward the bottom-left. */
+.cp-panel::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: repeating-linear-gradient(0deg, rgba(5, 5, 5, 0.07) 0 1px, transparent 1px 26px);
-  mask-image: radial-gradient(70% 80% at 60% 40%, #000, transparent);
-  -webkit-mask-image: radial-gradient(70% 80% at 60% 40%, #000, transparent);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(80% 90% at 80% 10%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(80% 90% at 80% 10%, #000, transparent 75%);
 }
 
-.cp-inner {
-  display: grid;
-  gap: 24px;
-  padding-block: 36px 40px;
-}
-.cp-top {
-  display: grid;
-  gap: 18px;
-}
-
-/* ---------- Heading ---------- */
-.cp-eyebrow {
+/* ---------- Intro ---------- */
+.cp-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 7px 12px;
+  gap: 10px;
+  padding: 7px 14px 7px 12px;
   border-radius: 999px;
-  background: var(--cp-ink);
-  color: #FFDE59;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cp-yellow);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .18em;
   text-transform: uppercase;
 }
-.cp-eyebrow svg { animation: cp-beat 1.6s ease-in-out infinite; }
-@keyframes cp-beat {
-  0%, 60%, 100% { transform: none; }
-  30% { transform: scale(1.25); }
+.cp-pulse {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cp-yellow);
 }
+.cp-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--cp-yellow);
+  animation: cp-ping 1.8s var(--cp-ease) infinite;
+}
+@keyframes cp-ping {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3); opacity: 0; }
+}
+
 .cp-title {
-  font-size: clamp(2.3rem, 4.6vw, 3.8rem);
+  margin-top: 20px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(2.2rem, 4.2vw, 3.5rem);
   font-weight: 700;
-  line-height: .98;
+  line-height: 1.02;
   letter-spacing: -.03em;
 }
 .cp-title-line {
   display: block;
-  width: fit-content;
   opacity: 0;
   transform: translateY(.4em);
   transition: opacity .6s var(--cp-ease), transform .6s var(--cp-ease);
   transition-delay: calc(var(--i) * 160ms + 200ms);
 }
-.cp-top.is-visible .cp-title-line { opacity: 1; transform: none; }
-/* The last line (the "scale" line) turns blue. */
-.cp-title-line.is-hl { color: var(--cp-blue); }
+.cp-title-line.is-hl { color: var(--cp-yellow); }
+.cp-intro.is-visible .cp-title-line { opacity: 1; transform: none; }
 
-/* ---------- Body ---------- */
 .cp-text {
-  max-width: 30rem;
+  max-width: 28rem;
+  margin-top: 18px;
   font-size: 1rem;
   line-height: 1.65;
-  color: rgba(5, 5, 5, 0.78);
+  color: rgba(255, 255, 255, 0.74);
 }
 
-/* ---------- Keep / cut / try-next cards ---------- */
-.cp-steps { display: grid; gap: 14px; }
-.cp-step-reveal { height: 100%; }
+/* Signal wave: the noise fades in, then the clean wave draws itself and the end dot lights up. */
+.cp-wave {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  margin-top: 30px;
+  overflow: visible;
+}
+.cp-wave path {
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.cp-wave-noise { stroke: rgba(255, 255, 255, 0.4); }
+.cp-wave-signal { stroke: var(--cp-yellow); }
+.cp-wave-dot {
+  fill: var(--cp-yellow);
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 222, 89, 0.9));
+}
+.cp-intro.is-visible .cp-wave-noise { animation: cp-draw .7s linear .5s forwards; }
+.cp-intro.is-visible .cp-wave-signal { animation: cp-draw 1.4s var(--cp-ease) 1.1s forwards; }
+.cp-intro.is-visible .cp-wave-dot { animation: cp-dot .4s ease 2.2s forwards; }
+@keyframes cp-draw { to { stroke-dashoffset: 0; } }
+@keyframes cp-dot { to { opacity: 1; } }
+
+/* ---------- Keep / cut / try-next flow ---------- */
+/* Lighter frosted surface behind the steps so the right half reads brighter than the blue panel. */
+.cp-flow {
+  display: grid;
+  padding: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background:
+    radial-gradient(90% 60% at 100% 0%, rgba(255, 222, 89, 0.12), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 24px 50px -30px rgba(0, 12, 45, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.cp-flow > li { position: relative; }
+/* Rail joining each step's number to the next one. */
+.cp-flow > li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 38px;
+  top: 72px;
+  bottom: -12px;
+  width: 1px;
+  background: linear-gradient(rgba(255, 222, 89, 0.55), rgba(255, 255, 255, 0.15));
+}
 .cp-step {
-  position: relative;
-  height: 100%;
-  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 18px;
+  padding: 20px 16px;
   border-radius: 20px;
-  border: 1px solid rgba(5, 5, 5, 0.12);
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(6px);
-  transition: background .35s var(--cp-ease), color .35s var(--cp-ease), transform .35s var(--cp-ease), box-shadow .35s var(--cp-ease);
+  transition: background .35s var(--cp-ease);
 }
-.cp-step:hover {
-  background: var(--cp-ink);
-  color: #FFFFFF;
-  transform: translateY(-6px);
-  box-shadow: 0 22px 40px -22px rgba(0, 0, 0, 0.6);
-}
-.cp-step-top { display: flex; align-items: center; gap: 10px; }
-.cp-step-icon {
+.cp-step:hover { background: rgba(255, 255, 255, 0.1); }
+.cp-step-num {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: var(--cp-ink);
-  color: #FFDE59;
-  transition: background .35s var(--cp-ease), color .35s var(--cp-ease), transform .35s var(--cp-ease);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-family: 'Urbanist', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  transition: background .35s var(--cp-ease), color .35s var(--cp-ease), border-color .35s var(--cp-ease), transform .35s var(--cp-ease);
 }
-.cp-step:hover .cp-step-icon { background: #FFDE59; color: var(--cp-ink); transform: rotate(-8deg); }
+.cp-step:hover .cp-step-num {
+  background: var(--cp-yellow);
+  border-color: var(--cp-yellow);
+  color: var(--cp-ink);
+  transform: scale(1.06);
+}
 .cp-step-tag {
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  font-size: .66rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--cp-yellow);
+  font-size: .68rem;
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  opacity: .75;
 }
-.cp-step-num {
-  margin-left: auto;
-  font-size: 2.2rem;
-  font-weight: 700;
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(5, 5, 5, 0.3);
-  transition: -webkit-text-stroke-color .35s var(--cp-ease);
-}
-.cp-step:hover .cp-step-num { -webkit-text-stroke-color: #FFDE59; }
 .cp-step-title {
-  margin-top: 10px;
-  font-size: 1.25rem;
+  margin-top: 8px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.35rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: -.02em;
 }
 .cp-step-text {
   margin-top: 6px;
-  font-size: .9rem;
-  line-height: 1.55;
-  opacity: .72;
+  max-width: 34rem;
+  font-size: .94rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 @media (min-width: 768px) {
-  .cp-inner { gap: 28px; padding-block: 44px 52px; }
-  .cp-top { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: end; }
-  .cp-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .cp-section { padding-block: 32px 72px; }
+  .cp-panel { padding: 52px; }
 }
-@media (max-width: 767px) {
-  .cp-inner { padding-inline: 20px; }
+@media (min-width: 1024px) {
+  .cp-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 56px;
+    align-items: center;
+    padding: 64px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cp-band * { animation: none !important; transition: none !important; }
+  .cp-section *, .cp-section *::after { animation: none !important; transition: none !important; }
   .cp-title-line { opacity: 1; transform: none; }
+  .cp-wave path { stroke-dashoffset: 0; }
+  .cp-wave-dot { opacity: 1; }
 }

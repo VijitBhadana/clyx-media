@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
+import CaseHeroArt from '@/components/sections/CaseHeroArt';
+import { RevealWords } from '@/components/ui/ScrollMotion';
 import { cn } from '@/lib/utils';
 import { useCollection } from '@/lib/siteContent';
 import { safeHref, usePageContent } from '@/lib/pageContent';
+import '@/styles/case-studies-hero.css';
 
 interface CaseStudyItem {
   id: string;
@@ -71,135 +73,113 @@ const defaultCaseStudies: CaseStudyItem[] = [
   },
 ];
 
-function HoverExpand_002({
+interface CaseCardProps {
+  item: CaseStudyItem;
+  index: number;
+  href: string;
+  buttonText: string;
+  featured?: boolean;
+}
+
+function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardProps) {
+  return (
+    <motion.a
+      href={href}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, delay: featured ? 0 : index * 0.08, ease: [0.25, 1, 0.5, 1] }}
+      className={cn(
+        'group relative flex overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-sm',
+        'shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)] transition-all duration-500',
+        'hover:-translate-y-1.5 hover:border-yellow/60 hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow',
+        featured ? 'flex-col lg:flex-row' : 'flex-col'
+      )}
+    >
+      {/* Image */}
+      <div
+        className={cn(
+          'relative shrink-0 overflow-hidden',
+          featured ? 'aspect-[16/10] lg:aspect-auto lg:w-[58%]' : 'aspect-[16/11]'
+        )}
+      >
+        <img
+          src={item.src}
+          alt={item.alt}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+        <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
+          <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
+            {item.category}
+          </span>
+          <span className="font-mono text-xs font-bold text-yellow drop-shadow">#{item.code}</span>
+        </div>
+
+        <div className="absolute bottom-4 left-4 rounded-2xl bg-yellow px-4 py-2 shadow-lg">
+          <span className="display block text-lg font-bold leading-none text-dark md:text-xl">{item.result}</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className={cn('flex flex-1 flex-col', featured ? 'p-6 md:p-8 lg:p-10' : 'p-6')}>
+        <h3 className="font-['Poppins',sans-serif] text-[26px] font-normal leading-tight tracking-normal text-white">
+          {item.brand}
+        </h3>
+        <h4 className="mt-3 font-['Poppins',sans-serif] text-lg font-medium leading-snug tracking-normal text-white/90">
+          {item.headline}
+        </h4>
+        <p className="mt-1.5 font-['Poppins',sans-serif] text-lg font-normal leading-[1.65] tracking-normal text-white/70">
+          {item.detail}
+        </p>
+
+        {featured && (
+          <span className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-dark transition-colors group-hover:bg-blue group-hover:text-white">
+            {buttonText} <ArrowUpRight size={15} />
+          </span>
+        )}
+      </div>
+    </motion.a>
+  );
+}
+
+function CaseCards({
   items,
   className,
   buttonText,
   buttonUrl,
-  outcomeLabel,
 }: {
   items: CaseStudyItem[];
   className?: string;
   buttonText: string;
   buttonUrl: string;
-  outcomeLabel: string;
 }) {
-  const [activeItem, setActiveItem] = useState<number | null>(0);
+  const href = safeHref(buttonUrl || '/contact');
+  const [featured, ...rest] = items;
+  if (!featured) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.2 }}
-      className={cn('relative w-full max-w-6xl mx-auto px-4 py-8 select-none', className)}
-    >
-      <div className="flex w-full flex-col items-center justify-center gap-3">
-        {items.map((item, index) => {
-          const isActive = activeItem === index;
+    <div className={cn('relative mx-auto w-full max-w-6xl px-4 py-8', className)}>
+      <CaseCard item={featured} index={0} href={href} buttonText={buttonText} featured />
 
-          return (
-            <motion.div
+      {rest.length > 0 && (
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((item, i) => (
+            <CaseCard
               key={item.id}
-              className={cn(
-                'group relative w-full cursor-pointer overflow-hidden rounded-2xl md:rounded-3xl border transition-all duration-300',
-                isActive
-                  ? 'border-yellow ring-1 ring-yellow/50 shadow-2xl'
-                  : 'border-grid hover:border-foreground/40 bg-zinc-900/60'
-              )}
-              initial={{ height: '4.5rem' }}
-              animate={{
-                height: isActive ? '22rem' : '4.5rem',
-              }}
-              transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              onClick={() => setActiveItem(index)}
-              onHoverStart={() => setActiveItem(index)}
-            >
-              {/* Background Photo */}
-              <img
-                src={item.src}
-                className="absolute inset-0 h-full w-full object-cover"
-                alt={item.alt}
-                loading="lazy"
-                decoding="async"
-              />
-
-              {/* Dark Overlay Gradient */}
-              <div
-                className={cn(
-                  'absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/40 transition-opacity duration-300',
-                  isActive ? 'opacity-95' : 'opacity-85 group-hover:opacity-75'
-                )}
-              />
-
-              {/* Collapsed State Bar (Always Visible at Top) */}
-              <div className="relative z-10 flex h-[4.5rem] w-full items-center justify-between px-5 md:px-8">
-                <div className="flex items-center gap-4 md:gap-6">
-                  <span className="font-mono text-xs md:text-sm font-bold text-yellow">
-                    #{item.code}
-                  </span>
-                  <h3 className="display text-xl md:text-2xl font-bold text-white tracking-tight">
-                    {item.brand}
-                  </h3>
-                  <span className="hidden sm:inline-block text-xs uppercase tracking-wider text-white/60 font-medium">
-                    / {item.category}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="display text-lg md:text-xl font-bold text-yellow">
-                    {item.result}
-                  </span>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-transform group-hover:scale-110">
-                    <ArrowUpRight size={16} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Expanded State Content Area */}
-              <AnimatePresence>
-                {isActive && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 15 }}
-                    transition={{ duration: 0.25 }}
-                    className="relative z-10 flex h-[calc(22rem-4.5rem)] w-full flex-col justify-between px-5 pb-6 md:px-8 md:pb-8 pt-1"
-                  >
-                    <div className="max-w-2xl">
-                      <h4 className="display text-2xl md:text-4xl font-bold text-white leading-tight">
-                        {item.headline}
-                      </h4>
-                      <p className="mt-3 text-sm md:text-base text-white/80 leading-relaxed font-normal max-w-xl">
-                        {item.detail}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-end justify-between gap-4 border-t border-white/20 pt-4">
-                      <div>
-                        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/60 block">
-                          {outcomeLabel}
-                        </span>
-                        <span className="display text-2xl md:text-4xl font-bold text-yellow mt-0.5 block">
-                          {item.result}
-                        </span>
-                      </div>
-
-                      <a
-                        href={safeHref(buttonUrl || '/contact')}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-dark hover:bg-blue hover:text-white transition-colors"
-                      >
-                        {buttonText} <ArrowUpRight size={15} />
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          );
-        })}
-      </div>
-    </motion.div>
+              item={item}
+              index={i}
+              href={href}
+              buttonText={buttonText}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -220,18 +200,34 @@ export default function CaseStudies() {
 
   return (
     <PageShell
+      heroClass="cs-hero"
       eyebrow={c.heroEyebrow}
       title={
         <>
-          {c.heroTitle}
+          <RevealWords text={c.heroTitle} delay={150} step={50} />
           <br />
-          <span className="text-yellow">{c.heroHighlight}</span>
+          <RevealWords
+            text={c.heroHighlight}
+            className="cs-hl"
+            delay={150 + c.heroTitle.replace(/\s/g, '').length * 50}
+            step={50}
+          />
         </>
       }
+      lead={
+        <div className="cs-proof">
+          {caseStudies.slice(0, 3).map((item) => (
+            <span key={item.id} className="cs-chip">
+              <strong>{item.result}</strong>
+              {item.brand}
+            </span>
+          ))}
+        </div>
+      }
       intro={c.heroIntro}
+      aside={<CaseHeroArt />}
     >
-      {/* Skiper53 / HoverExpand_002 Expanding Accordion Showcase */}
-      <HoverExpand_002 items={caseStudies} buttonText={c.caseButton} buttonUrl={c.caseButtonUrl} outcomeLabel={c.caseOutcomeLabel} />
+      <CaseCards items={caseStudies} buttonText={c.caseButton} buttonUrl={c.caseButtonUrl} />
 
       <CasePattern content={c} />
     </PageShell>

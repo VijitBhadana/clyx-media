@@ -1,13 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Hammer, MessageSquareQuote, TrendingUp } from 'lucide-react';
 import { Label } from '@/components/ui/primitives';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const ICONS = [Hammer, MessageSquareQuote, TrendingUp];
-// Desktop zigzag: heading sits top-left, cards go top-right → bottom-right → bottom-left.
+// Tablet/desktop zigzag: heading sits top-left, cards go top-right → bottom-right → bottom-left.
 const PLACEMENT = [
-  'lg:col-start-2 lg:row-start-1 lg:justify-self-end lg:self-center',
-  'lg:col-start-2 lg:row-start-2 lg:justify-self-end',
-  'lg:col-start-1 lg:row-start-2 lg:justify-self-start',
+  'md:col-start-2 md:row-start-1 md:justify-self-end md:self-center',
+  'md:col-start-2 md:row-start-2 md:justify-self-end',
+  'md:col-start-1 md:row-start-2 md:justify-self-start',
 ];
 // Arrows are scrubbed by scroll: each draws over SPAN px of scrolling, in order, as its midpoint passes
 // TRIGGER (a fraction of the viewport height from the top).
@@ -84,6 +85,29 @@ function arrowBetween(a: Box, b: Box, flip: boolean): Arrow {
     return `${(p1.x - 20 * (dirX * c - dirY * sn)).toFixed(1)} ${(p1.y - 20 * (dirX * sn + dirY * c)).toFixed(1)}`;
   };
   return { d, head: `M ${wing(0.6)} L ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${wing(-0.6)}`, mid: (p0.y + p1.y) / 2 };
+}
+
+/**
+ * The heading's highlight: once it scrolls into view its letters rise out of per-word masks one by one.
+ */
+function FlowHighlight({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useScrollReveal(ref);
+  let n = 0;
+  const words = text.split(/\s+/).filter(Boolean).map(word => Array.from(word).map(ch => ({ ch, i: n++ })));
+  return (
+    <span ref={ref} className={`vf-highlight text-blue${inView ? ' is-in' : ''}`} style={{ '--n': n } as React.CSSProperties}>
+      <span className="sr-only">{text}</span>
+      {words.map((letters, w) => (
+        <span key={w} aria-hidden="true">
+          {w > 0 && ' '}
+          <span className="vf-word">
+            {letters.map(({ ch, i }) => <span key={i} className="vf-ch" style={{ '--i': i } as React.CSSProperties}>{ch}</span>)}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
 }
 
 type Props = {
@@ -187,7 +211,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
   }, []);
 
   return (
-    <div ref={rootRef} className="values-flow relative grid gap-y-32 lg:grid-cols-2 lg:gap-x-32 lg:gap-y-56">
+    <div ref={rootRef} className="values-flow relative grid gap-y-32 md:grid-cols-2 md:gap-x-12 md:gap-y-40 lg:gap-x-32 lg:gap-y-56">
       <svg className="values-flow-arrows" aria-hidden="true">
         {arrows.map((arrow, i) => (
           <g key={i}>
@@ -196,10 +220,10 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
           </g>
         ))}
       </svg>
-      <div className="lg:col-start-1 lg:row-start-1 lg:self-center">
+      <div className="md:col-start-1 md:row-start-1 md:self-center">
         <Label>{label}</Label>
-        <h2 ref={headRef} className="display w-fit text-4xl font-bold md:text-6xl">
-          {title}<br /><span className="text-blue">{highlight}</span>
+        <h2 ref={headRef} className="display vf-heading w-fit text-4xl font-bold md:text-5xl lg:text-6xl">
+          {title}<br /><FlowHighlight text={highlight} />
         </h2>
         {intro && <p className="mt-6 max-w-md text-base leading-7 text-muted">{intro}</p>}
       </div>
@@ -211,9 +235,8 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
             ref={el => { cardRefs.current[i] = el; }}
             className={`value-tile values-flow-card ${PLACEMENT[i] ?? ''}`}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <span className="service-row-index"><Icon size={22} /></span>
-              <span className="font-mono text-xs text-muted">{String(i + 1).padStart(2, '0')} / {String(values.length).padStart(2, '0')}</span>
             </div>
             <div className="mt-auto pt-5">
               <h3 className="display text-3xl font-bold md:text-4xl">{value.title}</h3>

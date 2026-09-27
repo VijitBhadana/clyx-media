@@ -98,7 +98,7 @@ export default function CoverFlowCarousel({
   items = clyxCampaigns,
   sectionLabel = "FEATURED CAMPAIGNS",
   autoplay = true,
-  autoplayDelay = 5000,
+  autoplayDelay = 2000,
   className = "",
   id,
 }: CoverFlowCarouselProps) {
@@ -146,11 +146,14 @@ export default function CoverFlowCarousel({
     setCurrentIndex(idx % total);
   };
 
+  const isPlaying = autoplay && !isHovered && isOnScreen && isTabVisible && total > 1;
+
+  // A fresh timer per slide, so moving with the arrows, dots or a swipe restarts the countdown.
   useEffect(() => {
-    if (!autoplay || isHovered || !isOnScreen || !isTabVisible || total <= 1) return;
-    const interval = setInterval(nextSlide, autoplayDelay);
-    return () => clearInterval(interval);
-  }, [autoplay, autoplayDelay, isHovered, isOnScreen, isTabVisible, nextSlide, total]);
+    if (!isPlaying) return;
+    const timer = setTimeout(nextSlide, autoplayDelay);
+    return () => clearTimeout(timer);
+  }, [isPlaying, autoplayDelay, nextSlide, currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -180,8 +183,6 @@ export default function CoverFlowCarousel({
       ref={sectionRef}
       id={id}
       className={`relative w-full min-h-[720px] flex items-center justify-center overflow-hidden py-16 select-none bg-[#050505] text-white border-b border-grid ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -269,6 +270,9 @@ export default function CoverFlowCarousel({
               <div
                 key={idx}
                 onClick={() => !isCenter && goToSlide(idx)}
+                // Autoplay waits only while the pointer is on the front card, so it can be read and its link clicked.
+                onMouseEnter={() => isCenter && setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 style={{
                   position: "absolute",
                   width: "280px",
@@ -282,7 +286,7 @@ export default function CoverFlowCarousel({
                   zIndex,
                   filter,
                   transformOrigin: "center center",
-                  transition: "all 800ms cubic-bezier(0.25, 1, 0.5, 1)",
+                  transition: "all 280ms cubic-bezier(0.25, 1, 0.5, 1)",
                   boxShadow: isCenter
                     ? "0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(0,58,163,0.35)"
                     : "0 15px 35px rgba(0,0,0,0.5)",
@@ -330,7 +334,10 @@ export default function CoverFlowCarousel({
                     zIndex: 20,
                     opacity: isCenter ? 1 : 0,
                     transform: isCenter ? "translateY(0px)" : "translateY(16px)",
-                    transition: "opacity 500ms ease, transform 500ms ease",
+                    // The outgoing card's text clears at once; the incoming text follows once its card has mostly arrived.
+                    transition: isCenter
+                      ? "opacity 200ms ease 100ms, transform 200ms ease 100ms"
+                      : "opacity 100ms ease, transform 100ms ease",
                     pointerEvents: isCenter ? "auto" : "none",
                   }}
                 >
@@ -387,7 +394,9 @@ export default function CoverFlowCarousel({
 
                     <a
                       href={item.ctaUrl || "/case-studies"}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-yellow text-black! text-xs font-bold uppercase tracking-wider hover:bg-blue hover:text-white! transition-colors"
+                      // Inline padding: landing-v1.css resets `* { padding: 0 }` outside any layer, which beats Tailwind's px/py.
+                      style={{ padding: "10px 18px 10px 22px" }}
+                      className="inline-flex items-center gap-2 rounded-full bg-yellow text-black! text-xs font-bold uppercase tracking-wider hover:bg-blue hover:text-white! transition-colors"
                     >
                       <span>{item.ctaText || "View Case Study"}</span>
                       <ArrowRightIcon />
@@ -424,15 +433,32 @@ export default function CoverFlowCarousel({
               onClick={() => goToSlide(idx)}
               aria-label={`Go to slide ${idx + 1}`}
               style={{
+                position: "relative",
+                overflow: "hidden",
                 height: "8px",
                 width: idx === currentIndex ? "28px" : "8px",
                 borderRadius: "9999px",
-                backgroundColor: idx === currentIndex ? "#FFDE59" : "rgba(255,255,255,0.25)",
+                backgroundColor: idx === currentIndex && isPlaying ? "rgba(255,222,89,0.3)" : idx === currentIndex ? "#FFDE59" : "rgba(255,255,255,0.25)",
                 border: "none",
                 cursor: "pointer",
                 transition: "all 300ms ease",
               }}
-            />
+            >
+              {/* Fills up over the autoplay delay; keyed by slide so it restarts on every move. */}
+              {idx === currentIndex && isPlaying && (
+                <span
+                  key={currentIndex}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundColor: "#FFDE59",
+                    transformOrigin: "left center",
+                    animation: `carousel-progress ${autoplayDelay}ms linear forwards`,
+                  }}
+                />
+              )}
+            </button>
           ))}
         </div>
       </div>

@@ -5,6 +5,10 @@
   overflow: hidden;
   isolation: isolate;
 }
+/* Lighter blue gradient in place of the flat brand blue; the far end stays deep enough for white ink. */
+.ct-band.bg-blue {
+  background: linear-gradient(135deg, #1D56C9 0%, #2F6BDA 45%, #4F8AE8 100%);
+}
 /* Faint line grid, fading out towards the bottom. */
 .ct-band::before {
   content: '';
@@ -86,7 +90,7 @@
   max-width: 440px;
   font-size: 1rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.86);
 }
 @media (min-width: 768px) { .ct-intro { justify-self: end; } }
 
@@ -98,7 +102,7 @@
 @media (min-width: 768px) { .ct-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; } }
 .ct-grid > .scroll-reveal { height: 100%; }
 
-/* Glass card on blue; flips to the brand yellow on hover. */
+/* Glass card on blue; on hover it lifts and the glass brightens (only the first card is yellow). */
 .ct-card {
   position: relative;
   display: flex;
@@ -122,12 +126,11 @@
   opacity: 0;
   transition: opacity 0.4s var(--ease-out);
 }
-.ct-card:hover {
-  transform: translateY(-6px);
-  border-color: #FFDE59;
-  color: #050505;
+.ct-card:hover { transform: translateY(-6px); }
+.ct-card:not(.is-yellow):hover {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.07) 100%);
+  border-color: rgba(255, 255, 255, 0.34);
 }
-.ct-card:hover::before { opacity: 1; }
 .ct-card > * { position: relative; z-index: 1; }
 
 .ct-card-top {
@@ -146,47 +149,17 @@
   width: 54px;
   height: 54px;
   border-radius: 16px;
-  overflow: hidden;
-  /* Dark lacquered tile: lit from the top-left, bevelled edge, deep cast shadow. */
-  background:
-    radial-gradient(120% 90% at 25% 0%, #2B3F86 0%, rgba(43, 63, 134, 0) 60%),
-    linear-gradient(160deg, #111C45 0%, #060B22 100%);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.55),
-    0 14px 24px -10px rgba(0, 0, 0, 0.7),
-    0 3px 6px rgba(0, 0, 0, 0.3);
-  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+  /* Transparent glass tile with white ink, so it sits on the blue card instead of on top of it. */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.4s var(--ease-out), border-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
 }
-/* Glossy reflection across the top half. */
-.ct-icon::before {
-  content: '';
-  position: absolute;
-  inset: 1px 1px 50% 1px;
-  border-radius: 15px 15px 40% 40% / 15px 15px 12px 12px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
-  pointer-events: none;
-}
-/* Gold icon (stroke gradient set in the component) with a warm glow and a pressed-in shadow. */
-.ct-icon svg {
-  position: relative;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 7px rgba(255, 210, 60, 0.45));
-  transition: transform 0.45s var(--ease-out), filter 0.45s var(--ease-out);
-}
-.ct-card:hover .ct-icon {
-  transform: rotate(-6deg) translateY(-2px);
-  box-shadow:
-    0 0 0 1px rgba(5, 5, 5, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.55),
-    0 18px 28px -12px rgba(5, 5, 5, 0.6),
-    0 4px 8px rgba(5, 5, 5, 0.25);
-}
-.ct-card:hover .ct-icon svg {
-  transform: scale(1.1);
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 10px rgba(255, 210, 60, 0.7));
-}
+.ct-icon svg { transition: transform 0.45s var(--ease-out); }
+.ct-card:hover .ct-icon { transform: rotate(-6deg) translateY(-2px); }
+.ct-card:hover .ct-icon svg { transform: scale(1.1); }
 .ct-tag {
   margin: 0;
   padding: 5px 11px;
@@ -199,7 +172,6 @@
   color: rgba(255, 255, 255, 0.8);
   transition: border-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
 }
-.ct-card:hover .ct-tag { border-color: rgba(5, 5, 5, 0.25); color: rgba(5, 5, 5, 0.7); }
 
 /* Big outlined number in the card background, bottom-right. */
 .ct-card > .ct-num {
@@ -216,10 +188,7 @@
   user-select: none;
   transition: transform 0.45s var(--ease-out), -webkit-text-stroke-color 0.4s var(--ease-out);
 }
-.ct-card:hover > .ct-num {
-  transform: translateY(-8px);
-  -webkit-text-stroke-color: rgba(5, 5, 5, 0.2);
-}
+.ct-card:hover > .ct-num { transform: translateY(-8px); }
 
 .ct-card-title {
   margin: 0;
@@ -231,12 +200,64 @@
   max-width: 30ch;
   font-size: 0.95rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.86);
   transition: color 0.4s var(--ease-out);
 }
-.ct-card:hover .ct-card-text { color: rgba(5, 5, 5, 0.72); }
+
+/* The first card ("The Hook") is always yellow, not only on hover. */
+.ct-card.is-yellow {
+  border-color: #FFDE59;
+  color: #050505;
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.55);
+}
+.ct-card.is-yellow::before { opacity: 1; }
+.ct-card.is-yellow .ct-icon { border-color: rgba(5, 5, 5, 0.3); color: #050505; }
+.ct-card.is-yellow .ct-tag { border-color: rgba(5, 5, 5, 0.25); color: rgba(5, 5, 5, 0.7); }
+.ct-card.is-yellow > .ct-num { -webkit-text-stroke-color: rgba(5, 5, 5, 0.2); }
+.ct-card.is-yellow .ct-card-text { color: rgba(5, 5, 5, 0.72); }
+
+/* ---------- Card content entrance ----------
+   Once a card scrolls in: icon pops, tag slides in, title words rise out of a mask, text unblurs, number climbs.
+   `backwards` fill (not `both`) so the hover transforms still apply after the entrance finishes. */
+.ct-word { display: inline-block; overflow: hidden; vertical-align: top; padding-block: .14em; margin-block: -.14em; }
+.ct-word > span { display: inline-block; }
+.scroll-reveal:not(.is-visible) .ct-card .ct-icon,
+.scroll-reveal:not(.is-visible) .ct-card .ct-tag,
+.scroll-reveal:not(.is-visible) .ct-card .ct-word > span,
+.scroll-reveal:not(.is-visible) .ct-card .ct-card-text,
+.scroll-reveal:not(.is-visible) .ct-card > .ct-num { opacity: 0; }
+.scroll-reveal.is-visible .ct-card .ct-icon { animation: ct-pop .7s cubic-bezier(.34, 1.56, .64, 1) calc(var(--card-delay, 0ms) + 250ms) backwards; }
+.scroll-reveal.is-visible .ct-card .ct-tag { animation: ct-slide-in .6s var(--ease-out) calc(var(--card-delay, 0ms) + 380ms) backwards; }
+.scroll-reveal.is-visible .ct-card .ct-word > span { animation: ct-rise .7s var(--ease-out) calc(var(--card-delay, 0ms) + 460ms + var(--w) * 90ms) backwards; }
+.scroll-reveal.is-visible .ct-card .ct-card-text { animation: ct-unblur .8s var(--ease-out) calc(var(--card-delay, 0ms) + 680ms) backwards; }
+.scroll-reveal.is-visible .ct-card > .ct-num { animation: ct-climb 1s var(--ease-out) calc(var(--card-delay, 0ms) + 300ms) backwards; }
+@keyframes ct-pop {
+  from { opacity: 0; transform: scale(.4) rotate(-20deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ct-slide-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ct-rise {
+  from { opacity: 0; transform: translateY(110%); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ct-unblur {
+  from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes ct-climb {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+/* Hover: title words lift one after another. */
+.ct-card-title .ct-word > span { transition: transform .35s var(--ease-out); transition-delay: calc(var(--w) * 50ms); }
+.ct-card:hover .ct-card-title .ct-word > span { transform: translateY(-3px); }
 
 @media (prefers-reduced-motion: reduce) {
+  .ct-card .ct-icon, .ct-card .ct-tag, .ct-card .ct-word > span, .ct-card .ct-card-text, .ct-card > .ct-num { animation: none !important; opacity: 1 !important; }
+  .ct-card:hover .ct-card-title .ct-word > span { transform: none; }
   .ct-ch { opacity: 1; }
   .ct-head.is-visible .ct-ch { animation: none; }
   .ct-card, .ct-card::before, .ct-icon, .ct-icon svg, .ct-tag, .ct-num, .ct-card-text { transition: none; }

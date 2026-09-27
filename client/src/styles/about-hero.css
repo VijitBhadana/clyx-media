@@ -1,0 +1,290 @@
+/* About hero (PageShell heroClass="about-hero", layout in AboutHero.tsx): beige base, moving blue light, three cards hanging from a screw on the left and the copy on the right. */
+.inner-hero.about-hero {
+  --ab-ink: #0E1530;
+  --ab-accent: #013AA3;
+  --ab-line: rgba(14, 21, 48, 0.1);
+  color: var(--ab-ink);
+  background: #F5EFE4;
+  border-bottom-color: var(--ab-line);
+}
+.inner-hero.about-hero::before { display: none; }
+/* No clipping, so cards breaking off the hinge fall over the next section (the glow clips itself). */
+.inner-hero.about-hero { overflow: visible; z-index: 2; }
+.inner-hero.about-hero .ih-orb { display: none; }
+
+/* Centre glow: a bright core plus a softer cyan halo, drifting and breathing in opposite directions. */
+.inner-hero .ab-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.inner-hero .ab-glow-core,
+.inner-hero .ab-glow-soft {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+.inner-hero .ab-glow-core {
+  width: 44rem;
+  height: 36rem;
+  margin: -18rem 0 0 -22rem;
+  background: radial-gradient(closest-side, rgba(37, 92, 255, 1) 0%, rgba(59, 115, 255, 0.75) 40%, rgba(120, 160, 255, 0.32) 70%, transparent 100%);
+  filter: blur(24px);
+  animation: ab-core 7s ease-in-out infinite alternate;
+}
+.inner-hero .ab-glow-soft {
+  width: 60rem;
+  height: 44rem;
+  margin: -22rem 0 0 -30rem;
+  background: radial-gradient(closest-side, rgba(80, 190, 255, 0.6) 0%, rgba(100, 145, 255, 0.3) 55%, transparent 100%);
+  filter: blur(50px);
+  animation: ab-soft 10s ease-in-out infinite alternate;
+}
+@keyframes ab-core {
+  0% { transform: translate3d(-12rem, 2rem, 0) scale(.92); opacity: .9; }
+  50% { transform: translate3d(0, -2rem, 0) scale(1.08); opacity: 1; }
+  100% { transform: translate3d(10rem, 3rem, 0) scale(.96); opacity: .92; }
+}
+@keyframes ab-soft {
+  0% { transform: translate3d(10rem, -2rem, 0) scale(1); }
+  100% { transform: translate3d(-10rem, 2rem, 0) scale(1.12); }
+}
+@media (max-width: 640px) {
+  .inner-hero .ab-glow-core { width: 28rem; height: 26rem; margin: -13rem 0 0 -14rem; }
+  .inner-hero .ab-glow-soft { width: 36rem; height: 30rem; margin: -15rem 0 0 -18rem; }
+}
+/* Layout: stacked and centred on phones, hanging cards left / copy right (right-aligned) from 900px. */
+.inner-hero.about-hero { padding: 96px 0 40px; }
+.inner-hero .ab-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+.inner-hero .ab-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 44rem;
+}
+
+/* Label pill: blue dot, label, divider, note. */
+.inner-hero .ab-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(14, 21, 48, 0.08);
+  box-shadow: 0 10px 30px -16px rgba(14, 21, 48, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(14, 21, 48, 0.65);
+}
+.inner-hero .ab-tag-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ab-accent);
+  animation: ab-pulse 2.4s infinite;
+}
+@keyframes ab-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0.45); }
+  70% { box-shadow: 0 0 0 8px rgba(1, 58, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0); }
+}
+.inner-hero .ab-tag-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ab-accent);
+}
+.inner-hero .ab-tag-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(14, 21, 48, 0.18);
+}
+
+/* Heading: the second line is a slow-moving blue gradient. */
+.inner-hero .ab-title {
+  margin-top: 14px;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 4.6vw, 4rem);
+  letter-spacing: -.04em;
+  line-height: .98;
+  color: var(--ab-ink);
+}
+.inner-hero .ab-title-hl {
+  background: linear-gradient(90deg, #013AA3 0%, #2F6BFF 30%, #013AA3 60%, #2F6BFF 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ab-shimmer 6s linear infinite;
+}
+@keyframes ab-shimmer {
+  from { background-position: 0% 0; }
+  to { background-position: -200% 0; }
+}
+.inner-hero .ab-sub {
+  max-width: 38rem;
+  margin-top: 14px;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(14, 21, 48, 0.78);
+}
+
+/* Shared hero buttons, restyled for the light background. */
+.inner-hero.about-hero .ih-actions {
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 0;
+  border-top: 0;
+}
+.inner-hero.about-hero .ih-btn { height: 44px; padding: 0 20px; }
+.inner-hero.about-hero .ih-btn-primary {
+  background: var(--ab-ink);
+  border-color: var(--ab-ink);
+  color: #FFFFFF;
+  box-shadow: 0 12px 28px -12px rgba(14, 21, 48, 0.6);
+}
+.inner-hero.about-hero .ih-btn-primary:hover { background: var(--ab-accent); border-color: var(--ab-accent); }
+.inner-hero.about-hero .ih-btn-ghost {
+  color: var(--ab-ink);
+  border-color: rgba(14, 21, 48, 0.14);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.inner-hero.about-hero .ih-btn-ghost:hover { border-color: var(--ab-ink); background: #FFFFFF; }
+.inner-hero.about-hero a:focus-visible { outline-color: var(--ab-accent); }
+
+/* Hanging cards: three cards pinned by one screw near their top-left corner, fanned downwards to the right.
+   --cw/--ch card size, --off room kept left of the cards for the swing, --pin screw distance from the corner. */
+.inner-hero .ab-fan {
+  --cw: 320px;
+  --ch: 180px;
+  --off: 100px;
+  --pin: 22px;
+  position: relative;
+  width: calc(var(--cw) + var(--off));
+  height: calc(var(--ch) + 190px);
+  transform-origin: calc(var(--off) + var(--pin)) var(--pin);
+  animation: ab-swing 7s ease-in-out 1.8s infinite;
+}
+@keyframes ab-swing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1.5deg); }
+  75% { transform: rotate(-1.5deg); }
+}
+.inner-hero .ab-card {
+  --r: 0deg;
+  --rh: 0deg;
+  --rot: var(--r);
+  position: absolute;
+  top: 0;
+  left: var(--off);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: var(--cw);
+  height: var(--ch);
+  padding: 20px 22px;
+  border: 2px solid #BDE0FE;
+  border-radius: 20px;
+  align-items: flex-end;
+  text-align: right;
+  /* --fx/--fy/--fr are set on scroll by useFallingCards in AboutHero.tsx. */
+  transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0) rotate(calc(var(--rot) + var(--fr, 0deg)));
+  transform-origin: var(--pin) var(--pin);
+  will-change: transform;
+  box-shadow: 0 22px 40px -22px rgba(14, 21, 48, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform .6s cubic-bezier(.34, 1.4, .64, 1), box-shadow .3s var(--ih-ease);
+  animation: ab-fan-in 1.1s cubic-bezier(.34, 1.4, .64, 1) .6s backwards;
+}
+@keyframes ab-fan-in {
+  from { transform: rotate(0deg); }
+}
+.inner-hero .ab-card-2 { --r: 14deg; --rh: 22deg; }
+.inner-hero .ab-card-3 { --r: 28deg; --rh: 44deg; }
+.inner-hero .ab-fan:hover .ab-card { --rot: var(--rh); }
+/* Once a card starts to break away it follows the scroll directly instead of easing behind it. */
+.inner-hero .ab-card.is-loose { transition: box-shadow .3s var(--ih-ease); }
+/* The hovered card comes to the front. */
+.inner-hero .ab-card:hover { z-index: 5; box-shadow: 0 28px 50px -22px rgba(14, 21, 48, 0.65); }
+
+.inner-hero .ab-card-1 { background: #FFFFFF; color: var(--ab-ink); }
+.inner-hero .ab-card-2 { background: linear-gradient(135deg, #3B6EFF, #013AA3); color: #FFFFFF; }
+.inner-hero .ab-card-3 { background: linear-gradient(135deg, #1A2550, #0E1530); color: #FFFFFF; }
+.inner-hero .ab-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+.inner-hero .ab-card-1 .ab-card-icon { color: #FFFFFF; background: linear-gradient(135deg, #013AA3, #3B6EFF); }
+.inner-hero .ab-card-2 .ab-card-icon { color: #FFFFFF; background: rgba(255, 255, 255, 0.18); }
+.inner-hero .ab-card-3 .ab-card-icon { color: var(--ab-ink); background: #FFDE59; }
+.inner-hero .ab-card-title { font-size: 19px; font-weight: 700; line-height: 1.25; }
+.inner-hero .ab-card-text { margin-top: 4px; font-size: 14px; line-height: 1.45; opacity: .72; }
+
+/* Screw (SVG in AboutHero.tsx), screwed in on load. */
+.inner-hero .ab-screw {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--pin) - 14px);
+  left: calc(var(--off) + var(--pin) - 14px);
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 3px 3px rgba(14, 21, 48, 0.45)) drop-shadow(0 1px 1px rgba(14, 21, 48, 0.3));
+  animation: ab-screw-in .9s cubic-bezier(.23, 1, .32, 1) .3s backwards;
+}
+@keyframes ab-screw-in {
+  from { transform: rotate(-300deg) scale(1.4); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  .inner-hero .ab-fan { --cw: 240px; --ch: 140px; --off: 64px; --pin: 18px; }
+}
+/* Smallest phones (≤360px): keep the tag on one line and the fan inside the viewport. */
+@media (max-width: 360px) {
+  .inner-hero .ab-tag { gap: 7px; padding: 6px 12px 6px 10px; font-size: 11px; white-space: nowrap; }
+  .inner-hero .ab-tag-label { font-size: 10px; letter-spacing: .1em; }
+  .inner-hero .ab-fan { --cw: 212px; --ch: 128px; --off: 52px; --pin: 16px; }
+}
+
+@media (min-width: 900px) {
+  .inner-hero.about-hero { padding: 108px 0 44px; }
+  .inner-hero .ab-hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 48px;
+    text-align: right;
+  }
+  .inner-hero .ab-hero-copy { grid-column: 2; grid-row: 1; justify-self: end; align-items: flex-end; }
+  .inner-hero.about-hero .ih-actions { justify-content: flex-end; }
+  .inner-hero .ab-fan-wrap { grid-column: 1; grid-row: 1; justify-self: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner-hero .ab-glow-core,
+  .inner-hero .ab-glow-soft,
+  .inner-hero .ab-tag-dot,
+  .inner-hero .ab-title-hl,
+  .inner-hero .ab-fan,
+  .inner-hero .ab-card,
+  .inner-hero .ab-screw { animation: none; }
+}

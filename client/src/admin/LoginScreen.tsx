@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { AlertCircle, ArrowLeft, ArrowRight, Eye, EyeOff, Loader2, Lock, ShieldCheck, User, Zap } from 'lucide-react';
 import { PAGES } from '@/lib/pageContent';
+import BrandLogo from '@/components/ui/BrandLogo';
 import { PAGE_ICONS } from './nav';
 
 export default function LoginScreen({
@@ -29,7 +30,7 @@ export default function LoginScreen({
         <div className="adm-login-orb is-yellow" />
 
         <div className="adm-login-brand">
-          CLYX<span>.</span>
+          <BrandLogo size={64} />
           <em>Studio</em>
         </div>
 
@@ -76,7 +77,7 @@ export default function LoginScreen({
       <section className="adm-login-panel">
         <form className="adm-login-card" onSubmit={submit}>
           <div className="adm-login-mobile-brand">
-            CLYX<span>.</span>
+            <BrandLogo size={56} />
           </div>
           <span className="adm-login-badge">
             <ShieldCheck size={14} /> Secure admin access

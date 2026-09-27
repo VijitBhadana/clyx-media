@@ -1,0 +1,314 @@
+/* Portfolio hero (PageShell heroClass="pf-hero"): baby-blue background with navy text, rotating title word, dealt card stack, results ticker. */
+.inner-hero.pf-hero {
+  padding-top: 96px;
+  padding-bottom: 80px;
+  --pf-ink: #031A52;
+  --pf-accent: #013AA3;
+  --pf-line: rgba(3, 26, 82, 0.15);
+  background: #BDE0FE;
+  color: var(--pf-ink);
+  border-bottom-color: var(--pf-line);
+}
+.inner-hero.pf-hero .ih-title { color: var(--pf-ink); }
+.inner-hero.pf-hero .ih-eyebrow {
+  color: var(--pf-accent);
+  border-color: rgba(1, 58, 163, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+}
+.inner-hero.pf-hero .ih-dot { background: var(--pf-accent); animation-name: pf-pulse; }
+@keyframes pf-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0.45); }
+  70% { box-shadow: 0 0 0 9px rgba(1, 58, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0); }
+}
+/* Dot grid instead of the default column lines. */
+.inner-hero.pf-hero::before {
+  background-image: radial-gradient(rgba(3, 26, 82, 0.2) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 75% 80% at 30% 45%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 30% 45%, #000 30%, transparent 100%);
+}
+.inner-hero.pf-hero .ih-orb { display: none; }
+.inner-hero.pf-hero .ih-inner { align-items: center; }
+/* Let long rotating words wrap instead of widening the column past the screen. */
+.inner-hero.pf-hero .ih-inner > * { min-width: 0; }
+.inner-hero.pf-hero .ih-eyebrow { margin-bottom: 14px; }
+.inner-hero.pf-hero .ih-title { font-size: clamp(2.5rem, 4.6vw, 4.25rem); }
+
+/* Rotating second line. The grid stacks every word in one cell, so the line is always as wide as the longest. */
+.pf-words {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  color: var(--pf-accent);
+}
+.pf-words-track {
+  display: inline-grid;
+  overflow: hidden;
+  padding-bottom: .14em;
+  vertical-align: top;
+}
+.pf-word {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(70%);
+  filter: blur(8px);
+  transition: opacity .55s var(--ih-ease), transform .55s var(--ih-ease), filter .55s var(--ih-ease);
+}
+.pf-word.is-active { opacity: 1; transform: none; filter: none; }
+.pf-word.is-leaving { transform: translateY(-70%); }
+/* Left column under the title. */
+.pf-lead { margin-top: 16px; max-width: 34rem; }
+.pf-intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(3, 26, 82, 0.75);
+}
+.pf-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 16px;
+  border-top: 1px solid var(--pf-line);
+  border-bottom: 1px solid var(--pf-line);
+}
+.pf-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  padding: 10px 16px 10px 0;
+}
+.pf-stat + .pf-stat {
+  padding-left: 16px;
+  border-left: 1px solid var(--pf-line);
+}
+.pf-stat dd {
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--pf-ink);
+}
+.pf-stat dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(3, 26, 82, 0.6);
+}
+
+/* Card stack. */
+.pf-stack {
+  position: relative;
+  height: 360px;
+}
+.pf-stack-cards {
+  position: absolute;
+  inset: 26px 0 24px;
+}
+.pf-card {
+  --x: 0%;
+  --y: 0%;
+  --r: -3deg;
+  --s: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(248px, 62%);
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 2px solid #BDE0FE;
+  /* Baby blue behind the photo too, so no dark edge shows at the rounded corners. */
+  background: #BDE0FE;
+  box-shadow: 0 30px 60px -28px rgba(3, 26, 82, 0.6);
+  transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)) scale(var(--s));
+  transition: transform .8s var(--ih-ease), opacity .6s var(--ih-ease), filter .6s var(--ih-ease);
+}
+.pf-card[data-pos='0'] { z-index: 3; }
+.pf-card[data-pos='1'] { --x: 30%; --y: -5%; --r: 7deg; --s: .9; z-index: 2; filter: brightness(.7); }
+.pf-card[data-pos='2'] { --x: -30%; --y: 4%; --r: -11deg; --s: .84; z-index: 1; filter: brightness(.55); }
+.pf-card[data-pos='3'] { --y: 12%; --s: .7; z-index: 0; opacity: 0; }
+.pf-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pf-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.15) 55%, transparent);
+}
+.pf-card figcaption {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 18px;
+  color: #FFFFFF;
+}
+.pf-card-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ih-yellow);
+  color: #050505;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.pf-card-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.pf-card-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+  color: var(--ih-yellow);
+}
+
+.pf-chip {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--pf-line);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 12px;
+  color: rgba(3, 26, 82, 0.75);
+}
+.pf-chip b { color: var(--pf-ink); font-weight: 700; }
+
+.pf-note {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.45rem;
+  line-height: 1;
+  color: var(--pf-accent);
+  transform: rotate(-6deg);
+}
+.pf-note-arrow {
+  width: 32px;
+  height: 28px;
+  margin-top: 10px;
+  overflow: visible;
+}
+.pf-note-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pf-stack-dots {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  display: flex;
+  gap: 6px;
+}
+.pf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(3, 26, 82, 0.25);
+  transition: width .35s var(--ih-ease), background .35s var(--ih-ease);
+}
+.pf-dot:hover { background: rgba(3, 26, 82, 0.5); }
+.pf-dot.is-active { width: 26px; background: var(--pf-accent); }
+.pf-dot:focus-visible { outline: 2px solid var(--pf-accent); outline-offset: 3px; }
+
+/* Results ticker along the bottom edge. */
+.pf-ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--pf-line);
+  background: rgba(255, 255, 255, 0.35);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.pf-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: pf-marquee 60s linear infinite;
+}
+.pf-ticker:hover .pf-ticker-track { animation-play-state: paused; }
+.pf-ticker-group { display: flex; }
+.pf-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0 16px 28px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: rgba(3, 26, 82, 0.55);
+}
+.pf-ticker-item b {
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--pf-ink);
+}
+.pf-ticker-item span { color: var(--pf-accent); font-weight: 600; }
+.pf-ticker-spark { color: rgba(3, 26, 82, 0.35); }
+@keyframes pf-marquee {
+  to { transform: translateX(-50%); }
+}
+
+@media (min-width: 900px) {
+  .inner-hero.pf-hero { padding-top: 100px; padding-bottom: 84px; }
+  .inner-hero.pf-hero .ih-inner { gap: 40px; }
+}
+
+@media (max-width: 899px) {
+  .inner-hero.pf-hero { padding-top: 104px; }
+  .inner-hero.pf-hero .ih-inner { gap: 12px; }
+  .pf-stack { height: 350px; }
+  .pf-card { width: min(220px, 60%); }
+}
+@media (max-width: 480px) {
+  .inner-hero.pf-hero { padding-bottom: 92px; }
+  .pf-stat { padding-right: 10px; }
+  .pf-stat + .pf-stat { padding-left: 10px; }
+  .pf-stack { height: 330px; }
+  .pf-note { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-word,
+  .pf-card { transition: none; }
+  .pf-ticker-track { animation: none; }
+}

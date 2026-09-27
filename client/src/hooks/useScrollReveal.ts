@@ -1,4 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react';
+import { hasRevealed, revealThresholds } from '@/lib/reveal';
 
 // The landing page shows a full-screen #loader that slides away once LandingV1 adds `.loaded`.
 // Wait for that (plus most of its 0.85s slide) so an entrance never plays hidden behind it.
@@ -41,9 +42,9 @@ export function useScrollReveal(ref: RefObject<Element | null>) {
       return;
     }
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.intersectionRatio >= 0.2) setInView(true);
+      if (hasRevealed(entry, 0.2)) setInView(true);
       else if (!entry.isIntersecting) setInView(false);
-    }, { threshold: [0, 0.2] });
+    }, { threshold: revealThresholds(0.2) });
     observer.observe(node);
     return () => observer.disconnect();
   }, [ref]);

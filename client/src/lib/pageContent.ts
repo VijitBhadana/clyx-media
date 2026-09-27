@@ -90,7 +90,6 @@ export const PAGES: PageDef[] = [
         id: 'header',
         title: 'Navigation bar',
         fields: [
-          t('logoText', 'Logo text', 'CLYX', 'A yellow dot is added after it.'),
           long('navLinks', 'Menu links', 'Home | /\nAbout | /about\nServices | /services\nPortfolio | /portfolio\nCase Studies | /case-studies\nCreators | /creators\nBlog | /blog\nCareers | /careers', LINKS),
           t('headerCtaText', 'Button text', 'Start a project'),
           link('headerCtaUrl', 'Button link', '/contact'),
@@ -276,7 +275,8 @@ export const PAGES: PageDef[] = [
         description: 'Each channel tile keeps its icon.',
         fields: [
           t('channelsEyebrow', 'Eyebrow label', 'Channels We Scale On'),
-          t('channelsTitle', 'Heading', 'Every feed your buyers scroll. One team running it.'),
+          t('channelsTitle', 'Heading', 'Every feed your buyers scroll.'),
+          t('channelsHighlight', 'Heading highlight', 'One team running it.'),
           long('channelsText', 'Body text', 'Creative, media buying and conversion under one roof, so the hook that wins on Reels becomes the ad that scales on Meta and the page that closes on Shopify.'),
           ...numbered(
             [
@@ -381,12 +381,19 @@ export const PAGES: PageDef[] = [
     blurb: 'Story, principles band and the leadership team.',
     collections: ['team'],
     sections: [
-      pageHero(
-        'About CLYX',
-        'Culture creates',
-        'the opening.',
-        'CLYX is a performance creative studio for brands that want to move faster than the feed. We connect creator instinct, paid distribution, and the systems that make growth repeatable.',
-      ),
+      {
+        id: 'hero',
+        title: 'Hero banner',
+        description: 'The first thing visitors see at the top of the page. The two buttons are edited under "Header & Footer".',
+        fields: [
+          t('heroTag', 'Small label', 'About CLYX'),
+          t('heroTagNote', 'Label note (after the divider)', 'Performance creative studio'),
+          t('heroHeadline', 'Heading (first line)', 'Where culture'),
+          t('heroHeadlineHighlight', 'Heading highlight (blue second line)', 'meets performance.'),
+          long('heroSub', 'Intro paragraph', 'CLYX is a performance creative studio for brands that want to move faster than the feed. We connect creator instinct, paid distribution, and the systems that make growth repeatable.'),
+          long('heroPillars', 'Hanging cards (right side)', 'Creator instinct | Ideas that feel native to the feed\nPaid distribution | Media that finds the right people\nRepeatable systems | Testing loops that turn wins into process', 'Up to three cards, one per line, written as: Title | short line.'),
+        ],
+      },
       {
         id: 'intro',
         title: 'Intro statement',
@@ -440,7 +447,7 @@ export const PAGES: PageDef[] = [
     blurb: 'The six disciplines, the operating principle and the services call-to-action.',
     collections: [],
     sections: [
-      withFields(pageHero('Services', 'One growth engine.', 'Six disciplines.', null), [
+      withFields(pageHero('Services', 'One growth engine.', 'Six disciplines', null), [
         t('heroNote', 'Handwritten note above the cards', 'all six, under one roof'),
       ]),
       {
@@ -456,7 +463,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('opEyebrow', 'Eyebrow label', 'The operating principle'),
           t('opTitle', 'Heading', 'Make the creative'),
-          t('opHighlight', 'Heading highlight', 'measurable.'),
+          t('opHighlight', 'Heading highlight', 'measurable'),
           long('opText', 'Body text', 'We build a feedback loop between what makes people stop and what makes them convert. That loop is where growth compounds.'),
           t('opStep1Title', 'Step 1 · title', 'Test hooks, not hunches.'),
           t('opStep1Text', 'Step 1 · text', 'Every creative starts as a hypothesis.'),
@@ -479,7 +486,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('ctaEyebrow', 'Eyebrow label', 'Need a sharper system?'),
           t('ctaTitle', 'Heading', 'Let’s find the'),
-          t('ctaHighlight', 'Heading highlight', 'next lever.'),
+          t('ctaHighlight', 'Heading highlight', 'next lever'),
           long('ctaText', 'Body text', 'Tell us what’s stuck: creative, spend or conversion. You’ll talk to the people who’d actually do the work, not a sales rep.'),
           t('ctaTeamNote', 'Text after the team names', 'read every message themselves.'),
           t('ctaButton', 'Button text', 'Start a project'),
@@ -518,7 +525,27 @@ export const PAGES: PageDef[] = [
     blurb: 'The filterable project showcase and the case-studies call-to-action.',
     collections: ['portfolio'],
     sections: [
-      pageHero('Portfolio', 'Proof, not', 'promises.', 'A selection of the systems, campaigns, and storefronts we have built to turn attention into measurable growth.'),
+      {
+        id: 'hero',
+        title: 'Hero banner',
+        description: 'The first thing visitors see. The card stack on the right and the scrolling results strip use the portfolio projects.',
+        fields: [
+          t('heroTag', 'Eyebrow label', 'Selected work'),
+          t('heroHeadline', 'Title (first line)', 'Work that'),
+          long('heroWords', 'Rotating words (yellow second line)', 'sells\nscales\nconverts\nsticks', ONE_PER_LINE),
+          long('heroLede', 'Intro paragraph', 'Campaigns, creators and storefronts built to turn attention into revenue. Every project below comes with the number it moved.'),
+          ...numbered(
+            [
+              ['30+', 'Projects shipped'],
+              ['5', 'Industries'],
+              ['4.4x', 'Peak ROAS'],
+            ],
+            ([value, label], n) => [t(`heroStat${n}Value`, `Stat ${n} · number`, value), t(`heroStat${n}Label`, `Stat ${n} · label`, label)],
+          ),
+          t('heroNote', 'Handwritten note (next to the cards)', 'real brands, real numbers'),
+          t('heroCountLabel', 'Text after the project count', 'projects & counting'),
+        ],
+      },
       {
         id: 'cta',
         title: 'Case-studies call-to-action (blue)',
@@ -547,13 +574,13 @@ export const PAGES: PageDef[] = [
     blurb: 'Expanding case-study showcase and the recurring-pattern band.',
     collections: ['caseStudies'],
     sections: [
-      pageHero('Case studies', 'The work behind', 'the movement.', 'Real brands, real constraints, real growth systems. Explore how CLYX turns creative instinct into measurable momentum.'),
+      pageHero('Case studies', 'The work behind', 'the movement', 'Real brands, real constraints, real growth systems. Explore how CLYX turns creative instinct into measurable momentum.'),
       {
         id: 'pattern',
-        title: 'Recurring pattern band (yellow)',
+        title: 'Recurring pattern (blue panel)',
         fields: [
           t('patternLabel', 'Label', 'The recurring pattern'),
-          long('patternTitle', 'Heading', 'Find the signal.\nScale the signal.', LINES),
+          long('patternTitle', 'Heading', 'Find the signal\nScale the signal', LINES),
           long('patternText', 'Body text', 'The best results rarely come from one perfect post. They come from building a system that knows what to keep, what to cut, and what to try next.'),
           t('patternStep1Tag', 'Card 1 · tag', 'Keep'),
           t('patternStep1Title', 'Card 1 · title', 'Double down on what holds.'),
@@ -564,7 +591,6 @@ export const PAGES: PageDef[] = [
           t('patternStep3Tag', 'Card 3 · tag', 'Try next'),
           t('patternStep3Title', 'Card 3 · title', 'Seed the next angle.'),
           long('patternStep3Text', 'Card 3 · text', 'Every winner spins off new variations, so the testing pipeline never runs dry.'),
-          t('caseOutcomeLabel', 'Result label inside each case study', 'Verified Scale Outcome'),
           t('caseButton', 'Button inside each case study', 'Request Case Breakdown'),
           link('caseButtonUrl', 'Button link inside each case study', '/contact'),
         ],
@@ -578,11 +604,23 @@ export const PAGES: PageDef[] = [
     blurb: 'Creator network story, the parallax talent gallery and creator types.',
     collections: ['creators'],
     sections: [
-      pageHero('Creators', 'People make', 'the difference.', 'Our creator network is built for relevance, not reach alone. We match the right voice to the right category, then give the best content room to travel.'),
+      withFields(pageHero('Creators', 'People make', 'the difference.', null), [
+        long('heroCloudLeft', 'Left cloud notes', 'say cheese!\nhold that pose…\nthat’s the one!', `${ONE_PER_LINE} The two clouds take turns showing their next note each time the camera flashes.`),
+        long('heroCloudRight', 'Right cloud notes', 'real voices only\nmade for the feed\none more take', ONE_PER_LINE),
+      ]),
       {
         id: 'feature',
         title: 'Intro feature',
         fields: [
+          t('featureLine1', 'Headline line 1 (dark)', 'Meet our'),
+          t('featureLine2', 'Headline line 2 (white)', 'Creators'),
+          t('featureLine3', 'Headline line 3 (dark)', 'In action'),
+          ...numbered([1, 2, 3, 4, 5, 6], (_, n) => [
+            link(`featureVideo${n}`, `Video card ${n} · video URL`, '', 'Direct link to an .mp4 file. Plays muted on a loop.'),
+            img(`featurePoster${n}`, `Video card ${n} · poster image`, '', 'Leave empty to use a default stock photo.'),
+          ]),
+          t('featureSeeMore', 'See more button text', 'See more'),
+          link('featureSeeMoreUrl', 'See more button link', '/portfolio'),
           t('featureTag', 'Card tag', 'CREATOR / CLYX'),
           long('featureCardTitle', 'Card heading', 'The feed is a conversation.'),
           img('featureImage', 'Card background image', '', 'Optional. Leave empty for the plain yellow card.'),
@@ -609,8 +647,8 @@ export const PAGES: PageDef[] = [
         title: 'Creator types (blue band)',
         fields: [
           t('typesEyebrow', 'Eyebrow label', 'Who we cast'),
-          t('typesTitle', 'Heading', 'Three voices.'),
-          t('typesHighlight', 'Heading highlight', 'One brief.'),
+          t('typesTitle', 'Heading', 'Three voices'),
+          t('typesHighlight', 'Heading highlight', 'One brief'),
           long('typesIntro', 'Intro text', 'Every campaign needs attention, belief, and a reason to buy. We cast creators for each job, so the content does all three.'),
           t('type1Tag', 'Type 1 · tag', 'Attention'),
           t('type1Title', 'Type 1 · title', 'The Hook'),
@@ -657,19 +695,28 @@ export const PAGES: PageDef[] = [
     blurb: 'How the team works, open roles and the three team values.',
     collections: ['careers'],
     sections: [
-      withFields(pageHero('Careers', 'Come build', 'the next edge.', null), [
-        long('heroNote', 'Handwritten note (right side)', "Nobody here was hired for a job title.\nWe were hired for the itch to make things better than they need to be. Bring your curiosity, your taste and a little stubbornness, and we will bring the room to run with it.", `${LINES} Leave empty to hide the note.`),
-        t('heroSign', 'Note signature', '— team CLYX'),
-      ]),
+      pageHero('Careers', 'Come build', 'the next edge.', null),
+      {
+        id: 'heroCard',
+        title: 'Hero card',
+        description: 'The yellow card on the right of the hero.',
+        fields: [
+          t('heroCardTitle', 'Title', 'We’re hiring'),
+          long('heroCardText', 'Text', 'Small team, real ownership. Pick a seat and ship work that moves numbers.'),
+          t('heroCardTags', 'Chips (comma separated)', 'Remote, Onsite, Full-time'),
+        ],
+      },
       {
         id: 'how',
         title: 'How we work',
         fields: [
           t('howLabel', 'Label', 'How we work'),
-          t('howTitle', 'Heading', 'Small team.'),
-          t('howHighlight', 'Heading highlight', 'Big responsibility.'),
+          t('howTitle', 'Heading', 'Small team'),
+          t('howHighlight', 'Heading highlight', 'Big responsibility'),
           long('howText1', 'Paragraph 1', 'You will work close to founders, creators, and the numbers. You will see the idea through from first brief to final result.'),
           long('howText2', 'Paragraph 2', 'We care about taste, pace, candour, and doing the version that is difficult to fake.'),
+          t('howPoints', 'Chips (comma separated)', 'Direct founder access, Ownership from day one, Taste over templates'),
+          t('howFlow', 'Brief-to-result steps (comma separated)', 'Brief, Create, Launch, Result'),
         ],
       },
       {
@@ -691,7 +738,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('valuesLabel', 'Label', 'What we value'),
           t('valuesTitle', 'Heading', 'Three rules we'),
-          t('valuesHighlight', 'Heading highlight', 'actually live by.'),
+          t('valuesHighlight', 'Heading highlight', 'actually live by'),
           long('valuesIntro', 'Intro', 'Not a poster on the wall. These are the standards we hire for, review against, and hold each other to every week.'),
           t('value1', 'Value 1', 'Do the work.'),
           long('value1Text', 'Value 1 · text', 'No shortcuts dressed up as strategy. We ship, measure, and let the results do the talking.'),

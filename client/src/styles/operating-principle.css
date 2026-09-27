@@ -54,7 +54,7 @@
   line-height: .95;
 }
 .op-highlight { color: var(--op-blue); white-space: nowrap; }
-/* "measurable." letters rise one by one like chart bars, then a soft wave rolls through them every few seconds. */
+/* "measurable" letters rise one by one like chart bars, then a soft wave rolls through them every few seconds. */
 .op-ch { display: inline-block; transform-origin: 50% 100%; }
 .op-inner.is-visible .op-ch {
   animation:

@@ -21,16 +21,6 @@
     radial-gradient(50% 60% at 0% 100%, rgba(0, 0, 0, 0.25), transparent 70%),
     linear-gradient(180deg, var(--cf-blue) 0%, var(--cf-blue-deep) 100%);
 }
-.clyx-footer::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: calc(100% / 6) 100%;
-  mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
-}
 .clyx-footer p { margin: 0; }
 .clyx-footer ul { list-style: none; margin: 0; padding: 0; }
 .clyx-footer a { text-decoration: none; }
@@ -39,7 +29,7 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 40px 18px;
+  padding: 22px 40px 12px;
 }
 
 /* ---------- Top: contact statement ---------- */
@@ -48,8 +38,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--cf-line);
+  padding-bottom: 12px;
 }
 .clyx-footer .cf-eyebrow {
   display: flex;
@@ -82,7 +71,7 @@
   color: #FFFFFF;
   font-family: 'Urbanist', sans-serif;
   font-weight: 600;
-  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
   letter-spacing: -.03em;
   line-height: 1;
   transition: color .3s var(--cf-ease);
@@ -118,7 +107,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 44px;
+  height: 40px;
   padding: 0 20px;
   border-radius: 999px;
   font-size: 14px;
@@ -138,26 +127,25 @@
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr 1fr;
   gap: 48px;
-  padding: 24px 0 20px;
+  padding: 12px 0 8px;
 }
 .clyx-footer .cf-logo {
   display: inline-block;
-  color: #FFFFFF;
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -.07em;
-  line-height: 1;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
+  transition: transform .3s var(--cf-ease);
 }
-.clyx-footer .cf-logo span { color: var(--cf-yellow); }
+.clyx-footer .cf-logo:hover { transform: translateY(-2px); }
+/* Logo and social icons share one row so the brand column stays as short as the link columns. */
+.clyx-footer .cf-brand-row { display: flex; align-items: center; gap: 18px; }
 .clyx-footer .cf-tagline {
   max-width: 320px;
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 15px;
   line-height: 1.5;
   color: var(--cf-text);
 }
-.clyx-footer .cf-socials { display: flex; gap: 10px; margin-top: 14px; }
+.clyx-footer .cf-socials { display: flex; gap: 10px; }
 .clyx-footer .cf-social {
   display: grid;
   place-items: center;
@@ -219,11 +207,11 @@
   right: 0;
   bottom: -0.05em; /* baseline sits ~.05em above the box edge; this lands the letters on the footer's bottom edge */
   z-index: -1;
-  padding-right: .08em;
+  padding-left: .1em; /* balances the trailing letter-spacing so the word stays centred */
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(5rem, 20vw, 17rem);
-  letter-spacing: -.08em;
+  font-size: clamp(3.5rem, 12vw, 10rem);
+  letter-spacing: .1em;
   line-height: .8;
   text-align: center;
   white-space: nowrap;
@@ -242,8 +230,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px 24px;
-  padding-top: 14px;
-  border-top: 1px solid var(--cf-line);
+  padding-top: 10px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.55);
 }
@@ -293,12 +280,12 @@
 }
 
 @media (max-width: 767px) {
-  .clyx-footer .cf-inner { padding: 32px 20px 16px; }
-  .clyx-footer .cf-top { padding-bottom: 20px; }
+  .clyx-footer .cf-inner { padding: 20px 20px 12px; }
+  .clyx-footer .cf-top { padding-bottom: 14px; }
   .clyx-footer .cf-email { gap: 12px; font-size: clamp(1.45rem, 7.4vw, 2.2rem); }
   .clyx-footer .cf-top-actions { width: 100%; }
   .clyx-footer .cf-btn { flex: 1; justify-content: center; padding: 0 16px; }
-  .clyx-footer .cf-main { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 20px; padding: 20px 0 18px; }
+  .clyx-footer .cf-main { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; padding: 14px 0 12px; }
   .clyx-footer .cf-bottom { flex-direction: column; align-items: flex-start; gap: 12px; padding-right: 72px; }
 }
 

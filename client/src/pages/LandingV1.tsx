@@ -244,6 +244,16 @@ export default function LandingV1() {
                     <div className="chart-bar-group"><div className="chart-bar" style={{ height: "86%" }}></div><span className="chart-label">Fri</span></div>
                     <div className="chart-bar-group"><div className="chart-bar" style={{ height: "96%" }}></div><span className="chart-label">Sat</span></div>
                     <div className="chart-bar-group"><div className="chart-bar" style={{ height: "90%" }}></div><span className="chart-label">Sun</span></div>
+                    {/* Trading-style trace over the bar tops, drawn by useLandingMotion. */}
+                    <svg className="chart-trace" aria-hidden="true">
+                      <line className="trace-level trace-level-hi" />
+                      <line className="trace-level trace-level-lo" />
+                      <polyline className="trace-halo" />
+                      <polyline className="trace-line" />
+                      <g className="trace-dots" />
+                      <g className="trace-tag trace-tag-hi"><rect rx="4" /><text /></g>
+                      <g className="trace-tag trace-tag-lo"><rect rx="4" /><text /></g>
+                    </svg>
                   </div>
                 </div>
               </div>

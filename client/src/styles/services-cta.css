@@ -76,29 +76,20 @@
   line-height: .95;
 }
 .svc-cta-mark {
-  position: relative;
   display: inline-block;
   color: var(--cta-yellow);
 }
-/* Hand-drawn underline that "draws" itself when the card scrolls into view. */
-.svc-cta-mark svg {
-  position: absolute;
-  left: -2%;
-  bottom: -.2em;
-  width: 104%;
-  height: .32em;
-  overflow: visible;
+/* Each letter rises out of a blur, staggered by its index (--i), when the card scrolls into view. */
+.svc-cta-word { display: inline-block; white-space: nowrap; }
+.svc-cta-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(.5em) rotate(8deg);
+  filter: blur(8px);
+  transition: opacity .5s var(--cta-ease), transform .8s var(--cta-ease), filter .6s var(--cta-ease);
+  transition-delay: calc(.35s + var(--i, 0) * 50ms);
 }
-.svc-cta-mark path {
-  fill: none;
-  stroke: var(--cta-yellow);
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-dasharray: 320;
-  stroke-dashoffset: 320;
-  transition: stroke-dashoffset 1.1s var(--cta-ease) .35s;
-}
-.svc-cta.is-in .svc-cta-mark path { stroke-dashoffset: 0; }
+.svc-cta.is-in .svc-cta-char { opacity: 1; transform: none; filter: none; }
 
 .svc-cta-lede {
   max-width: 30rem;
@@ -344,6 +335,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .svc-cta-dot, .svc-cta-bubble, .svc-cta-bubble.is-typing span { animation: none !important; opacity: 1 !important; }
-  .svc-cta-mark path { transition: none; stroke-dashoffset: 0; }
   .svc-cta-chat, .svc-cta-chat:hover { transform: none; }
+  .svc-cta-char { transition: none; opacity: 1; transform: none; filter: none; }
 }

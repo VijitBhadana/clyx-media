@@ -1,0 +1,144 @@
+/* Case Studies hero (PageShell heroClass="cs-hero"): light paper background, faded blue grid, navy title with a blue highlight and result chips. */
+.inner-hero.cs-hero {
+  --cs-ink: #031A52;
+  --cs-accent: #013AA3;
+  --cs-muted: rgba(3, 26, 82, 0.68);
+  --cs-line: rgba(3, 26, 82, 0.1);
+  color: var(--cs-ink);
+  background:
+    radial-gradient(38% 55% at 88% 8%, rgba(255, 222, 89, 0.38), transparent 70%),
+    radial-gradient(45% 60% at 4% 100%, rgba(1, 58, 163, 0.1), transparent 70%),
+    linear-gradient(180deg, #FBFBF7 0%, #F3F5FB 100%);
+  border-bottom-color: var(--cs-line);
+}
+/* Square grid across the whole hero, including behind the illustration, softening only at the very edges. */
+.inner-hero.cs-hero::before {
+  background-image:
+    linear-gradient(to right, rgba(3, 26, 82, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(3, 26, 82, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, #000 55%, transparent 100%);
+}
+.inner-hero.cs-hero .ih-orb {
+  background: radial-gradient(circle, rgba(59, 110, 255, 0.18), transparent 65%);
+}
+
+.inner-hero.cs-hero .ih-eyebrow {
+  color: var(--cs-accent);
+  border-color: rgba(1, 58, 163, 0.18);
+  background: #FFFFFF;
+  box-shadow: 0 6px 18px -10px rgba(3, 26, 82, 0.35);
+}
+.inner-hero.cs-hero .ih-dot { background: var(--cs-accent); animation-name: cs-pulse; }
+@keyframes cs-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0.4); }
+  70% { box-shadow: 0 0 0 9px rgba(1, 58, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 58, 163, 0); }
+}
+
+.inner-hero.cs-hero .ih-title { color: var(--cs-ink); }
+/* Second line in brand blue. */
+.inner-hero .cs-hl { color: var(--cs-accent); }
+
+/* Title letters drop in one by one from above and settle with a small bounce (letters split by RevealWords). */
+.inner-hero.cs-hero .ih-title .reveal-word { overflow: visible; }
+.inner-hero.cs-hero .ih-title .reveal-word > span {
+  opacity: 0;
+  filter: none;
+  transform: translateY(-1.1em) rotate(-8deg);
+  animation: cs-drop .8s cubic-bezier(.22, 1, .36, 1) forwards;
+}
+@keyframes cs-drop {
+  0% { opacity: 0; transform: translateY(-1.1em) rotate(-8deg); }
+  45% { opacity: 1; }
+  60% { transform: translateY(.08em) rotate(0); }
+  80% { transform: translateY(-.03em); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* Result chips under the title, pulled from the case studies collection. */
+.inner-hero .cs-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+.inner-hero .cs-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--cs-line);
+  box-shadow: 0 8px 20px -14px rgba(3, 26, 82, 0.4);
+  font-size: 13px;
+  color: var(--cs-muted);
+  white-space: nowrap;
+}
+.inner-hero .cs-chip strong {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--cs-ink);
+}
+
+/* Illustration on the right (CaseHeroArt): transparent artwork layers, so the hero grid shows behind them. */
+.inner-hero.cs-hero .ih-inner { align-items: center; }
+.inner-hero .csi {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  margin: 8px auto 0;
+}
+.inner-hero .csi-base { display: block; width: 100%; height: auto; }
+.inner-hero .csi-pop,
+.inner-hero .csi-glass,
+.inner-hero .csi-hand { position: absolute; }
+.inner-hero .csi-float { display: block; width: 100%; height: 100%; }
+/* Only the magnifier moves: it sweeps across the (static) face, turning in the hand's grip.
+   Each .csi-glass layer sets its transform-origin to the grip point inline, so they turn together. */
+.inner-hero .csi-glass { animation: csi-inspect 6.5s ease-in-out infinite; }
+@keyframes csi-inspect {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-7deg); }
+  55% { transform: rotate(6deg); }
+  78% { transform: rotate(-3deg); }
+}
+.inner-hero .csi-pop { animation: csi-pop .6s cubic-bezier(.34, 1.56, .64, 1) backwards; }
+@keyframes csi-pop {
+  from { opacity: 0; transform: scale(0); }
+}
+.inner-hero .csi-float { animation: csi-float ease-in-out infinite alternate; }
+@keyframes csi-float {
+  from { transform: translateY(-5%); }
+  to { transform: translateY(5%); }
+}
+
+/* Compact hero: less space above and below than the default inner hero. */
+.inner-hero.cs-hero { padding: 104px 0 40px; }
+.inner-hero.cs-hero .ih-eyebrow { margin-bottom: 18px; }
+.inner-hero.cs-hero .cs-proof { margin-top: 22px; }
+
+@media (min-width: 900px) {
+  .inner-hero.cs-hero { padding: 112px 0 36px; }
+  .inner-hero.cs-hero .ih-inner { grid-template-columns: 1.25fr .75fr; }
+  .inner-hero.cs-hero .ih-title { font-size: clamp(2.75rem, 4.8vw, 4.3rem); }
+  /* Let the art spill into the column gap so it reads larger next to the title. */
+  .inner-hero .csi { width: calc(100% + 60px); max-width: none; margin: 0 0 0 -60px; }
+}
+
+@media (max-width: 480px) {
+  .inner-hero .cs-chip { padding: 7px 12px; font-size: 12px; }
+  .inner-hero .cs-chip strong { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner-hero.cs-hero .ih-title .reveal-word > span { transform: none; animation: reveal-word-fade .6s ease forwards; }
+  .inner-hero .csi-glass,
+  .inner-hero .csi-pop,
+  .inner-hero .csi-float { animation: none; }
+}

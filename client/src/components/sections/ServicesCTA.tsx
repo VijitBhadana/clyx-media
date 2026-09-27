@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowUpRight, MessageCircle, RotateCcw } from 'lucide-react';
 import { leaders as defaultLeaders } from '@/data/home';
 import { useCollection } from '@/lib/siteContent';
 import { pageDefaults, safeHref } from '@/lib/pageContent';
 import '@/styles/services-cta.css';
+import { hasRevealed, revealThresholds } from '@/lib/reveal';
 
 const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2);
 const firstName = (name: string) => name.split(' ')[0];
@@ -20,8 +21,8 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setInView(true); io.disconnect(); }
-    }, { threshold: 0.3 });
+      if (hasRevealed(entry, 0.3)) { setInView(true); io.disconnect(); }
+    }, { threshold: revealThresholds(0.3) });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -43,6 +44,8 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
   const team = leaders.map(l => firstName(l.name));
   const teamLine = team.length > 1 ? `${team.slice(0, -1).join(', ')} & ${team[team.length - 1]}` : team[0] ?? '';
   const host = team[0] ?? 'CLYX';
+  const highlightWords = (c.ctaHighlight ?? '').split(' ').filter(Boolean);
+  const wordStarts = highlightWords.map((_, w) => highlightWords.slice(0, w).join('').length);
   const whatsapp = safeHref(c.ctaWhatsappUrl);
   // Prefilled WhatsApp text only works on wa.me style links.
   const waHref = topic && /^https?:\/\//.test(whatsapp)
@@ -59,10 +62,18 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
           <h2 id="svc-cta-title" className="svc-cta-title display">
             {c.ctaTitle}<br />
             <span className="svc-cta-mark">
-              {c.ctaHighlight}
-              <svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M4 16 C 60 6, 120 8, 170 12 S 260 18, 296 7" />
-              </svg>
+              <span className="sr-only">{c.ctaHighlight}</span>
+              {/* Letters rise in one by one once the card is in view. */}
+              {highlightWords.map((word, w) => (
+                <Fragment key={w}>
+                  {w > 0 && ' '}
+                  <span className="svc-cta-word" aria-hidden="true">
+                    {Array.from(word).map((ch, i) => (
+                      <span key={i} className="svc-cta-char" style={{ '--i': wordStarts[w] + i } as CSSProperties}>{ch}</span>
+                    ))}
+                  </span>
+                </Fragment>
+              ))}
             </span>
           </h2>
           <p className="svc-cta-lede">{c.ctaText}</p>

@@ -1,0 +1,147 @@
+/* Careers hero: the single yellow hiring card on the right. All text is Urbanist bold. */
+.careers-hero-card {
+  --chc-ease: cubic-bezier(.23, 1, .32, 1);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  padding: 24px 24px 22px;
+  border-radius: 28px;
+  overflow: hidden;
+  color: #111111;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 700;
+  background:
+    radial-gradient(70% 60% at 100% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
+    #FFDE59;
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  /* Hidden until the heartbeat line arrives, then wiped in left to right (negative insets keep the shadow). */
+  opacity: 0;
+  clip-path: inset(-40px 100% -90px -40px round 28px);
+  transition: transform .35s var(--chc-ease), box-shadow .35s var(--chc-ease), opacity .4s ease, clip-path .9s var(--chc-ease);
+}
+.careers-hero-card.is-in {
+  opacity: 1;
+  clip-path: inset(-40px -40px -90px -40px round 28px);
+}
+/* Text animations wait for the card to be revealed. */
+.careers-hero-card:not(.is-in) .reveal-word > span,
+.careers-hero-card:not(.is-in) .chc-word { animation-play-state: paused; }
+.careers-hero-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.careers-hero-card:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 4px;
+}
+
+.careers-hero-card .chc-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.careers-hero-card .chc-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #050505;
+  color: #FFDE59;
+}
+.careers-hero-card .chc-title {
+  margin-top: 22px;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+.careers-hero-card .chc-text {
+  margin-top: 8px;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: rgba(17, 17, 17, 0.7);
+}
+/* Paragraph words rise in one by one after the title letters. */
+.careers-hero-card .chc-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(60%);
+  filter: blur(4px);
+  animation: chc-word-up .6s var(--chc-ease) forwards;
+}
+@keyframes chc-word-up { to { opacity: 1; transform: none; filter: blur(0); } }
+
+.careers-hero-card .chc-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+}
+.careers-hero-card .chc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.careers-hero-card .chc-tags li {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  background: rgba(255, 255, 255, 0.28);
+  font-size: 13px;
+  line-height: 1.2;
+}
+.careers-hero-card .chc-arrow {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #050505;
+  color: #FFDE59;
+  transition: transform .35s var(--chc-ease);
+}
+.careers-hero-card:hover .chc-arrow { transform: rotate(45deg); }
+
+@media (max-width: 899px) {
+  .careers-hero-card { margin-left: 0; }
+}
+
+/* Heartbeat line drawn across the hero, behind the headline and the card. */
+.careers-hero-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+}
+.careers-hero-line path {
+  fill: none;
+  stroke: #FFDE59;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 222, 89, 0.55));
+}
+.careers-hero-line.is-static path { stroke-dashoffset: 0; }
+.careers-hero-line.is-drawing path { animation: chl-draw var(--chl-dur) linear var(--chl-delay) forwards; }
+@keyframes chl-draw { to { stroke-dashoffset: 0; } }
+@media (max-width: 899px) {
+  .careers-hero-line { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .careers-hero-card,
+  .careers-hero-card .chc-arrow { transition: none; }
+  .careers-hero-card:hover { transform: none; }
+  .careers-hero-card .chc-word { transform: none; filter: none; animation: chc-word-fade .5s ease forwards; }
+  @keyframes chc-word-fade { to { opacity: 1; } }
+}

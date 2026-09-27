@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import {
   ArrowUpRight,
@@ -17,6 +17,7 @@ import { Label, Section } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 import { useCollection } from '@/lib/siteContent';
 import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageContent';
+import '@/styles/portfolio-hero.css';
 
 interface PortfolioImage {
   src: string;
@@ -27,56 +28,48 @@ interface PortfolioImage {
   result: string;
 }
 
-const defaultPortfolio: PortfolioImage[] = [
-  {
-    src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Kulture Skin UGC Ads',
-    code: '#01',
-    category: 'Beauty',
-    title: 'Kulture Skin',
-    result: '3.4x ROAS',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Nova Nutrition Hook Scale',
-    code: '#02',
-    category: 'Food',
-    title: 'Nova Nutrition',
-    result: '42% lower CPA',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Mutha Editorial Feed',
-    code: '#03',
-    category: 'Fashion',
-    title: 'Mutha Beauty',
-    result: '10M+ impressions',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Orbit Labs CRO Architecture',
-    code: '#04',
-    category: 'Tech',
-    title: 'Orbit Labs',
-    result: '+28% CVR lift',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Halo D2C Whitelisting',
-    code: '#05',
-    category: 'D2C',
-    title: 'Halo Goods',
-    result: '4.1x blended ROAS',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85',
-    alt: 'Aura Social Paid Pipeline',
-    code: '#06',
-    category: 'Fashion',
-    title: 'Aura Collective',
-    result: '+188% CTR',
-  },
-];
+// Shown only until the CMS answers (e.g. backend asleep on a first visit). Mirrors the backend seed list.
+const defaultPortfolio: PortfolioImage[] = (
+  [
+    ['Kulture Skin', 'Beauty', '3.4x ROAS', 'photo-1522337360788-8b13dee7a37e'],
+    ['Nova Nutrition', 'Food', '42% lower CPA', 'photo-1541643600914-78b084683601'],
+    ['Mutha Beauty', 'Fashion', '10M+ impressions', 'photo-1515886657613-9f3515b0c78f'],
+    ['Orbit Labs', 'Tech', '+28% CVR lift', 'photo-1460925895917-afdab827c52f'],
+    ['Halo Goods', 'D2C', '4.1x blended ROAS', 'photo-1496747611176-843222e1e57c'],
+    ['Aura Collective', 'Fashion', '+188% CTR', 'photo-1483985988355-763728e1935b'],
+    ['Glow Theory', 'Beauty', '2.8x ROAS', 'photo-1596462502278-27bfdc403348'],
+    ['Fresh Fork', 'Food', '3.1x ROAS', 'photo-1504674900247-0877df9cc836'],
+    ['Thread Society', 'Fashion', '3.8x ROAS', 'photo-1490481651871-ab68de25d43d'],
+    ['Pixel Stack', 'Tech', '+34% CVR lift', 'photo-1518770660439-4636190af475'],
+    ['Tick Theory', 'D2C', '3.6x ROAS', 'photo-1523275335684-37898b6baf30'],
+    ['Dewdrop Labs', 'Beauty', '+64% repeat orders', 'photo-1571781926291-c477ebfd024b'],
+    ['Slice House', 'Food', '+72% online orders', 'photo-1565299624946-b28f40a0ae38'],
+    ['Luxe Lane', 'Fashion', '+96% CTR', 'photo-1445205170230-053b83016050'],
+    ['DataPulse', 'Tech', '2.9x pipeline', 'photo-1551288049-bebda4e38f71'],
+    ['Stride Co', 'D2C', '+140% sales', 'photo-1542291026-7eec264c27ff'],
+    ['Blush & Co', 'Beauty', '6.2M views', 'photo-1512496015851-a90fb38ba796'],
+    ['Green Bowl Co', 'Food', '5M+ impressions', 'photo-1512621776951-a57141f2eefd'],
+    ['Muse Studio', 'Fashion', '8M+ reach', 'photo-1469334031218-e382a71b716b'],
+    ['CodeCraft', 'Tech', '45% lower CPL', 'photo-1498050108023-c5249f4df085'],
+    ['SoundNest', 'D2C', '29% lower CPA', 'photo-1505740420928-5e560c06d30e'],
+    ['Pure Ritual', 'Beauty', '38% lower CAC', 'photo-1570172619644-dfd03ed5d881'],
+    ['Harvest Kitchen', 'Food', '35% lower CPA', 'photo-1546069901-ba9599a7e63c'],
+    ['Noir Atelier', 'Fashion', '31% lower CPA', 'photo-1509631179647-0177331693ae'],
+    ['Nimbus Cloud', 'Tech', '+210% sign-ups', 'photo-1519389950473-47ba0277781c'],
+    ['Frame & Lens', 'D2C', '4.4x ROAS', 'photo-1526170375885-4d8ecf77b99f'],
+    ['Velvet Skin', 'Beauty', '+152% CTR', 'photo-1608248597279-f99d160bfcbc'],
+    ['Morning Stack', 'Food', '2.6x ROAS', 'photo-1567620905732-2d1ec7ab7445'],
+    ['Byte Wave', 'Tech', '3.2x ROAS', 'photo-1531297484001-80022131f5a1'],
+    ['Shade Club', 'D2C', '+81% CTR', 'photo-1572635196237-14b3f281503f'],
+  ] as const
+).map(([title, category, result, photo], i) => ({
+  src: `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=1000&q=85`,
+  alt: title,
+  code: `#${String(i + 1).padStart(2, '0')}`,
+  category,
+  title,
+  result,
+}));
 
 // Known categories get their own icon; any new category the admin types gets a generic one.
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -156,29 +149,194 @@ function FilterPills({ filters, active, onChange }: { filters: Filter[]; active:
   );
 }
 
-function HoverExpandPortfolio({ items, className }: { items: PortfolioImage[]; className?: string }) {
+// Second title line: cycles through the admin's words.
+const WORD_MS = 2400;
+
+function HeroWords({ words }: { words: string[] }) {
+  const reduceMotion = useReducedMotion();
+  const [tick, setTick] = useState(0);
+  const count = words.length;
+
+  useEffect(() => {
+    if (reduceMotion || count < 2) return;
+    const id = window.setInterval(() => setTick(t => t + 1), WORD_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, count]);
+
+  if (!count) return null;
+  const active = tick % count;
+  const leaving = (active - 1 + count) % count;
+
+  return (
+    <span className="pf-words">
+      <span className="sr-only">{words.join(' ')}</span>
+      <span className="pf-words-track" aria-hidden="true">
+        {words.map((word, i) => (
+          <span key={i} className={cn('pf-word', i === active && 'is-active', count > 1 && i === leaving && 'is-leaving')}>
+            {word}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+// Left column under the title: intro and stat row.
+function HeroLead({ c }: { c: Record<string, string> }) {
+  const stats = [1, 2, 3].map(n => ({ value: c[`heroStat${n}Value`], label: c[`heroStat${n}Label`] })).filter(s => s.value);
+
+  return (
+    <div className="pf-lead">
+      {c.heroLede && <p className="pf-intro">{c.heroLede}</p>}
+      {stats.length > 0 && (
+        <dl className="pf-stats">
+          {stats.map((s, i) => (
+            <div key={i} className="pf-stat">
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
+}
+
+// Right column: a fanned stack of project cards that deals the next one to the front every few seconds.
+const DEAL_MS = 3200;
+
+function HeroStack({ items, note, countLabel, total }: { items: PortfolioImage[]; note: string; countLabel: string; total: number }) {
+  const reduceMotion = useReducedMotion();
+  const [front, setFront] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const count = items.length;
+
+  useEffect(() => {
+    if (reduceMotion || paused || count < 2) return;
+    const id = window.setInterval(() => setFront(i => (i + 1) % count), DEAL_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, paused, count]);
+
+  return (
+    <div className="pf-stack" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <span className="pf-chip">
+        <span className="ih-dot" aria-hidden="true" />
+        <b>{total}</b> {countLabel}
+      </span>
+
+      {note && (
+        <p className="pf-note" aria-hidden="true">
+          {note}
+          <svg viewBox="0 0 50 40" className="pf-note-arrow">
+            <path d="M4 6 C 26 4, 42 14, 40 34" />
+            <path d="M32 28 L 40 36 L 47 27" />
+          </svg>
+        </p>
+      )}
+
+      <div className="pf-stack-cards">
+        {items.map((item, i) => {
+          const pos = (i - front + count) % count;
+          return (
+            <figure key={item.code} className="pf-card" data-pos={Math.min(pos, 3)} aria-hidden={pos !== 0}>
+              <img src={item.src} alt={item.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+              <figcaption>
+                <span className="pf-card-tag">
+                  {item.code} · {item.category}
+                </span>
+                <span className="pf-card-title">{item.title}</span>
+                <span className="pf-card-result">
+                  <TrendingUp size={14} strokeWidth={2.5} />
+                  {item.result}
+                </span>
+              </figcaption>
+            </figure>
+          );
+        })}
+      </div>
+
+      {count > 1 && (
+        <div className="pf-stack-dots">
+          {items.map((item, i) => (
+            <button
+              key={item.code}
+              type="button"
+              aria-label={`Show ${item.title}`}
+              aria-pressed={i === front}
+              className={cn('pf-dot', i === front && 'is-active')}
+              onClick={() => setFront(i)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Results strip running along the bottom edge of the hero.
+function HeroTicker({ items }: { items: PortfolioImage[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="pf-ticker" aria-hidden="true">
+      <div className="pf-ticker-track">
+        {[0, 1].map(copy => (
+          <div key={copy} className="pf-ticker-group">
+            {items.map((item, i) => (
+              <span key={i} className="pf-ticker-item">
+                <b>{item.title}</b>
+                <span>{item.result}</span>
+                <Sparkles size={12} className="pf-ticker-spark" />
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Cards per hover-expand strip; longer lists (e.g. "All") stack into several strips.
+const ROW_SIZE = 6;
+
+type OpenHandler = (image: PortfolioImage) => void;
+
+function HoverExpandPortfolio({ items, onOpen, className }: { items: PortfolioImage[]; onOpen?: OpenHandler; className?: string }) {
+  const rows = Array.from({ length: Math.ceil(items.length / ROW_SIZE) }, (_, i) => items.slice(i * ROW_SIZE, (i + 1) * ROW_SIZE));
+
+  return (
+    <div className={cn('relative w-full max-w-7xl mx-auto py-8 select-none space-y-4 md:space-y-6', className)}>
+      {rows.map((row, i) => (
+        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} onOpen={onOpen} />
+      ))}
+    </div>
+  );
+}
+
+function PortfolioRow({ items, delay, onOpen }: { items: PortfolioImage[]; delay: number; onOpen?: OpenHandler }) {
   const [activeImage, setActiveImage] = useState<number | null>(0);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-      className={cn('relative w-full max-w-7xl mx-auto py-8 select-none', className)}
+      transition={{ duration: 0.4, delay }}
+      className="overflow-x-auto pb-4 pt-2"
     >
-      <div className="flex w-full items-center justify-center gap-2 md:gap-3 overflow-x-auto pb-4 pt-2">
+      {/* w-max + mx-auto centres the strip when it fits and lets it scroll from the first card when it doesn't. */}
+      <div className="mx-auto flex w-max items-center gap-2 md:gap-3">
         {items.map((image, index) => {
           const isActive = activeImage === index;
           return (
             <motion.div
               key={image.title + index}
-              className="relative cursor-pointer overflow-hidden rounded-2xl md:rounded-3xl border border-grid shrink-0 bg-[#050505]"
+              className="relative cursor-pointer overflow-hidden rounded-2xl md:rounded-3xl border-2 border-[#DCEBFA] shrink-0 bg-[#DCEBFA]"
               animate={{
                 width: isActive ? '24rem' : '5rem',
                 height: '24rem',
               }}
               transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              onClick={() => setActiveImage(index)}
+              // Hover already expands the card on desktop; on touch the first tap expands and the second opens it.
+              onClick={() => (isActive && onOpen ? onOpen(image) : setActiveImage(index))}
               onHoverStart={() => setActiveImage(index)}
             >
               <img
@@ -687,26 +845,39 @@ export default function Portfolio() {
     icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
   }));
   const [filter, setFilter] = useState('All');
-  const filtered = filter === 'All' ? portfolioImages : portfolioImages.filter(item => item.category === filter);
+  // "All" is a single preview strip; picking one of its cards opens that card's category.
+  const isAll = filter === 'All';
+  const filtered = isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter);
+  // The hero stack deals the first project of up to four categories, so it shows some range.
+  const seen = new Set<string>();
+  const heroPicks = portfolioImages.filter(item => !seen.has(item.category) && Boolean(seen.add(item.category))).slice(0, 4);
 
   return (
     <PageShell
-      eyebrow={c.heroEyebrow}
+      heroClass="pf-hero"
+      eyebrow={c.heroTag}
       title={
         <>
-          {c.heroTitle}
+          {c.heroHeadline}
           <br />
-          <span className="text-yellow">{c.heroHighlight}</span>
+          <HeroWords words={splitLines(c.heroWords)} />
         </>
       }
-      intro={c.heroIntro}
+      intro=""
+      lead={<HeroLead c={c} />}
+      aside={heroPicks.length > 0 && <HeroStack items={heroPicks} note={c.heroNote} countLabel={c.heroCountLabel} total={portfolioImages.length} />}
+      heroDecor={<HeroTicker items={portfolioImages} />}
     >
       <Section className="py-12 !pt-4 md:!pt-6">
         {/* Category Filter Pills */}
         <FilterPills filters={filters} active={filter} onChange={setFilter} />
 
-        {/* Hover-Expand Animated Showcase */}
-        <HoverExpandPortfolio items={filtered} />
+        {/* Hover-Expand Animated Showcase (remounted per filter so each strip opens on its first card) */}
+        <HoverExpandPortfolio
+          key={filter}
+          items={filtered}
+          onOpen={isAll ? image => image.category && setFilter(image.category) : undefined}
+        />
       </Section>
 
       <CaseStudiesCta content={c} />
