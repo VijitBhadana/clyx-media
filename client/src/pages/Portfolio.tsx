@@ -300,19 +300,19 @@ const ROW_SIZE = 6;
 
 type OpenHandler = (image: PortfolioImage) => void;
 
-function HoverExpandPortfolio({ items, onOpen, className }: { items: PortfolioImage[]; onOpen?: OpenHandler; className?: string }) {
+function HoverExpandPortfolio({ items, onOpen, className, outcomeLabel }: { items: PortfolioImage[]; onOpen?: OpenHandler; className?: string; outcomeLabel: string }) {
   const rows = Array.from({ length: Math.ceil(items.length / ROW_SIZE) }, (_, i) => items.slice(i * ROW_SIZE, (i + 1) * ROW_SIZE));
 
   return (
     <div className={cn('relative w-full max-w-7xl mx-auto py-8 select-none space-y-4 md:space-y-6', className)}>
       {rows.map((row, i) => (
-        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} onOpen={onOpen} />
+        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} onOpen={onOpen} outcomeLabel={outcomeLabel} />
       ))}
     </div>
   );
 }
 
-function PortfolioRow({ items, delay, onOpen }: { items: PortfolioImage[]; delay: number; onOpen?: OpenHandler }) {
+function PortfolioRow({ items, delay, onOpen, outcomeLabel }: { items: PortfolioImage[]; delay: number; onOpen?: OpenHandler; outcomeLabel: string }) {
   const [activeImage, setActiveImage] = useState<number | null>(0);
 
   return (
@@ -390,7 +390,7 @@ function PortfolioRow({ items, delay, onOpen }: { items: PortfolioImage[]; delay
                       </h3>
                       <div className="mt-3 flex items-center gap-3 border-t border-white/20 pt-3">
                         <span className="text-xs uppercase tracking-widest text-white/70 font-semibold">
-                          Outcome
+                          {outcomeLabel || 'Outcome'}
                         </span>
                         <span className="text-base font-bold text-yellow">{image.result}</span>
                       </div>
@@ -840,13 +840,14 @@ export default function Portfolio() {
     title: item.title,
     result: item.result,
   }));
-  const filters: Filter[] = ['All', ...Array.from(new Set(portfolioImages.map(item => item.category).filter(Boolean)))].map(label => ({
+  const allLabel = c.heroFilterAllLabel || 'All';
+  const filters: Filter[] = [allLabel, ...Array.from(new Set(portfolioImages.map(item => item.category).filter(Boolean)))].map(label => ({
     label,
     icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
   }));
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState(allLabel);
   // "All" is a single preview strip; picking one of its cards opens that card's category.
-  const isAll = filter === 'All';
+  const isAll = filter === allLabel;
   const filtered = isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter);
   // The hero stack deals the first project of up to four categories, so it shows some range.
   const seen = new Set<string>();
@@ -877,6 +878,7 @@ export default function Portfolio() {
           key={filter}
           items={filtered}
           onOpen={isAll ? image => image.category && setFilter(image.category) : undefined}
+          outcomeLabel={c.outcomeLabel}
         />
       </Section>
 

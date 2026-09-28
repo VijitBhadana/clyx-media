@@ -49,7 +49,7 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
   const whatsapp = safeHref(c.ctaWhatsappUrl);
   // Prefilled WhatsApp text only works on wa.me style links.
   const waHref = topic && /^https?:\/\//.test(whatsapp)
-    ? `${whatsapp}${whatsapp.includes('?') ? '&' : '?'}text=${encodeURIComponent(`Hi CLYX! ${topic.label}. Can we talk?`)}`
+    ? `${whatsapp}${whatsapp.includes('?') ? '&' : '?'}text=${encodeURIComponent((c.chatWhatsappMessage || 'Hi CLYX! {topic}. Can we talk?').replace(/\{topic\}/g, topic.label))}`
     : whatsapp;
 
   return (
@@ -101,7 +101,7 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
             <div className="svc-cta-chat-head">
               <span className="svc-cta-avatar tone-0 is-sm" aria-hidden="true">{initials(leaders[0]?.name ?? 'CLYX')}<i /></span>
               <div>
-                <p className="svc-cta-chat-name">{host} from CLYX</p>
+                <p className="svc-cta-chat-name">{(c.chatHeaderText || '{name} from CLYX').replace(/\{name\}/g, host)}</p>
                 <p className="svc-cta-chat-status">{c.chatStatus}</p>
               </div>
             </div>

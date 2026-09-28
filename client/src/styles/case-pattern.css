@@ -1,4 +1,4 @@
-/* Case Studies "recurring pattern": a brand-blue panel with the heading on the left and the
+/* Case Studies "recurring pattern": a panel split blue | white, with the heading on the blue left and the
    keep / cut / try-next loop on the right. The panel looks the same in light and dark mode.
    `bg-blue` only opts the section out of the dark-mode frosted-section style; the section itself stays transparent. */
 .cp-section.bg-blue {
@@ -16,18 +16,17 @@
 .cp-panel {
   position: relative;
   display: grid;
-  gap: 36px;
-  padding: 32px 22px;
-  overflow: hidden;
+  /* clip, not hidden: hidden would make the panel a scroll container and stop the intro from pinning. */
+  overflow: clip;
   isolation: isolate;
   border-radius: 28px;
   color: #FFFFFF;
   background:
-    radial-gradient(55% 70% at 100% 0%, rgba(255, 222, 89, 0.16), transparent 62%),
+    radial-gradient(45% 70% at 45% 0%, rgba(255, 222, 89, 0.14), transparent 62%),
     linear-gradient(150deg, #0247C4 0%, var(--cp-blue) 45%, #002366 100%);
   box-shadow: 0 30px 60px -34px rgba(1, 35, 102, 0.7);
 }
-/* Faint grid, fading out toward the bottom-left. */
+/* Faint grid behind the blue half, fading out toward the edges. */
 .cp-panel::before {
   content: '';
   position: absolute;
@@ -38,11 +37,12 @@
     linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: radial-gradient(80% 90% at 80% 10%, #000, transparent 75%);
-  -webkit-mask-image: radial-gradient(80% 90% at 80% 10%, #000, transparent 75%);
+  mask-image: radial-gradient(70% 90% at 30% 10%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(70% 90% at 30% 10%, #000, transparent 75%);
 }
 
 /* ---------- Intro ---------- */
+.cp-intro { padding: 36px 22px; }
 .cp-label {
   display: inline-flex;
   align-items: center;
@@ -132,65 +132,64 @@
 @keyframes cp-draw { to { stroke-dashoffset: 0; } }
 @keyframes cp-dot { to { opacity: 1; } }
 
-/* ---------- Keep / cut / try-next flow ---------- */
-/* Lighter frosted surface behind the steps so the right half reads brighter than the blue panel. */
+/* ---------- Step flow (six steps) ---------- */
+/* The right half of the panel is white: the panel is split blue | white, edge to edge.
+   On desktop it is also the window the steps scroll up through. */
+.cp-flow-window {
+  color: var(--cp-ink);
+  background: #FFFFFF;
+}
 .cp-flow {
+  /* Vertical padding of each step. Taller on desktop so the steps take longer to scroll past the pinned intro. */
+  --cp-step-py: 20px;
+
   display: grid;
-  padding: 8px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background:
-    radial-gradient(90% 60% at 100% 0%, rgba(255, 222, 89, 0.12), transparent 70%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 24px 50px -30px rgba(0, 12, 45, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 18px 6px;
 }
 .cp-flow > li { position: relative; }
-/* Rail joining each step's number to the next one. */
+/* Rail joining each step's number to the next one, with an 8px gap at both circles. */
 .cp-flow > li:not(:last-child)::after {
   content: '';
   position: absolute;
   left: 38px;
-  top: 72px;
-  bottom: -12px;
+  top: calc(var(--cp-step-py) + 44px + 8px);
+  bottom: calc(8px - var(--cp-step-py));
   width: 1px;
-  background: linear-gradient(rgba(255, 222, 89, 0.55), rgba(255, 255, 255, 0.15));
+  background: linear-gradient(rgba(1, 58, 163, 0.45), rgba(1, 58, 163, 0.12));
 }
 .cp-step {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 18px;
-  padding: 20px 16px;
+  padding: var(--cp-step-py) 16px;
   border-radius: 20px;
   transition: background .35s var(--cp-ease);
 }
-.cp-step:hover { background: rgba(255, 255, 255, 0.1); }
+.cp-step:hover, .cp-step.is-active { background: #F2F6FF; }
 .cp-step-num {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(1, 58, 163, 0.25);
+  color: var(--cp-blue);
   font-family: 'Urbanist', sans-serif;
   font-size: .95rem;
   font-weight: 700;
   transition: background .35s var(--cp-ease), color .35s var(--cp-ease), border-color .35s var(--cp-ease), transform .35s var(--cp-ease);
 }
-.cp-step:hover .cp-step-num {
-  background: var(--cp-yellow);
-  border-color: var(--cp-yellow);
-  color: var(--cp-ink);
+.cp-step:hover .cp-step-num, .cp-step.is-active .cp-step-num {
+  background: var(--cp-blue);
+  border-color: var(--cp-blue);
+  color: #FFFFFF;
   transform: scale(1.06);
 }
 .cp-step-tag {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--cp-yellow);
+  color: var(--cp-blue);
   font-size: .68rem;
   font-weight: 700;
   letter-spacing: .16em;
@@ -209,20 +208,39 @@
   max-width: 34rem;
   font-size: .94rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(5, 5, 5, 0.66);
 }
 
 @media (min-width: 768px) {
   .cp-section { padding-block: 32px 72px; }
-  .cp-panel { padding: 52px; }
+  .cp-intro { padding: 52px; }
+  .cp-flow { padding: 28px 36px; }
 }
+/* Desktop: the whole panel pins below the fixed header (68px) at a fixed height. CasePattern.tsx sets the
+   track's height and moves .cp-flow up with the scroll; once the last step is in view the panel releases. */
 @media (min-width: 1024px) {
   .cp-panel {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    gap: 56px;
-    align-items: center;
-    padding: 64px;
+    position: sticky;
+    top: 88px;
+    height: min(620px, calc(100vh - 112px));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* One row locked to the panel height, so the steps window cannot grow with its content. */
+    grid-template-rows: minmax(0, 1fr);
   }
+  .cp-intro { align-self: center; padding: 56px 64px; }
+  .cp-flow-window { position: relative; overflow: clip; }
+  /* White fades over the top and bottom edges, so steps fade in at the bottom and out at the top as they move. */
+  .cp-flow-window::before,
+  .cp-flow-window::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cp-flow-window::before { top: 0; height: 40px; background: linear-gradient(#FFFFFF, rgba(255, 255, 255, 0)); }
+  .cp-flow-window::after { bottom: 0; height: 72px; background: linear-gradient(rgba(255, 255, 255, 0), #FFFFFF); }
+  .cp-flow { --cp-step-py: 36px; padding: 48px 40px; will-change: transform; }
 }
 
 @media (prefers-reduced-motion: reduce) {

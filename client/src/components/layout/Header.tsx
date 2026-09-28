@@ -83,7 +83,7 @@ export default function Header() {
       >
         {/* Brand Logo */}
         <a href="/" className="clyx-nav-plain group relative shrink-0" aria-label="CLYX Media home">
-          <BrandLogo size={scrolled ? 40 : 46} className="transition-all duration-500 ease-[cubic-bezier(.23,1,.32,1)] group-hover:scale-105" />
+          <BrandLogo size={scrolled ? 40 : 46} src={c.logoImage} className="transition-all duration-500 ease-[cubic-bezier(.23,1,.32,1)] group-hover:scale-105" />
         </a>
 
         {/* Center Desktop Navigation */}

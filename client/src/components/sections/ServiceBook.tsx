@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
-import { pageDefaults, safeHref, useServices, type ServiceContent } from '@/lib/pageContent';
+import { pageDefaults, safeHref, useServices, usePageContent, type ServiceContent } from '@/lib/pageContent';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '../../styles/service-book.css';
 
@@ -31,15 +31,15 @@ function ServiceIcon({ iconKey, size }: { iconKey: string; size: number }) {
   return <icon.Icon size={size} strokeWidth={1.6} className={`sc-icon sc-icon--${icon.motion}`} aria-hidden="true" />;
 }
 
-function Cover({ c, items }: { c: Copy; items: Service[] }) {
+function Cover({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: string }) {
   return (
     <div className="sb-cover">
       <span className="sb-cover-frame" aria-hidden="true" />
       <span className="sb-cover-ribbon" aria-hidden="true" />
-      <header className="sb-cover-kicker"><BrandLogo size={48} className="sb-cover-logo" /><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
+      <header className="sb-cover-kicker"><BrandLogo size={48} src={logoSrc} className="sb-cover-logo" /><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
       <div className="sb-cover-title">
-        <span className="sb-cover-clyx">CLYX<span className="sb-cover-dot">.</span></span>
-        <span className="sb-cover-media">Media</span>
+        <span className="sb-cover-clyx">{c.bookCoverBrand || 'CLYX'}<span className="sb-cover-dot">.</span></span>
+        <span className="sb-cover-media">{c.bookCoverBrandSuffix || 'Media'}</span>
         <p className="sb-cover-sub">{c.bookCoverText} <em>{c.bookCoverHighlight}</em></p>
       </div>
       <ol className="sb-cover-index">
@@ -71,10 +71,10 @@ const COIL_PITCH = 30;
 
 // Left-hand page: decorative chapter opener. Everything on it is repeated on the detail page, so it is hidden from
 // assistive tech and simply not shown on mobile, where the book is a single page wide.
-function ChapterOpener({ service, chapter }: { service: Service; chapter: number }) {
+function ChapterOpener({ service, chapter, c }: { service: Service; chapter: number; c: Copy }) {
   return (
     <div className="sb-page sb-page--left sb-opener" aria-hidden="true">
-      <span className="sb-running">Chapter {pad(chapter)}</span>
+      <span className="sb-running">{c.bookChapterLabel || 'Chapter'} {pad(chapter)}</span>
       <div className="sb-opener-num">{pad(chapter)}</div>
       <div className="sb-opener-icon"><ServiceIcon iconKey={service.iconKey} size={40} /></div>
       <p className="sb-opener-title">{service.title}</p>
@@ -88,8 +88,8 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
   return (
     <article className="sb-page sb-detail">
       <header className="sb-running">
-        <span>CLYX Media</span>
-        <span>Chapter {pad(chapter)} / {pad(services.length)}</span>
+        <span>{c.bookRunningHead || 'CLYX Media'}</span>
+        <span>{c.bookChapterLabel || 'Chapter'} {pad(chapter)} / {pad(services.length)}</span>
       </header>
       <div className="sb-detail-head">
         <span className="sb-chip"><ServiceIcon iconKey={service.iconKey} size={22} /></span>
@@ -114,6 +114,7 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
 
 export default function ServiceBook({ content: c = pageDefaults('home') }: { content?: Copy }) {
   const items = useServices();
+  const logoSrc = usePageContent('global').logoImage;
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<HTMLDivElement>(null);
@@ -206,11 +207,11 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
               {Array.from({ length: LEAVES }, (_, i) => (
                 <div key={i} ref={(el) => { leafRefs.current[i] = el; }} className="sb-leaf">
                   <div className="sb-face sb-face--front">
-                    {i === 0 ? <Cover c={c} items={items} /> : <ServicePage service={items[i - 1]} chapter={i} c={c} />}
+                    {i === 0 ? <Cover c={c} items={items} logoSrc={logoSrc} /> : <ServicePage service={items[i - 1]} chapter={i} c={c} />}
                   </div>
                   <div className="sb-face sb-face--back">
                     {i < services.length
-                      ? <ChapterOpener service={items[i]} chapter={i + 1} />
+                      ? <ChapterOpener service={items[i]} chapter={i + 1} c={c} />
                       : <div className="sb-page sb-page--left" aria-hidden="true" />}
                   </div>
                 </div>
@@ -224,7 +225,7 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
 
         <nav className="sb-progress" aria-label="Service chapters">
           <span className="sb-caption">
-            {current ? <>{pad(spread)} — {current.title}</> : 'Cover'}
+            {current ? <>{pad(spread)} — {current.title}</> : (c.bookCoverLabel || 'Cover')}
           </span>
           <div className="sb-dots">
             {items.map((service, i) => (

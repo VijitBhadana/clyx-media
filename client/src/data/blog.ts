@@ -8,6 +8,7 @@ export type BlogArticle = {
   readTime: string;
   excerpt: string;
   body: string;
+  style?: 'yellow' | 'blue' | 'soft';
 };
 
 export const defaultArticles: BlogArticle[] = [

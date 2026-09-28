@@ -90,9 +90,9 @@ function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardP
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, delay: featured ? 0 : index * 0.08, ease: [0.25, 1, 0.5, 1] }}
       className={cn(
-        'group relative flex overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-sm',
-        'shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)] transition-all duration-500',
-        'hover:-translate-y-1.5 hover:border-yellow/60 hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)]',
+        'group relative flex overflow-hidden rounded-3xl border border-slate-200 bg-white backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.04]',
+        'shadow-[0_20px_50px_-30px_rgba(15,23,42,0.35)] transition-all duration-500 dark:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]',
+        'hover:-translate-y-1.5 hover:border-yellow/60 hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)] dark:hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow',
         featured ? 'flex-col lg:flex-row' : 'flex-col'
       )}
@@ -112,6 +112,7 @@ function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardP
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5" style={{ background: item.accent }} />
 
         <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
           <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
@@ -127,13 +128,13 @@ function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardP
 
       {/* Body */}
       <div className={cn('flex flex-1 flex-col', featured ? 'p-6 md:p-8 lg:p-10' : 'p-6')}>
-        <h3 className="font-['Poppins',sans-serif] text-[26px] font-normal leading-tight tracking-normal text-white">
+        <h3 className="font-['Poppins',sans-serif] text-[26px] font-normal leading-tight tracking-normal text-slate-900 dark:text-white">
           {item.brand}
         </h3>
-        <h4 className="mt-3 font-['Poppins',sans-serif] text-lg font-medium leading-snug tracking-normal text-white/90">
+        <h4 className="mt-3 font-['Poppins',sans-serif] text-lg font-medium leading-snug tracking-normal text-slate-800 dark:text-white/90">
           {item.headline}
         </h4>
-        <p className="mt-1.5 font-['Poppins',sans-serif] text-lg font-normal leading-[1.65] tracking-normal text-white/70">
+        <p className="mt-1.5 font-['Poppins',sans-serif] text-lg font-normal leading-[1.65] tracking-normal text-slate-600 dark:text-white/70">
           {item.detail}
         </p>
 
@@ -215,14 +216,17 @@ export default function CaseStudies() {
         </>
       }
       lead={
-        <div className="cs-proof">
-          {caseStudies.slice(0, 3).map((item) => (
-            <span key={item.id} className="cs-chip">
-              <strong>{item.result}</strong>
-              {item.brand}
-            </span>
-          ))}
-        </div>
+        <>
+          {c.heroIntro && <p className="ih-intro">{c.heroIntro}</p>}
+          <div className="cs-proof">
+            {caseStudies.slice(0, 3).map((item) => (
+              <span key={item.id} className="cs-chip">
+                <strong>{item.result}</strong>
+                {item.brand}
+              </span>
+            ))}
+          </div>
+        </>
       }
       intro={c.heroIntro}
       aside={<CaseHeroArt />}

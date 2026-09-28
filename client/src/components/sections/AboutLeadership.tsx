@@ -56,7 +56,9 @@ export default function AboutLeadership({
               </div>
               <p className="lead-access-title">{c.leadCardTitle}</p>
               <p className="lead-access-text">
-                No account-manager relay. {founders.length > 0 ? `${founders.length} founders and a` : 'A'} {members.length}-person core team, one conversation.
+                {(c.leadAccessText || 'No account-manager relay. {foundersPhrase} {count}-person core team, one conversation.')
+                  .replace(/\{foundersPhrase\}/g, founders.length > 0 ? `${founders.length} founders and a` : 'A')
+                  .replace(/\{count\}/g, String(members.length))}
               </p>
               <a href={safeHref(c.leadCardButtonUrl || '/contact')} className="lead-access-cta">{c.leadCardButton} <ArrowUpRight size={16} /></a>
             </div>

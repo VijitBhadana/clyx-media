@@ -23,7 +23,9 @@
 }
 @media (min-width: 900px) {
   .inner-hero .ih-inner:has(.cha) { grid-template-columns: 1fr 1fr; }
-  .cha { width: 100%; padding-top: 15%; margin-bottom: -88px; }
+  /* A shorter hero: less room above the copy and a capped illustration, kept against the right edge. */
+  .inner-hero:has(.cha) { padding-top: 128px; }
+  .cha { width: min(100%, 660px); margin-inline: auto 0; padding-top: 11%; margin-bottom: -88px; }
 }
 
 /* ---------- Illustration ---------- */

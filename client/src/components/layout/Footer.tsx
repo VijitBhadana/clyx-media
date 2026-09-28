@@ -55,7 +55,7 @@ export function Footer() {
           <div className="cf-brand">
             <div className="cf-brand-row">
               <a href="/" className="cf-logo" aria-label="CLYX Media home">
-                <BrandLogo size={48} />
+                <BrandLogo size={48} src={c.logoImage} />
               </a>
               <div className="cf-socials">
                 {socials.map(({ label, href, Icon }) => (

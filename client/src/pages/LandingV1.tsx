@@ -84,6 +84,7 @@ export default function LandingV1() {
     metric: c[`clip${i + 1}Metric`],
   }));
   const dashStats = [1, 2, 3, 4].map((n) => ({ label: c[`dashStat${n}Label`], value: c[`dashStat${n}Value`], note: c[`dashStat${n}Note`] }));
+  const chartDays = splitLines(c.dashChartDays);
 
   const campaigns = useCollection<CampaignItem>('campaigns', clyxCampaigns, (item) => ({
     tag: item.category ? `#${String(item.category).toUpperCase()}` : '',
@@ -126,7 +127,7 @@ export default function LandingV1() {
       <div ref={rootRef} className="v1-landing-wrapper bg-[color:var(--background)] text-foreground min-h-screen transition-colors">
         {showLoader && (
           <div id="loader" className={loaderDone ? 'loaded' : undefined} role="status" aria-label="Loading CLYX">
-            <div className="loader-mark">CLYX<span>.</span></div>
+            <div className="loader-mark">{(c.loaderWordmark || 'CLYX.').replace(/\.$/, '')}<span>.</span></div>
             <div className="loader-bar" aria-hidden="true"><span className="loader-progress" /></div>
           </div>
         )}
@@ -237,13 +238,9 @@ export default function LandingV1() {
                     <span style={{ fontSize: "0.75rem", color: "var(--clyx-yellow)" }}>{c.dashChartNote}</span>
                   </div>
                   <div className="chart-bars-wrap">
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "42%" }}></div><span className="chart-label">Mon</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "58%" }}></div><span className="chart-label">Tue</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "72%" }}></div><span className="chart-label">Wed</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "66%" }}></div><span className="chart-label">Thu</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "86%" }}></div><span className="chart-label">Fri</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "96%" }}></div><span className="chart-label">Sat</span></div>
-                    <div className="chart-bar-group"><div className="chart-bar" style={{ height: "90%" }}></div><span className="chart-label">Sun</span></div>
+                    {[42, 58, 72, 66, 86, 96, 90].map((h, i) => (
+                      <div key={i} className="chart-bar-group"><div className="chart-bar" style={{ height: `${h}%` }}></div><span className="chart-label">{chartDays[i] ?? ''}</span></div>
+                    ))}
                     {/* Trading-style trace over the bar tops, drawn by useLandingMotion. */}
                     <svg className="chart-trace" aria-hidden="true">
                       <line className="trace-level trace-level-hi" />

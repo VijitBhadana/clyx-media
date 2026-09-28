@@ -1,0 +1,134 @@
+/* Blog hero art: a stack of floating "note" cards, tilted in 3D and drifting on their own. */
+.bha {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1400px;
+}
+.bha-glow {
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  background: radial-gradient(45% 55% at 55% 45%, rgba(255, 222, 89, 0.18), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+.bha-stage {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(.23, 1, .32, 1);
+}
+
+.bha-slot {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.bha-slot-0 { left: 0; top: 4px; transform: translateZ(70px); }
+.bha-slot-1 { left: 86px; top: 76px; transform: translateZ(120px); }
+.bha-slot-2 { left: 24px; top: 160px; transform: translateZ(30px); }
+
+.bha-card {
+  width: 208px;
+  padding: 14px 16px 15px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.55);
+}
+.bha-card-top { margin-bottom: 10px; }
+.bha-card-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 222, 89, 0.14);
+  border: 1px solid rgba(255, 222, 89, 0.35);
+  color: #FFDE59;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.bha-card-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  color: #FFFFFF;
+}
+.bha-card-lines { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.bha-card-lines span { display: block; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.16); }
+.bha-card-lines span.is-short { width: 55%; }
+.bha-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@keyframes bha-float-0 {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-14px) rotate(-4deg); }
+}
+@keyframes bha-float-1 {
+  0%, 100% { transform: translateY(0) rotate(4deg); }
+  50% { transform: translateY(-10px) rotate(6deg); }
+}
+@keyframes bha-float-2 {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-16px) rotate(-1deg); }
+}
+.bha-float-0 { animation: bha-float-0 7s ease-in-out infinite; }
+.bha-float-1 { animation: bha-float-1 8s ease-in-out infinite; animation-delay: -3s; }
+.bha-float-2 { animation: bha-float-2 6.5s ease-in-out infinite; animation-delay: -1.5s; }
+
+.bha-badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(5, 5, 5, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 16px 32px -14px rgba(0, 0, 0, 0.6);
+  animation: bha-drift 5s ease-in-out infinite;
+}
+.bha-badge svg { color: #FFDE59; flex-shrink: 0; }
+.bha-badge-a { left: -6px; top: 190px; transform: translateZ(150px); animation-delay: -1s; }
+.bha-badge-b { right: -14px; top: 40px; transform: translateZ(170px); }
+@keyframes bha-drift {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -8px; }
+}
+
+@media (max-width: 480px) {
+  .bha { min-height: 300px; }
+  .bha-stage { width: 240px; height: 260px; transform: none !important; }
+  .bha-slot-0 { left: -4px; top: 0; }
+  .bha-slot-1 { left: 62px; top: 62px; }
+  .bha-slot-2 { left: 12px; top: 132px; }
+  .bha-card { width: 176px; }
+  .bha-badge-b { right: -8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bha-stage { transform: none !important; }
+  .bha-float-0, .bha-float-1, .bha-float-2, .bha-badge { animation: none; }
+}

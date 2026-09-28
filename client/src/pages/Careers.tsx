@@ -65,5 +65,5 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
     </button>})}</div>
     {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-white/70">{c.rolesNote}</p><a href={safeHref(c.applyUrl||'mailto:work@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-clyx-yellow hover:text-white md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
   </div>
-  {lastRole.current&&<Suspense fallback={null}><ApplyDialog open={applyRole!==null} onOpenChange={o=>!o&&setApplyRole(null)} roles={roles.map(r=>r.title)} initialRole={lastRole.current}/></Suspense>}
+  {lastRole.current&&<Suspense fallback={null}><ApplyDialog open={applyRole!==null} onOpenChange={o=>!o&&setApplyRole(null)} roles={roles.map(r=>r.title)} initialRole={lastRole.current} content={c}/></Suspense>}
 </section>}

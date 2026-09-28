@@ -30,6 +30,7 @@ export function useBlogPosts(): BlogPost[] {
       readTime: item.readTime || known?.readTime || '',
       excerpt: item.excerpt || known?.excerpt || '',
       body: item.body || known?.body || '',
+      style: item.style || known?.style || 'yellow',
     };
   });
 }

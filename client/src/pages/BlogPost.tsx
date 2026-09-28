@@ -6,6 +6,7 @@ import { CookieBar, Footer, WhatsAppButton } from '@/components/layout/Footer';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { parseBody, useBlogPosts } from '@/lib/blog';
 import { useSiteContent } from '@/lib/siteContent';
+import { safeHref, usePageContent } from '@/lib/pageContent';
 import NotFound from './NotFound';
 import '@/styles/blog-article.css';
 
@@ -61,6 +62,7 @@ export default function BlogPost() {
   const { slug = '' } = useParams<{ slug: string }>();
   const posts = useBlogPosts();
   const { data } = useSiteContent();
+  const c = usePageContent('blog');
   const post = posts.find((p) => p.slug === slug);
   const blocks = useMemo(() => parseBody(post?.body ?? ''), [post?.body]);
   const headings = blocks.filter((b) => b.kind === 'h2');
@@ -87,14 +89,14 @@ export default function BlogPost() {
           <div className="ba-hero-glow" aria-hidden="true" />
           <div className="container ba-hero-inner">
             <Reveal>
-              <a href="/blog" className="ba-back"><ArrowLeft size={16} aria-hidden="true" /> All articles</a>
+              <a href="/blog" className="ba-back"><ArrowLeft size={16} aria-hidden="true" /> {c.articleBackLabel || 'All articles'}</a>
               <div className="ba-meta">
                 {post.tag && <span className="ba-tag">{post.tag}</span>}
                 {post.readTime && <span className="ba-read"><Clock3 size={14} aria-hidden="true" />{post.readTime}</span>}
               </div>
               <h1 className="ba-title">{post.title}</h1>
               {post.excerpt && <p className="ba-lede">{post.excerpt}</p>}
-              <p className="ba-byline"><span className="ba-byline-mark" aria-hidden="true">C</span>CLYX Media · Journal</p>
+              <p className="ba-byline"><span className="ba-byline-mark" aria-hidden="true">C</span>{c.articleByline || 'CLYX Media · Journal'}</p>
             </Reveal>
           </div>
         </header>
@@ -112,15 +114,15 @@ export default function BlogPost() {
           <aside className="ba-aside">
             <div className="ba-aside-sticky">
               {headings.length > 1 && (
-                <nav className="ba-toc" aria-label="On this page">
-                  <p className="ba-aside-label">On this page</p>
+                <nav className="ba-toc" aria-label={c.articleTocLabel || 'On this page'}>
+                  <p className="ba-aside-label">{c.articleTocLabel || 'On this page'}</p>
                   <ol>{headings.map((h) => <li key={h.id}><a href={`#${h.id}`}>{h.text}</a></li>)}</ol>
                 </nav>
               )}
               <div className="ba-cta">
-                <p className="ba-cta-title">Want this working for your brand?</p>
-                <p className="ba-cta-text">We run the creator ads, the testing loop and the pages that convert.</p>
-                <a href="/contact" className="ba-cta-btn">Talk to CLYX <ArrowUpRight size={16} aria-hidden="true" /></a>
+                <p className="ba-cta-title">{c.articleCtaTitle || 'Want this working for your brand?'}</p>
+                <p className="ba-cta-text">{c.articleCtaText || 'We run the creator ads, the testing loop and the pages that convert.'}</p>
+                <a href={safeHref(c.articleCtaUrl || '/contact')} className="ba-cta-btn">{c.articleCtaButton || 'Talk to CLYX'} <ArrowUpRight size={16} aria-hidden="true" /></a>
               </div>
             </div>
           </aside>
@@ -130,8 +132,8 @@ export default function BlogPost() {
           <section className="ba-more">
             <div className="container">
               <div className="ba-more-head">
-                <h2>Keep reading</h2>
-                <a href="/blog" className="ba-more-all">All articles <ArrowUpRight size={16} aria-hidden="true" /></a>
+                <h2>{c.articleMoreTitle || 'Keep reading'}</h2>
+                <a href="/blog" className="ba-more-all">{c.articleBackLabel || 'All articles'} <ArrowUpRight size={16} aria-hidden="true" /></a>
               </div>
               <div className="ba-more-grid">
                 {more.map((p) => (
