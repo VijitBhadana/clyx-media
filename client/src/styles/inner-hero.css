@@ -199,9 +199,9 @@
 }
 
 /* Blog: shorter hero than the other inner pages. */
-.inner-hero.is-blog { padding: 96px 0 40px; }
+.inner-hero.is-blog { padding: 72px 0 28px; }
 @media (min-width: 900px) {
-  .inner-hero.is-blog { padding: 108px 0 56px; }
+  .inner-hero.is-blog { padding: 84px 0 36px; }
 }
 
 @media (max-width: 480px) {

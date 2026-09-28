@@ -87,7 +87,19 @@ body { margin:0; font-family:var(--font-body); }
 @keyframes carousel-progress { from { transform:scaleX(0); } to { transform:scaleX(1); } }
 button,a { transition:transform .18s var(--ease-out), background .18s var(--ease-out), color .18s var(--ease-out), border-color .18s var(--ease-out); }
 button, a.inline-flex { border-radius: 12px !important; }
-.whatsapp-button { border-radius: 50% !important; }
+.whatsapp-button { border-radius: 50% !important; position:relative; animation: whatsapp-float 3s ease-in-out infinite; }
+@keyframes whatsapp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+.whatsapp-button-ping { position:absolute; inset:0; border-radius:50%; background:#25D366; opacity:.65; animation: whatsapp-ping 2.2s cubic-bezier(0,0,.2,1) infinite; }
+@keyframes whatsapp-ping { 0% { transform:scale(1); opacity:.55; } 75%,100% { transform:scale(1.9); opacity:0; } }
+.whatsapp-widget { align-items:flex-end; }
+.whatsapp-popup { max-width:0; opacity:0; transform:translateX(12px) scale(.9); overflow:hidden; white-space:nowrap; pointer-events:none; background:#fff; color:#111; font-size:.9rem; font-weight:500; padding:0; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.18); transition:max-width .35s var(--ease-out), opacity .3s var(--ease-out), transform .35s var(--ease-out), padding .35s var(--ease-out); display:flex; align-items:center; gap:8px; }
+.whatsapp-popup.is-visible { max-width:280px; opacity:1; transform:translateX(0) scale(1); padding:10px 14px; pointer-events:auto; white-space:normal; }
+.dark .whatsapp-popup { background:#1c1f22; color:#f2f2f2; }
+.whatsapp-popup-close { flex-shrink:0; border:none; background:transparent; color:inherit; opacity:.55; font-size:1.1rem; line-height:1; cursor:pointer; padding:0 2px; }
+.whatsapp-popup-close:hover { opacity:1; }
+@media (max-width: 480px) {
+  .whatsapp-popup.is-visible { max-width:60vw; }
+}
 button:active,a:active{transform:scale(.97)}
 .dark .invert-on-dark{filter:invert(1)}
 
@@ -297,18 +309,25 @@ button:active,a:active{transform:scale(.97)}
   border-color: rgba(221,232,247,0.2);
   color: #FFFFFF !important;
 }
-/* Blog cards: lift + glow on hover, arrow nudges out. */
-.blog-card { position: relative; overflow: hidden; transition: transform .45s var(--ease-out), box-shadow .45s var(--ease-out); }
-.blog-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%); transform: translateX(-120%); transition: transform .8s var(--ease-out); }
-.blog-card:hover { transform: translateY(-6px); box-shadow: 0 22px 44px -20px rgba(0,0,0,0.55); }
-.blog-card:hover::after { transform: translateX(120%); }
-.blog-card .blog-card-arrow { transition: transform .35s var(--ease-out); }
-.blog-card:hover .blog-card-arrow { transform: translate(3px,-3px) scale(1.15); }
-/* Card text rises in once its Reveal wrapper is visible: date row, then tag, then title. */
-.blog-card .blog-card-text { opacity: 0; transform: translateY(18px); filter: blur(4px); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out), filter .6s var(--ease-out); transition-delay: calc(var(--card-delay, 0ms) + 250ms); }
-.blog-card p.blog-card-text { transition-delay: calc(var(--card-delay, 0ms) + 380ms); }
-.blog-card h2.blog-card-text { transition-delay: calc(var(--card-delay, 0ms) + 510ms); }
-.scroll-reveal.is-visible .blog-card-text { opacity: 1; transform: none; filter: none; }
+/* Journal cards: cover image, meta row, read-article pill + circular arrow button. */
+.journal-card-link { display: block; height: 100%; border-radius: 22px; }
+.journal-card { position: relative; display: flex; height: 100%; flex-direction: column; padding: 14px; border-radius: 22px; background: #FFFFFF; border: 1px solid var(--border-subtle); box-shadow: 0 1px 2px rgba(15,23,42,0.04); transition: transform .45s var(--ease-out), box-shadow .45s var(--ease-out), border-color .45s var(--ease-out); }
+.dark .journal-card { background: rgba(255,255,255,0.04); }
+.journal-card:hover { transform: translateY(-6px); box-shadow: 0 22px 44px -24px rgba(0,0,0,0.35); border-color: var(--border-accent); }
+.journal-card-media { position: relative; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: #E7ECF5; }
+.dark .journal-card-media { background: rgba(255,255,255,0.06); }
+.journal-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease-out); }
+.journal-card:hover .journal-card-media img { transform: scale(1.06); }
+.journal-card-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.journal-card-body { display: flex; flex: 1; flex-direction: column; padding: 16px 4px 4px; }
+.journal-card-title { font-family: 'Urbanist', sans-serif; font-size: 1.15rem; font-weight: 700; line-height: 1.25; letter-spacing: -.01em; color: var(--foreground); }
+.journal-card-subtitle { margin-top: 4px; font-size: .85rem; color: var(--text-muted); }
+.journal-card-meta { display: flex; flex: 1; align-items: flex-end; gap: 16px; margin-top: 14px; font-size: .78rem; font-weight: 600; color: var(--text-muted); }
+.journal-card-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+.journal-card-actions { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.journal-card-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 46px; border-radius: 999px; background: var(--foreground); color: var(--background); font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.journal-card-circle { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 999px; border: 1px solid var(--border-subtle); color: var(--foreground); transition: background .3s var(--ease-out), transform .3s var(--ease-out), border-color .3s var(--ease-out), color .3s var(--ease-out); }
+.journal-card:hover .journal-card-circle { background: #FFDE59; border-color: #FFDE59; color: #050505; transform: translate(2px,-2px); }
 /* Blog dispatch band: grid, glows, perk chips. */
 .dispatch-band { position: relative; overflow: hidden; isolation: isolate; }
 .dispatch-band::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 70% 90% at 70% 50%, #000 30%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 70% 90% at 70% 50%, #000 30%, transparent 100%); }

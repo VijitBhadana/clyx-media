@@ -153,7 +153,10 @@ export const PAGES: PageDef[] = [
       {
         id: 'whatsapp',
         title: 'Floating WhatsApp bubble',
-        fields: [link('whatsappUrl', 'WhatsApp link', 'https://wa.me/919671430111', 'Leave empty to hide the bubble.')],
+        fields: [
+          link('whatsappUrl', 'WhatsApp link', 'https://wa.me/919671430111', 'Leave empty to hide the bubble.'),
+          t('whatsappPopupText', 'Popup message', 'Need help? Chat with us!', 'Shown in a speech bubble that pops up next to the button every so often.'),
+        ],
       },
       {
         id: 'cookie',

@@ -270,7 +270,7 @@
 
 /* Keep the bottom bar clear of the floating WhatsApp button when the page is narrow. */
 @media (max-width: 1420px) {
-  .clyx-footer .cf-bottom { padding-right: 72px; }
+  .clyx-footer .cf-bottom { padding-right: 88px; }
 }
 
 @media (max-width: 1023px) {

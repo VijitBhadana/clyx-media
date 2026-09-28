@@ -9,6 +9,7 @@ export type BlogArticle = {
   excerpt: string;
   body: string;
   style?: 'yellow' | 'blue' | 'soft';
+  image?: string;
 };
 
 export const defaultArticles: BlogArticle[] = [

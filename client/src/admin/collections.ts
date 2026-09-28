@@ -184,12 +184,14 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     titleKey: 'title',
     subtitleKey: 'readTime',
     badgeKey: 'tag',
+    imageKey: 'image',
     fields: [
       { key: 'title', label: 'Title', required: true, wide: true },
+      { key: 'image', label: 'Cover image', type: 'image', wide: true },
       { key: 'tag', label: 'Topic tag', placeholder: 'Performance' },
       { key: 'date', label: 'Date', placeholder: '12.09.25' },
       { key: 'readTime', label: 'Read time', placeholder: '4 min read' },
-      { key: 'style', label: 'Card colour', type: 'select', options: ['yellow', 'blue', 'soft'], default: 'yellow' },
+      { key: 'style', label: 'Card colour (used when no image is set)', type: 'select', options: ['yellow', 'blue', 'soft'], default: 'yellow' },
       { key: 'excerpt', label: 'Intro (under the article title)', type: 'textarea', wide: true },
       {
         key: 'body',

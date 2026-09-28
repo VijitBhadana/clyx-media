@@ -106,21 +106,64 @@ export function Footer() {
   );
 }
 
+// Every cycle the bubble surfaces for a few seconds, then hides, so it keeps
+// drawing the eye without permanently covering content.
+const WHATSAPP_POPUP_INTERVAL_MS = 12000;
+const WHATSAPP_POPUP_VISIBLE_MS = 5000;
+
 export function WhatsAppButton() {
-  const { whatsappUrl } = usePageContent('global');
+  const { whatsappUrl, whatsappPopupText } = usePageContent('global');
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    if (!whatsappUrl || !whatsappPopupText) return;
+    const showTimer = setInterval(() => setShowPopup(true), WHATSAPP_POPUP_INTERVAL_MS);
+    const firstShow = setTimeout(() => setShowPopup(true), WHATSAPP_POPUP_INTERVAL_MS);
+    return () => {
+      clearInterval(showTimer);
+      clearTimeout(firstShow);
+    };
+  }, [whatsappUrl, whatsappPopupText]);
+
+  useEffect(() => {
+    if (!showPopup) return;
+    const hideTimer = setTimeout(() => setShowPopup(false), WHATSAPP_POPUP_VISIBLE_MS);
+    return () => clearTimeout(hideTimer);
+  }, [showPopup]);
+
   if (!whatsappUrl) return null;
+
   return (
-    <a
-      href={safeHref(whatsappUrl)}
-      target="_blank"
-      rel="noreferrer"
-      aria-label="Chat on WhatsApp"
-      className="whatsapp-button group fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1EBE5A] hover:scale-105 transition-all"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 !text-white fill-current">
-        <path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.9-1.3A9.5 9.5 0 1 0 12 2.5Zm0 17.3c-1.5 0-2.9-.4-4.1-1.2l-.3-.2-2.9.8.8-2.8-.2-.3a7.8 7.8 0 1 1 6.7 3.7Zm4.3-5.8c-.2-.1-1.3-.7-1.5-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.1-.2 0-.3.1-.4l.4-.5c.1-.1.1-.3 0-.4l-.6-1.4c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.1 1.5 2.4 3.7 3.3 1.4.6 1.9.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3Z" />
-      </svg>
-    </a>
+    <div className="whatsapp-widget fixed bottom-6 right-6 z-40 flex items-center gap-3">
+      {whatsappPopupText && (
+        <div className={`whatsapp-popup ${showPopup ? 'is-visible' : ''}`} role="status">
+          {whatsappPopupText}
+          <button
+            type="button"
+            aria-label="Dismiss"
+            className="whatsapp-popup-close"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowPopup(false);
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+      <a
+        href={safeHref(whatsappUrl)}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="whatsapp-button group flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#1EBE5A] hover:scale-105 transition-all"
+      >
+        <span className="whatsapp-button-ping" aria-hidden="true" />
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8 !text-white fill-current relative">
+          <path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.9-1.3A9.5 9.5 0 1 0 12 2.5Zm0 17.3c-1.5 0-2.9-.4-4.1-1.2l-.3-.2-2.9.8.8-2.8-.2-.3a7.8 7.8 0 1 1 6.7 3.7Zm4.3-5.8c-.2-.1-1.3-.7-1.5-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.1-.2 0-.3.1-.4l.4-.5c.1-.1.1-.3 0-.4l-.6-1.4c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.1 1.5 2.4 3.7 3.3 1.4.6 1.9.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3Z" />
+        </svg>
+      </a>
+    </div>
   );
 }
 

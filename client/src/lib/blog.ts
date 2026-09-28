@@ -31,6 +31,7 @@ export function useBlogPosts(): BlogPost[] {
       excerpt: item.excerpt || known?.excerpt || '',
       body: item.body || known?.body || '',
       style: item.style || known?.style || 'yellow',
+      image: item.image || known?.image || '',
     };
   });
 }
