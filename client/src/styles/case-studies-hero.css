@@ -41,6 +41,8 @@
 .inner-hero.cs-hero .ih-title { color: var(--cs-ink); }
 /* Second line in brand blue. */
 .inner-hero .cs-hl { color: var(--cs-accent); }
+/* Intro paragraph in dark navy. */
+.inner-hero.cs-hero .ih-intro { color: var(--cs-ink); }
 
 /* Title letters drop in one by one from above and settle with a small bounce (letters split by RevealWords). */
 .inner-hero.cs-hero .ih-title .reveal-word { overflow: visible; }

@@ -65,38 +65,40 @@ export default function AboutLeadership({
           </Reveal>
         </div>
 
-        {founders.length > 0 && (
-          <div className="lead-founders" style={{ '--lead-cols': Math.min(founders.length, 3) } as CSSProperties}>
-            {founders.map((m, i) => (
-              <Reveal key={`${m.name}-${i}`} delay={i * 140}>
-                <div className="lead-founder">
-                  <div className="lead-founder-media">
-                    <Portrait member={m} className="lead-founder-img" />
-                    {m.metric && <span className="lead-badge">{m.metric}</span>}
-                    <div className="lead-founder-caption">
-                      <h3 className="display">{m.name}</h3>
-                      <p>{m.role}</p>
-                    </div>
-                  </div>
-                  {m.bio && <p className="lead-founder-bio">{m.bio}</p>}
-                </div>
-              </Reveal>
-            ))}
+        {team.length > 0 && (
+          <div className="lead-subhead">
+            <p className="lead-eyebrow">{c.leadTeamLabel}</p>
+            {c.leadJoinText && <a href={safeHref(c.leadJoinUrl || '/careers')} className="lead-join">{c.leadJoinText} <ArrowUpRight size={14} /></a>}
           </div>
         )}
 
-        {team.length > 0 && (
-          <>
-            <div className="lead-subhead">
-              <p className="lead-eyebrow">{c.leadTeamLabel}</p>
-              {c.leadJoinText && <a href={safeHref(c.leadJoinUrl || '/careers')} className="lead-join">{c.leadJoinText} <ArrowUpRight size={14} /></a>}
+        {founders.length > 0 && (
+          <div className="lead-flank">
+            <div className="lead-founders" style={{ '--lead-cols': Math.min(founders.length, 3) } as CSSProperties}>
+              {founders.map((m, i) => (
+                <Reveal key={`${m.name}-${i}`} delay={i * 140}>
+                  <div className="lead-founder">
+                    <div className="lead-founder-media">
+                      <Portrait member={m} className="lead-founder-img" />
+                      {m.metric && <span className="lead-badge">{m.metric}</span>}
+                      <div className="lead-founder-caption">
+                        <h3 className="display">{m.name}</h3>
+                        <p>{m.role}</p>
+                      </div>
+                    </div>
+                    {m.bio && <p className="lead-founder-bio">{m.bio}</p>}
+                  </div>
+                </Reveal>
+              ))}
             </div>
-            <div className="lead-team">
+
+            {/* Whole team in one grid next to the founder: six across. */}
+            <div className="lead-flank-col">
               {team.map((m, i) => (
-                <Reveal key={`${m.name}-${i}`} delay={i * 90}>
-                  <div className="lead-member">
-                    <Portrait member={m} className="lead-member-img" />
-                    <div className="lead-member-info">
+                <Reveal key={`${m.name}-${i}`} delay={(i % 6) * 90}>
+                  <div className="lead-flank-member">
+                    <Portrait member={m} className="lead-flank-img" />
+                    <div className="lead-flank-info">
                       <h3>{m.name}</h3>
                       <p className="lead-member-role">{m.role}</p>
                     </div>
@@ -104,7 +106,7 @@ export default function AboutLeadership({
                 </Reveal>
               ))}
             </div>
-          </>
+          </div>
         )}
       </div>
     </section>

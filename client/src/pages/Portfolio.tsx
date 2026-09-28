@@ -494,12 +494,12 @@ function arrowHead(end: Pt, control: Pt): string {
   return `M ${f({ x: base.x + p.x * 12, y: base.y + p.y * 12 })} L ${f(end)} L ${f({ x: base.x - p.x * 12, y: base.y - p.y * 12 })}`;
 }
 
-// Builds two hand-drawn loop arrows in container pixels: aura chip -> kulture chip, then kulture chip -> button.
-function buildJourney(aura: Box, kulture: Box, button: Box): Journey {
+// Builds two hand-drawn loop arrows in container pixels: aura chip -> kulture chip, then kulture chip -> note.
+function buildJourney(aura: Box, kulture: Box, note: Box): Journey {
   const start = { x: aura.x + aura.w * 0.5, y: aura.y - 12 };
   const into = { x: kulture.x + kulture.w * 0.45, y: kulture.y + kulture.h + 18 };
   const out = { x: kulture.x + kulture.w + 16, y: kulture.y + kulture.h * 0.5 };
-  const end = { x: button.x - 18, y: button.y + button.h / 2 };
+  const end = { x: note.x + note.w * 0.2, y: note.y - 14 };
 
   // Rises from the aura chip bowing left, loops, then sweeps up-right into the kulture chip.
   const rise = { x: into.x - start.x, y: into.y - start.y };
@@ -513,7 +513,7 @@ function buildJourney(aura: Box, kulture: Box, button: Box): Journey {
     -1
   );
 
-  // Arches right off the kulture chip, loops on the inside of the bend, then drops onto the button.
+  // Arches right off the kulture chip, loops on the inside of the bend, then drops onto the note above the button.
   const drop = { x: end.x - out.x, y: end.y - out.y };
   const toButton = loopArrow(
     [
@@ -567,6 +567,18 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
       transition: { pathLength: { delay, duration, ease: 'easeInOut' }, opacity: { delay, duration: 0.01 } },
     }),
   };
+  const rise: Variants = {
+    hidden: { opacity: 0, y: '0.6em', rotateX: -80, filter: 'blur(6px)' },
+    show: (delay: number) => ({
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      filter: 'blur(0px)',
+      transition: { delay, type: 'spring', stiffness: 380, damping: 16 },
+    }),
+  };
+  const highlight = (c.ctaHighlight ?? '').trim();
+  const underlineDelay = 0.35 + highlight.replace(/\s/g, '').length * 0.055;
   const note = c.ctaNote;
   const includes = splitLines(c.ctaIncludes);
   const noteArrowDelay = 3.1 + note.length * 0.045;
@@ -576,24 +588,24 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
   };
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLAnchorElement>(null);
+  const noteRef = useRef<HTMLParagraphElement>(null);
   const chipRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [journey, setJourney] = useState<Journey | null>(null);
 
   useLayoutEffect(() => {
     const { aura, kulture } = chipRefs.current;
-    const button = buttonRef.current;
+    const noteEl = noteRef.current;
     const container = containerRef.current;
-    if (!aura || !kulture || !button || !container) return;
+    if (!aura || !kulture || !noteEl || !container) return;
 
     // Chips are display:none below xl, so offsetParent is null there and the arrow is skipped.
     const measure = () =>
       setJourney(
-        aura.offsetParent && kulture.offsetParent ? buildJourney(boxOf(aura), boxOf(kulture), boxOf(button)) : null
+        aura.offsetParent && kulture.offsetParent ? buildJourney(boxOf(aura), boxOf(kulture), boxOf(noteEl)) : null
       );
     measure();
     const observer = new ResizeObserver(measure);
-    [container, aura, kulture, button].forEach(el => observer.observe(el));
+    [container, aura, kulture, noteEl].forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
@@ -758,21 +770,44 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
             {c.ctaTitle}
             <br />
             <span className="relative inline-block text-yellow">
-              {c.ctaHighlight}
+              <span className="sr-only">{highlight}</span>
+              {/* Letters flip up one by one, then a hand-drawn underline sweeps under the words. */}
+              <span aria-hidden="true" className="[perspective:600px]">
+                {highlight.split(' ').map((word, w, words) => {
+                  const start = words.slice(0, w).join('').length;
+                  return (
+                    <span key={w}>
+                      {w > 0 && ' '}
+                      <span className="inline-block whitespace-nowrap">
+                        {Array.from(word).map((ch, i) => (
+                          <motion.span
+                            key={i}
+                            className="inline-block origin-bottom"
+                            variants={rise}
+                            custom={0.25 + (start + i) * 0.055}
+                          >
+                            {ch}
+                          </motion.span>
+                        ))}
+                      </span>
+                    </span>
+                  );
+                })}
+              </span>
               <svg
                 aria-hidden="true"
-                viewBox="0 0 240 16"
+                viewBox="0 0 300 20"
                 preserveAspectRatio="none"
-                className="absolute -bottom-3 left-0 h-3 w-full overflow-visible md:-bottom-4 md:h-4"
+                className="pointer-events-none absolute -bottom-3 left-0 h-4 w-full overflow-visible md:-bottom-4 md:h-5"
               >
                 <motion.path
-                  d="M3 10 C 40 3, 78 14, 118 8 S 196 3, 236 9"
+                  d="M4 13 C 70 5, 150 4, 296 9"
                   fill="none"
-                  stroke="rgba(255,255,255,0.75)"
-                  strokeWidth={3}
+                  stroke="currentColor"
+                  strokeWidth={5}
                   strokeLinecap="round"
                   variants={draw}
-                  custom={0.4}
+                  custom={underlineDelay}
                 />
               </svg>
             </span>
@@ -782,6 +817,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
         <div className="flex flex-col items-start gap-4 md:items-end">
           {/* Handwritten note, uncovered letter by letter like a pen stroke. */}
           <p
+            ref={noteRef}
             aria-hidden="true"
             className="flex items-start gap-1 font-['Caveat',cursive] text-2xl leading-none text-yellow -rotate-3 md:mr-10 md:text-[1.7rem]"
           >
@@ -816,7 +852,6 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
           </p>
 
           <motion.a
-            ref={buttonRef}
             href={safeHref(c.ctaButtonUrl || '/contact')}
             whileHover={reduceMotion ? undefined : { y: -3 }}
             className="group relative z-10 inline-flex items-center gap-3 bg-yellow px-6 py-4 text-sm font-semibold uppercase tracking-[.1em] text-dark shadow-[0_10px_30px_-12px_rgba(0,0,0,0.5)] transition-colors hover:bg-white"

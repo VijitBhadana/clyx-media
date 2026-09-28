@@ -1,0 +1,226 @@
+/* Blog hero (JournalHero, PageShell heroClass="journal-hero"): warm cream magazine masthead in black ink,
+   with brand yellow kept for accents. Looks the same in light and dark mode, like the other inner-page heroes. */
+.inner-hero.journal-hero {
+  --jh-ink: #111110;
+  --jh-ink-soft: rgba(17, 17, 16, 0.72);
+  --jh-line: rgba(17, 17, 16, 0.16);
+  --jh-yellow: #FFDE59;
+  --jh-paper: #FFFFFF;
+  color: var(--jh-ink);
+  padding: 84px 0 0;
+  background:
+    radial-gradient(40% 60% at 90% 5%, rgba(255, 222, 89, 0.22), transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(244, 196, 170, 0.28), transparent 70%),
+    #F8F5EE;
+  border-bottom: 0;
+}
+/* Printed dot screen instead of the default column lines, fading out towards the edges. */
+.inner-hero.journal-hero::before {
+  background-image: radial-gradient(rgba(17, 17, 16, 0.12) 1px, transparent 1.3px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 85% 80% at 50% 45%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 45%, #000 30%, transparent 100%);
+}
+.inner-hero.journal-hero .ih-orb { display: none; }
+
+/* Masthead strip: name and cadence between printed rules. */
+.journal-hero .jh-mast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  border-top: 3px double var(--jh-ink);
+  border-bottom: 1px solid var(--jh-ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.journal-hero .jh-mast-name {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+.journal-hero .jh-mast-rule { flex: 1; height: 1px; background: var(--jh-line); }
+.journal-hero .jh-mast-meta { color: var(--jh-ink-soft); }
+
+.journal-hero .jh-grid {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+  padding: 28px 0 32px;
+}
+
+.journal-hero .jh-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--jh-ink);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.journal-hero .jh-title {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.6rem, 5.6vw, 5rem);
+  line-height: .98;
+  letter-spacing: -.045em;
+  color: var(--jh-ink);
+}
+/* Highlight line: yellow type knocked out of a black block, dropped in at a slight angle. */
+.journal-hero .jh-hl {
+  display: inline-block;
+  margin-top: .1em;
+  padding: .02em .2em .1em;
+  border-radius: .14em;
+  background: var(--jh-ink);
+  color: var(--jh-yellow);
+  transform: rotate(-1.5deg);
+  animation: jh-drop .8s cubic-bezier(.34, 1.56, .64, 1) .35s backwards;
+}
+@keyframes jh-drop {
+  from { opacity: 0; transform: translateY(-.3em) rotate(-8deg) scale(.85); }
+}
+.journal-hero .jh-intro {
+  max-width: 30rem;
+  margin-top: 18px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--jh-ink-soft);
+}
+
+/* "In this issue": the latest three posts, on a cream card with a hard offset shadow. */
+.journal-hero .jh-index {
+  padding: 20px;
+  border: 1.5px solid var(--jh-ink);
+  border-radius: 20px;
+  background: var(--jh-paper);
+  box-shadow: 8px 8px 0 var(--jh-ink);
+}
+.journal-hero .jh-index-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 12px;
+  border-bottom: 1.5px solid var(--jh-ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.journal-hero .jh-index ol { margin: 6px 0 0; padding: 0; list-style: none; }
+.journal-hero .jh-index li + li { border-top: 1px solid var(--jh-line); }
+.journal-hero .jh-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin: 2px 0;
+  padding: 10px 10px;
+  border-radius: 12px;
+  color: var(--jh-ink);
+  transition: background-color .25s ease, color .25s ease;
+}
+.journal-hero .jh-row:hover,
+.journal-hero .jh-row:focus-visible {
+  background: var(--jh-ink);
+  color: var(--jh-yellow);
+  outline: none;
+}
+.journal-hero .jh-row-num {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.journal-hero .jh-row-body { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.journal-hero .jh-row-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .65;
+}
+.journal-hero .jh-row-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.journal-hero .jh-row-end { display: flex; align-items: center; gap: 8px; }
+.journal-hero .jh-row-time { font-size: 11px; font-weight: 600; opacity: .65; white-space: nowrap; }
+.journal-hero .jh-row-arrow { transition: transform .25s ease; }
+.journal-hero .jh-row:hover .jh-row-arrow,
+.journal-hero .jh-row:focus-visible .jh-row-arrow { transform: rotate(45deg); }
+.journal-hero .jh-index-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 13px 18px;
+  border-radius: 999px;
+  background: var(--jh-ink);
+  color: var(--jh-yellow);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: transform .25s ease;
+}
+.journal-hero .jh-index-btn:hover { transform: translateY(-2px); }
+.journal-hero .jh-index-btn:focus-visible { outline: 2px solid var(--jh-ink); outline-offset: 3px; }
+
+/* Topics strip along the bottom edge of the hero. */
+.journal-hero .jh-ticker {
+  overflow: hidden;
+  padding: 11px 0;
+  background: var(--jh-ink);
+  color: var(--jh-yellow);
+}
+.journal-hero .jh-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: jh-marquee 45s linear infinite;
+}
+.journal-hero .jh-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  padding-right: 22px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@keyframes jh-marquee { to { transform: translateX(-50%); } }
+
+@media (min-width: 900px) {
+  .inner-hero.journal-hero { padding-top: 88px; }
+  .journal-hero .jh-grid { grid-template-columns: 1.15fr .85fr; gap: 56px; padding: 36px 0 44px; }
+  .journal-hero .jh-grid.is-solo { grid-template-columns: 1fr; }
+  .journal-hero .jh-index { padding: 20px; }
+  .journal-hero .jh-ticker-item { font-size: 20px; }
+}
+
+@media (max-width: 640px) {
+  .journal-hero .jh-index { box-shadow: 5px 5px 0 var(--jh-ink); }
+  .journal-hero .jh-row { gap: 10px; padding: 12px 6px; }
+  .journal-hero .jh-row-time { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journal-hero .jh-hl,
+  .journal-hero .jh-ticker-track { animation: none; }
+}

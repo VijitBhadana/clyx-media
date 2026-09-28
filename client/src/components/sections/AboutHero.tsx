@@ -62,31 +62,88 @@ function Screw() {
 }
 
 // Scroll-driven fall: as the hero scrolls away, each card strains on the hinge, snaps off and drops, front card first.
-// Everything is derived from the scroll position, so scrolling back up hangs the cards again.
+// A fall only ever moves forward: scrolling back up never lifts a card again. A card caught half-way when the page
+// scrolls up finishes falling on its own, and every fallen card is hung back on the screw shortly after it is gone.
+// A re-hung card can fall again once the hero is scrolled back above the point where that card starts to go.
 const FALL_START = 0.06; // hero scroll progress where the first card starts to go
 const FALL_STAGGER = 0.2; // gap between one card and the next
 const FALL_SPAN = 0.45; // progress one card needs from strain to gone
+const FINISH_MS = 900; // time a whole fall takes when a card finishes it on its own
+const RETURN_DELAY = 500; // ms a fallen card stays gone before it is hung back
+type FallMode = 'armed' | 'auto' | 'gone' | 'resting';
 function useFallingCards(count: number) {
   const fanRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   useEffect(() => {
     const hero = fanRef.current?.closest<HTMLElement>('.inner-hero');
     if (!hero || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const states = Array.from({ length: count }, () => ({ t: 0, mode: 'armed' as FallMode }));
+    const timers: number[] = [];
     let frame = 0;
+    let autoFrame = 0;
+    let lastTick = 0;
+    const progressNow = () => Math.max(0, -hero.getBoundingClientRect().top) / (hero.offsetHeight * 0.85);
+    const scrollT = (progress: number, i: number) => Math.min(1, Math.max(0, (progress - FALL_START - i * FALL_STAGGER) / FALL_SPAN));
+    let lastProgress = progressNow();
+
+    const paint = (card: HTMLDivElement, t: number, i: number) => {
+      const strain = Math.min(1, t / 0.2); // swings further on the hinge first
+      const drop = Math.max(0, (t - 0.2) / 0.8); // then falls, accelerating like gravity
+      const dir = i % 2 ? -1 : 1;
+      if (t > 0) card.classList.add('is-loose');
+      card.style.setProperty('--fr', `${(strain * 12 + drop * 55 * dir).toFixed(2)}deg`);
+      card.style.setProperty('--fx', `${(drop * 70 * dir).toFixed(1)}px`);
+      card.style.setProperty('--fy', `${(drop * drop * 900).toFixed(1)}px`);
+      card.style.opacity = String(1 - Math.max(0, (drop - 0.75) / 0.25));
+    };
+    // Put a fallen card straight back in place (while its transition is still off, so it does not fly back up), then drop it onto the screw.
+    const hangBack = (i: number) => {
+      const card = cardRefs.current[i];
+      const s = states[i];
+      s.t = 0;
+      s.mode = scrollT(progressNow(), i) === 0 ? 'armed' : 'resting';
+      if (!card) return;
+      card.style.setProperty('--fr', '0deg');
+      card.style.setProperty('--fx', '0px');
+      card.style.setProperty('--fy', '0px');
+      card.style.opacity = '';
+      void card.offsetWidth;
+      card.classList.remove('is-loose');
+      card.animate(
+        [{ opacity: 0, translate: '0 -48px', scale: '0.92' }, { opacity: 1, translate: '0 0', scale: '1' }],
+        { duration: 700, easing: 'cubic-bezier(.34, 1.4, .64, 1)' },
+      );
+    };
+    const advance = (i: number, t: number) => {
+      const card = cardRefs.current[i];
+      const s = states[i];
+      s.t = t;
+      if (card) paint(card, t, i);
+      if (t >= 1) {
+        s.mode = 'gone';
+        timers.push(window.setTimeout(() => hangBack(i), RETURN_DELAY));
+      }
+    };
+    const tick = (now: number) => {
+      autoFrame = 0;
+      const dt = now - lastTick;
+      lastTick = now;
+      states.forEach((s, i) => { if (s.mode === 'auto') advance(i, Math.min(1, s.t + dt / FINISH_MS)); });
+      if (states.some((s) => s.mode === 'auto')) autoFrame = requestAnimationFrame(tick);
+    };
     const update = () => {
       frame = 0;
-      const progress = Math.max(0, -hero.getBoundingClientRect().top) / (hero.offsetHeight * 0.85);
-      cardRefs.current.forEach((card, i) => {
-        if (!card) return;
-        const t = Math.min(1, Math.max(0, (progress - FALL_START - i * FALL_STAGGER) / FALL_SPAN));
-        const strain = Math.min(1, t / 0.2); // swings further on the hinge first
-        const drop = Math.max(0, (t - 0.2) / 0.8); // then falls, accelerating like gravity
-        const dir = i % 2 ? -1 : 1;
-        card.classList.toggle('is-loose', t > 0);
-        card.style.setProperty('--fr', `${(strain * 12 + drop * 55 * dir).toFixed(2)}deg`);
-        card.style.setProperty('--fx', `${(drop * 70 * dir).toFixed(1)}px`);
-        card.style.setProperty('--fy', `${(drop * drop * 900).toFixed(1)}px`);
-        card.style.opacity = String(1 - Math.max(0, (drop - 0.75) / 0.25));
+      const progress = progressNow();
+      const scrollingUp = progress < lastProgress;
+      lastProgress = progress;
+      states.forEach((s, i) => {
+        const target = scrollT(progress, i);
+        if (s.mode === 'resting' && target === 0) s.mode = 'armed';
+        if (s.mode !== 'armed') return;
+        if (scrollingUp && s.t > 0) {
+          s.mode = 'auto';
+          if (!autoFrame) { lastTick = performance.now(); autoFrame = requestAnimationFrame(tick); }
+        } else if (target > s.t) advance(i, target);
       });
     };
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
@@ -97,6 +154,8 @@ function useFallingCards(count: number) {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(autoFrame);
+      timers.forEach((id) => clearTimeout(id));
     };
   }, [count]);
   return { fanRef, cardRefs };

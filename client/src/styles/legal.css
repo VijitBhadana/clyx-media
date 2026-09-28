@@ -1,0 +1,256 @@
+/* Privacy Policy and Terms of Use (LegalPage.tsx). Deliberately light on brand blue: warm off-white, ink text and
+   yellow accents, so long legal copy stays calm to read. Follows light and dark mode through the site tokens. */
+.legal-page {
+  --lg-ink: #0F172A;
+  --lg-soft: #475569;
+  --lg-line: rgba(15, 23, 42, 0.1);
+  --lg-paper: #FFFFFF;
+  --lg-warm: #FFFBEA;
+  --lg-yellow: #FFDE59;
+  --lg-yellow-soft: rgba(255, 222, 89, 0.35);
+  --lg-ease: cubic-bezier(.23, 1, .32, 1);
+
+  background: var(--lg-paper);
+  color: var(--lg-ink);
+}
+.dark .legal-page {
+  --lg-ink: #F8FAFC;
+  --lg-soft: #A3AEC2;
+  --lg-line: rgba(255, 255, 255, 0.1);
+  --lg-paper: #0B0B0F;
+  --lg-warm: #14130D;
+  --lg-yellow-soft: rgba(255, 222, 89, 0.18);
+}
+
+/* Hero */
+.lg-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 128px 0 44px;
+  border-bottom: 1px solid var(--lg-line);
+  background: linear-gradient(180deg, var(--lg-warm) 0%, var(--lg-paper) 100%);
+}
+.lg-hero-glow {
+  position: absolute;
+  z-index: -1;
+  top: -16rem;
+  right: -8rem;
+  width: 36rem;
+  height: 36rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--lg-yellow-soft), transparent 65%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+.lg-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  background: var(--lg-yellow);
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.lg-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #0F172A; }
+.lg-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(2.75rem, 6.5vw, 5.25rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.035em;
+  color: var(--lg-ink);
+}
+.lg-intro {
+  max-width: 40rem;
+  margin-top: 20px;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--lg-soft);
+}
+.lg-hero-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 36px;
+}
+.lg-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--lg-line);
+  background: var(--lg-paper);
+}
+.lg-switch a {
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lg-soft);
+  transition: background .25s var(--lg-ease), color .25s var(--lg-ease);
+}
+.lg-switch a:hover { color: var(--lg-ink); }
+.lg-switch a.is-active { background: var(--lg-ink); color: var(--lg-paper); }
+.dark .lg-switch a.is-active { background: var(--lg-yellow); color: #0F172A; }
+.lg-updated {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--lg-soft);
+}
+
+/* Body: table of contents on the left, the document on the right. */
+.lg-layout {
+  display: grid;
+  gap: 40px;
+  padding-block: 48px 88px;
+}
+.lg-toc {
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid var(--lg-line);
+  background: var(--lg-warm);
+}
+.lg-toc-label {
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--lg-soft);
+}
+.lg-toc ol { display: grid; gap: 2px; }
+.lg-toc a {
+  display: flex;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--lg-soft);
+  transition: background .2s var(--lg-ease), color .2s var(--lg-ease);
+}
+.lg-toc a span { font-variant-numeric: tabular-nums; font-weight: 600; opacity: .6; }
+.lg-toc a:hover { background: var(--lg-yellow-soft); color: var(--lg-ink); }
+
+.lg-body { max-width: 46rem; }
+.lg-section {
+  scroll-margin-top: 120px;
+  padding-block: 28px;
+  border-bottom: 1px solid var(--lg-line);
+}
+.lg-section:first-child { padding-top: 0; }
+.lg-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--lg-ink);
+}
+.lg-num {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--lg-yellow);
+  color: #0F172A;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.lg-section p,
+.lg-section li {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--lg-soft);
+}
+.lg-section p + p,
+.lg-section p + ul,
+.lg-section ul + p { margin-top: 14px; }
+.lg-section ul { display: grid; gap: 8px; padding-left: 4px; }
+.lg-section li { position: relative; padding-left: 22px; }
+.lg-section li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: .72em;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--lg-yellow);
+}
+.lg-section strong { font-weight: 600; color: var(--lg-ink); }
+.lg-section a,
+.lg-contact-text a {
+  color: var(--lg-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--lg-yellow);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Contact card at the end of the document. */
+.lg-contact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 40px;
+  padding: 26px 28px;
+  border-radius: 20px;
+  background: var(--lg-warm);
+  border: 1px solid var(--lg-line);
+}
+.lg-contact-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--lg-ink);
+}
+.lg-contact-text { margin-top: 4px; font-size: 14.5px; color: var(--lg-soft); }
+.lg-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--lg-yellow);
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform .25s var(--lg-ease), box-shadow .25s var(--lg-ease);
+}
+.lg-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -12px rgba(15, 23, 42, 0.35); }
+
+.legal-page a:focus-visible { outline: 2px solid var(--lg-ink); outline-offset: 3px; }
+
+@media (min-width: 900px) {
+  .lg-hero { padding: 156px 0 56px; }
+}
+@media (min-width: 1024px) {
+  .lg-layout { grid-template-columns: 260px minmax(0, 1fr); gap: 72px; padding-block: 72px 112px; }
+  .lg-toc { position: sticky; top: 120px; }
+}
+@media (max-width: 767px) {
+  .lg-contact { padding: 22px 20px; }
+  .lg-contact-btn { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .legal-page * { transition: none !important; }
+}

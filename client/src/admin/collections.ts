@@ -216,6 +216,13 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'title', label: 'Role title', required: true, wide: true },
       { key: 'type', label: 'Type / location', placeholder: 'Full-time / Remote', wide: true },
       { key: 'detail', label: 'Short description', type: 'textarea', wide: true },
+      {
+        key: 'description',
+        label: 'Full description ("See description" popup)',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet. Leave empty to show the short description.',
+      },
     ],
   },
 };

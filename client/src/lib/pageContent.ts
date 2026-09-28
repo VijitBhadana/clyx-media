@@ -53,6 +53,7 @@ const pageHero = (eyebrow: string, title: string, highlight: string, intro: stri
 const LINES = 'Press Enter for a line break.';
 const ONE_PER_LINE = 'One per line.';
 const LINKS = 'One link per line, written as: Label | /page (or https://…, mailto:…, #section).';
+const PAIRS = (shape: string) => `One per line, written as: ${shape}.`;
 
 /** Adds extra fields to a section built by a helper such as pageHero. */
 const withFields = (section: SectionDef, fields: FieldDef[]): SectionDef => ({ ...section, fields: [...section.fields, ...fields] });
@@ -66,14 +67,17 @@ const serviceSections: SectionDef[] = services.map((s, i) => {
   return {
     id: `service${n}`,
     title: `Service ${n} · ${s.title}`,
-    description: 'Shown on the Services page list, the Services hero cards and the homepage services book. The icon stays the same.',
+    description: `Shown on the Services page list, the Services hero cards, the homepage services book and its own page at /services/${s.slug}. The icon and page address stay the same.`,
     fields: [
       t(`service${n}Title`, 'Name', s.title),
       long(`service${n}Text`, 'Description', s.text),
-      long(`service${n}Points`, '“What’s included” points (homepage book)', s.points.join('\n'), ONE_PER_LINE),
+      long(`service${n}Points`, '“What’s included” points (homepage book and service page)', s.points.join('\n'), ONE_PER_LINE),
       t(`service${n}Short`, 'Short name (Services hero tab)', s.short),
-      t(`service${n}Line`, 'One-liner (Services hero card)', s.line),
-      t(`service${n}Tags`, 'Tags (Services hero card)', s.tags.join(', '), 'Separate with commas.'),
+      t(`service${n}Line`, 'One-liner (Services hero card and service page)', s.line),
+      t(`service${n}Tags`, 'Tags (Services hero card and service page)', s.tags.join(', '), 'Separate with commas.'),
+      long(`service${n}Overview`, 'Service page · overview', s.overview),
+      long(`service${n}Process`, 'Service page · how it works', s.process.map(([title, text]) => `${title} | ${text}`).join('\n'), PAIRS('Step title | step text')),
+      long(`service${n}Faqs`, 'Service page · FAQs', s.faqs.map(([q, a]) => `${q} | ${a}`).join('\n'), PAIRS('Question | answer')),
     ],
   };
 });
@@ -145,7 +149,7 @@ export const PAGES: PageDef[] = [
         title: 'Footer · bottom bar',
         fields: [
           t('footerCopyright', 'Copyright text', 'CLYX Media. All rights reserved.', '“© <current year>” is added in front automatically.'),
-          long('footerLegalLinks', 'Small links', 'Privacy | /about\nTerms | /about\nAdmin | /admin', LINKS),
+          long('footerLegalLinks', 'Small links', 'Privacy | /privacy\nTerms | /terms\nAdmin | /admin', LINKS),
           t('footerTopText', '“Back to top” button', 'Back to top'),
           t('footerWordmark', 'Giant wordmark', 'CLYX'),
         ],
@@ -480,6 +484,22 @@ export const PAGES: PageDef[] = [
       },
       ...serviceSections,
       {
+        id: 'detail',
+        title: 'Service pages · shared labels',
+        description: 'Headings used on every service page (/services/…). The content of each page is edited in its service section above.',
+        fields: [
+          t('detailBackLabel', 'Back link', 'All services'),
+          t('detailOverviewLabel', 'Overview label', 'Overview'),
+          t('detailIncludedLabel', '“What’s included” heading', 'What’s included'),
+          t('detailProcessLabel', 'How it works · eyebrow', 'How it works'),
+          t('detailProcessTitle', 'How it works · heading', 'From brief to results.'),
+          t('detailFaqLabel', 'FAQs · eyebrow', 'FAQs'),
+          t('detailFaqTitle', 'FAQs · heading', 'Questions, answered.'),
+          t('detailMoreLabel', 'Other services · eyebrow', 'Explore more'),
+          t('detailMoreTitle', 'Other services · heading', 'The rest of the engine.'),
+        ],
+      },
+      {
         id: 'principle',
         title: 'Operating principle (yellow)',
         fields: [
@@ -578,7 +598,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('ctaLabel', 'Label', 'Want the long version?'),
           t('ctaTitle', 'Heading', 'See how the'),
-          t('ctaHighlight', 'Heading highlight', 'work works.'),
+          t('ctaHighlight', 'Heading highlight', 'work works'),
           t('ctaButton', 'Button text', 'Request case studies'),
           link('ctaButtonUrl', 'Button link', '/contact'),
           t('ctaNote', 'Handwritten note', 'the real numbers live here'),
@@ -696,26 +716,20 @@ export const PAGES: PageDef[] = [
     blurb: 'Journal articles and the dispatch sign-up band.',
     collections: ['blog'],
     sections: [
-      pageHero('Journal', 'Ideas that', 'move.', 'Notes on creator culture, performance creative, conversion, and the systems that turn attention into momentum.'),
       {
-        id: 'heroArt',
-        title: 'Hero · floating note cards',
-        description: 'The three tilted cards and two badges next to the hero title.',
+        id: 'hero',
+        title: 'Hero banner (masthead)',
+        description: 'The magazine-style masthead at the top of the Blog. The "In this issue" list shows the first three posts from the Blog list.',
         fields: [
-          ...numbered(
-            [
-              ['Creator culture', 'Why creators outperform ads', '6 min read'],
-              ['Performance creative', 'Hook rate math that scales', 'Playbook'],
-              ['Conversion', 'Turning attention into momentum', 'Case study'],
-            ],
-            ([tag, title, meta], n) => [
-              t(`heroCard${n}Tag`, `Card ${n} · tag`, tag),
-              t(`heroCard${n}Title`, `Card ${n} · title`, title),
-              t(`heroCard${n}Meta`, `Card ${n} · meta`, meta),
-            ],
-          ),
-          t('heroBadge1', 'Floating badge 1', 'New idea weekly'),
-          t('heroBadge2', 'Floating badge 2', '+38% CTR'),
+          t('journalName', 'Masthead name (top left)', 'The CLYX Journal'),
+          t('journalCadence', 'Masthead note (top right)', 'New notes every week'),
+          t('journalEyebrow', 'Eyebrow label', 'Field notes'),
+          t('journalTitle', 'Title (first line)', 'Straight from'),
+          t('journalHighlight', 'Title highlight (black box)', 'the feed.'),
+          long('journalIntro', 'Intro paragraph', 'What we learn running creator ads, testing hooks and building pages that convert, written down while it is still fresh.'),
+          t('journalIndexLabel', '"In this issue" heading', 'In this issue'),
+          t('journalIndexButton', 'Button under the list', 'Browse all articles'),
+          long('journalTopics', 'Scrolling topics strip', 'Creator culture, Performance creative, Hook rate, Conversion, Landing pages, Testing loops, Creator briefs, Scaling', 'Comma separated.'),
         ],
       },
       {
@@ -792,6 +806,9 @@ export const PAGES: PageDef[] = [
           long('rolesNote', 'Footer note', 'Don’t see your role? Send us the work you are proudest of anyway.'),
           t('rolesNoteLink', 'Footer link text', 'Get in touch'),
           link('applyUrl', 'Footer link (Get in touch)', 'mailto:work@clyxmedia.com?subject=Careers'),
+          t('rolesDescButton', '"See description" button (on each card)', 'See description'),
+          t('rolesDescLabel', 'Label (description popup)', 'About the role'),
+          t('rolesDescApply', 'Apply button (description popup)', 'Apply for this role'),
         ],
       },
       {
@@ -868,12 +885,22 @@ export const PAGES: PageDef[] = [
         id: 'form',
         title: 'Enquiry form',
         fields: [
+          t('formNameLabel', 'Name box label', 'Your name'),
           t('formName', 'Name box placeholder', 'Your name'),
+          t('formEmailLabel', 'Email box label', 'Email'),
           t('formEmail', 'Email box placeholder', 'Work email'),
+          t('formCompanyLabel', 'Company box label', 'Company / brand (optional)'),
           t('formCompany', 'Company box placeholder', 'Company / brand'),
+          t('formMessageLabel', 'Message box label', 'Your message'),
           t('formMessage', 'Message box placeholder', 'What are you trying to move?'),
           t('formButton', 'Button text', 'Send enquiry'),
-          t('formSent', 'Button text after sending', 'Message sent'),
+          t('formSending', 'Button text while sending', 'Sending…'),
+          t('formSent', 'Label above the thank-you message', 'Message sent'),
+          t('formSentTitle', 'Thank-you heading', 'Thanks, we have your message.'),
+          long('formSentText', 'Thank-you text', 'Our team reads every enquiry and will reply to your email within one working day.'),
+          t('formSendAnother', 'Send-another button text', 'Send another message'),
+          t('formError', 'Error when sending fails', 'Could not send your message. Please try again or email us directly.'),
+          t('formNetworkError', 'Error when offline', 'Could not reach our server. Check your connection and try again, or email us directly.'),
         ],
       },
       {
@@ -947,9 +974,17 @@ export function parseLinks(text: string | undefined): { label: string; href: str
   });
 }
 
+/** A "Title | text" per line field as [title, text] pairs. A line without "|" is a title with no text. */
+export function parsePairs(text: string | undefined): [string, string][] {
+  return splitLines(text).map((line) => {
+    const bar = line.indexOf('|');
+    return bar === -1 ? [line, ''] : [line.slice(0, bar).trim(), line.slice(bar + 1).trim()];
+  });
+}
+
 /**
  * The six services as edited on the Services page. `iconKey` is the original name, so a renamed service keeps its icon.
- * Used by the homepage services book, the Services page list and the Services hero cards.
+ * Used by the homepage services book, the Services page list, the Services hero cards and each service's own page.
  */
 export function useServices() {
   const c = usePageContent('services');
@@ -966,6 +1001,10 @@ export function useServices() {
           short: c[`service${n}Short`] || c[`service${n}Title`] || s.short,
           line: c[`service${n}Line`] ?? s.line,
           tags: (c[`service${n}Tags`] ?? '').split(',').map((tag) => tag.trim()).filter(Boolean),
+          slug: s.slug,
+          overview: c[`service${n}Overview`] ?? s.overview,
+          process: parsePairs(c[`service${n}Process`]).map(([title, text]) => ({ title, text })),
+          faqs: parsePairs(c[`service${n}Faqs`]).map(([question, answer]) => ({ question, answer })),
         };
       }),
     [c],

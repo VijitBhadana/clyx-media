@@ -5,7 +5,7 @@
   --ab-line: rgba(14, 21, 48, 0.1);
   color: var(--ab-ink);
   background: #F5EFE4;
-  border-bottom-color: var(--ab-line);
+  border-bottom: 0;
 }
 .inner-hero.about-hero::before { display: none; }
 /* No clipping, so cards breaking off the hinge fall over the next section (the glow clips itself). */
@@ -44,6 +44,9 @@
   filter: blur(50px);
   animation: ab-soft 10s ease-in-out infinite alternate;
 }
+/* On About the glow runs past the hero's bottom edge, over the beige strip above the intro card
+   (that strip is the intro section's 24px padding), so there is no seam between the two sections. */
+.inner-hero.about-hero .ab-glow { bottom: -24px; }
 @keyframes ab-core {
   0% { transform: translate3d(-12rem, 2rem, 0) scale(.92); opacity: .9; }
   50% { transform: translate3d(0, -2rem, 0) scale(1.08); opacity: 1; }
@@ -143,6 +146,40 @@
   line-height: 1.55;
   color: rgba(14, 21, 48, 0.78);
 }
+
+/* Intro section right under the hero: same beige (no glow), no divider, so it continues the hero.
+   The content sits in a dark glass card that matches the dark-mode inner-page cards, in both themes. */
+.inner-page-shell .page-content-reveal > section.about-intro,
+.dark .inner-page-shell .page-content-reveal > section.about-intro:not(.bg-blue):not(.bg-yellow) {
+  margin: 0 !important;
+  padding: 24px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible;
+  background: #F5EFE4 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.dark .inner-page-shell .page-content-reveal > section.about-intro:not(.bg-blue):not(.bg-yellow)::before { display: none; }
+section.about-intro > .container {
+  position: relative;
+  max-width: none;
+  overflow: hidden;
+  padding: 72px 28px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top-color: rgba(255, 255, 255, 0.09);
+  color: #FFFFFF;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.035), transparent 42%),
+    linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035)),
+    radial-gradient(circle at 12% 10%, rgba(1, 58, 163, 0.28), transparent 32rem),
+    #050814;
+}
+@media (min-width: 768px) { section.about-intro > .container { padding: 120px 80px; } }
+@media (min-width: 1280px) { section.about-intro > .container { padding: 136px 104px; } }
+.about-intro h2 { color: #FFFFFF; }
+.about-intro .text-muted { color: #64748B; }
 
 /* Shared hero buttons, restyled for the light background. */
 .inner-hero.about-hero .ih-actions {

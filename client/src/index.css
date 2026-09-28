@@ -174,7 +174,8 @@ button:active,a:active{transform:scale(.97)}
   background: rgba(255,255,255,0.07);
   border-color: rgba(255,222,89,0.28);
 }
-/* Creators intro feature: a glass card on a stage that washes from white to baby blue while in view.
+/* Creators intro feature: a glass card on a stage that washes from white to baby blue as it scrolls in
+   (the colour and orb opacity are set from scroll in Creators.tsx).
    It stays light in dark mode too, so the text overrides below keep it readable. */
 .creator-feature {
   position: relative;
@@ -184,15 +185,12 @@ button:active,a:active{transform:scale(.97)}
   padding: 24px;
   background-color: #FFFFFF;
   color: #0F172A;
-  transition: background-color .7s var(--ease-out);
 }
-.creator-feature.is-active { background-color: #A2D2FF; }
 @media (max-width:767px){ .creator-feature { padding: 12px; } }
 /* Soft blue blobs behind the card give the glass blur something to catch; hidden while the stage is white. */
-.creator-feature-orb { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(40px); opacity: 0; transition: opacity .7s var(--ease-out); }
+.creator-feature-orb { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(40px); opacity: 0; }
 .creator-feature-orb-a { width: 34rem; height: 34rem; top: -12rem; left: -8rem; background: radial-gradient(circle, rgba(125,190,255,0.7), transparent 65%); }
 .creator-feature-orb-b { width: 38rem; height: 38rem; bottom: -16rem; right: -10rem; background: radial-gradient(circle, rgba(1,58,163,0.3), transparent 65%); }
-.creator-feature.is-active .creator-feature-orb { opacity: 1; }
 /* The spacer after the card is how long it stays pinned while the headline slides away. (A spacer, not padding:
    a sticky element cannot move into its parent's padding.) */
 .creator-feature-track::after { content: ''; display: block; height: 200vh; }
@@ -297,7 +295,7 @@ button:active,a:active{transform:scale(.97)}
 .creator-feature .text-muted { color: #475569; }
 .dark .creator-feature [class*="text-blue"] { color: #013AA3 !important; }
 @media (prefers-reduced-motion: reduce) {
-  .creator-feature, .creator-feature-orb, .cf-line-in { transition: none; }
+  .cf-line-in { transition: none; }
 }
 .inner-page-shell .blog-soft-card {
   background: #DDE8F7;
@@ -357,6 +355,14 @@ button:active,a:active{transform:scale(.97)}
   .blog-card:hover, .blog-card:hover .blog-card-arrow { transform: none; }
   .blog-card .blog-card-text { opacity: 1; transform: none; filter: none; transition: none; }
 }
+/* Keep browser autofill from painting a light box over the transparent contact fields. */
+.contact-form input:-webkit-autofill,
+.contact-form textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
 .dark .inner-page-shell .page-content-reveal .border-grid {
   border-color: rgba(255,255,255,0.12);
 }
@@ -486,6 +492,10 @@ button:active,a:active{transform:scale(.97)}
   box-shadow: 0 24px 48px -16px rgba(137, 207, 240, 0.9), 0 4px 12px rgba(137, 207, 240, 0.3);
 }
 .dark .service-row-card:hover { box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6); }
+/* Each card links to the service's own page (ServiceDetail.tsx). */
+.service-row-link { display: block; border-radius: 18px; color: inherit; }
+.service-row-link:focus-visible { outline: 2px solid #013AA3; outline-offset: 4px; }
+.dark .service-row-link:focus-visible { outline-color: #FFDE59; }
 .service-row-index {
   display: grid;
   place-items: center;

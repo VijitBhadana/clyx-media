@@ -3,3 +3,4 @@
 dist
 .env
 .manus-logs
+*.local

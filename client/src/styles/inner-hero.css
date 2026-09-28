@@ -198,12 +198,6 @@
   .inner-hero .ih-inner { grid-template-columns: 1.2fr .8fr; gap: 56px; }
 }
 
-/* Blog: shorter hero than the other inner pages. */
-.inner-hero.is-blog { padding: 72px 0 28px; }
-@media (min-width: 900px) {
-  .inner-hero.is-blog { padding: 84px 0 36px; }
-}
-
 @media (max-width: 480px) {
   .inner-hero .ih-card { padding: 22px 20px 20px; }
   .inner-hero .ih-card::before { left: 20px; }

@@ -12,7 +12,7 @@ const defaultCreatorImages = [
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/850cec7a-f3b6-4876-81d1-164884c50320.webp',
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/3dded1ef-3fb0-4bfd-a931-d7f107a51a05.webp',
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/69f632c0-f844-4fa4-9507-32293bdd0650.webp',
-  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/9807268d-3228-44c1-bb23-9cb318dc7643.webp',
+  'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/3dded1ef-3fb0-4bfd-a931-d7f107a51a05.webp',
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/804c4bf4-1fcc-4c74-90ee-a60bcec5c1e6.webp',
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/ba22219d-7aee-45a5-87e0-59534c9439c0.webp',
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/39a7a90b-5803-4a54-b133-bfa5f593e1c2.webp',
@@ -185,6 +185,10 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
   const track = useRef<HTMLDivElement>(null);
   // Blue only while the section crosses a line 40% down the screen: on page load it sits below that line, so it starts white.
   const featureInView = useInView(feature, { margin: '-40% 0px -60% 0px' });
+  // 0 = white, 1 = baby blue. Follows the scroll: it starts tinting the moment the section's top edge enters the
+  // screen, is fully blue by the time that edge is halfway up, and fades back as the section's bottom leaves.
+  const tint = useMotionValue(0);
+  const background = useTransform(tint, [0, 1], ['#FFFFFF', '#A2D2FF']);
   // 0 when the card pins, 1 when the pinned stretch (the track's spacer) has been scrolled through.
   const progress = useMotionValue(0);
   const buttonY = useTransform(progress, BUTTON_IN, [40, 0]);
@@ -200,6 +204,13 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
     let frame = 0;
     const update = () => {
       frame = 0;
+      const stage = feature.current?.getBoundingClientRect();
+      if (stage) {
+        const vh = window.innerHeight;
+        const enter = (vh - stage.top) / (vh * 0.5);
+        const exit = (stage.bottom - vh * 0.4) / (vh * 0.2);
+        tint.set(Math.min(1, Math.max(0, Math.min(enter, exit))));
+      }
       const el = track.current;
       const card = el?.firstElementChild as HTMLElement | null;
       if (!el || !card) return;
@@ -216,12 +227,12 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
-  }, [progress]);
+  }, [progress, tint]);
 
   return (
-    <div ref={feature} className={`creator-feature${featureInView ? ' is-active' : ''}`}>
-      <div className="creator-feature-orb creator-feature-orb-a" aria-hidden="true" />
-      <div className="creator-feature-orb creator-feature-orb-b" aria-hidden="true" />
+    <motion.div ref={feature} className={`creator-feature${featureInView ? ' is-active' : ''}`} style={{ backgroundColor: background }}>
+      <motion.div className="creator-feature-orb creator-feature-orb-a" style={{ opacity: tint }} aria-hidden="true" />
+      <motion.div className="creator-feature-orb creator-feature-orb-b" style={{ opacity: tint }} aria-hidden="true" />
       <div ref={track} className="creator-feature-track">
         <section className="section-shell creator-feature-glass" style={{ top: FEATURE_PIN_TOP }}>
           <h2 className="cf-title">
@@ -243,7 +254,7 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
           )}
         </section>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
