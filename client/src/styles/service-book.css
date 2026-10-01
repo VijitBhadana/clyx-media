@@ -197,6 +197,9 @@ html:not(.dark) .sb-book {
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: var(--accent-soft); color: var(--accent);
 }
+/* Uploaded icon image (admin), sized like the line icons it replaces. */
+.sb-book .sb-icon-img { display: block; object-fit: contain; }
+.sb-book .sb-opener-icon .sb-icon-img { width: 45%; height: 45%; }
 .sb-book .sb-opener-title {
   font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 700; letter-spacing: -0.03em;
   font-size: clamp(1.3rem, calc(var(--page-h) * 0.05), 2.1rem); line-height: 1.1; color: var(--ink);

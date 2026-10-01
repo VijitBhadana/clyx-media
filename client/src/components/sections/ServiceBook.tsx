@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
-import { pageDefaults, safeHref, useServices, usePageContent, type ServiceContent } from '@/lib/pageContent';
+import { pageDefaults, safeHref, useServiceBook, usePageContent, type BookChapter } from '@/lib/pageContent';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '../../styles/service-book.css';
 
@@ -21,12 +21,14 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const pad = (n: number) => String(n).padStart(2, '0');
 
-type Service = ServiceContent;
+type Service = BookChapter;
 type Copy = Record<string, string>;
 
-// Icons are looked up by the service's original name, so renaming a service in the admin keeps its icon.
-function ServiceIcon({ iconKey, size }: { iconKey: string; size: number }) {
-  const icon = ICONS[iconKey];
+// Icons are looked up by a service's original name (picked per chapter in the admin), so renaming a service keeps its
+// icon. An uploaded icon image replaces it.
+function ServiceIcon({ service, size }: { service: Service; size: number }) {
+  if (service.iconImage) return <img src={service.iconImage} alt="" width={size} height={size} className="sb-icon-img" aria-hidden="true" />;
+  const icon = ICONS[service.icon] ?? ICONS[service.iconKey];
   if (!icon) return null;
   return <icon.Icon size={size} strokeWidth={1.6} className={`sc-icon sc-icon--${icon.motion}`} aria-hidden="true" />;
 }
@@ -44,7 +46,7 @@ function Cover({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: str
       </div>
       <ol className="sb-cover-index">
         {items.map((service, i) => (
-          <li key={service.iconKey}><span>{pad(i + 1)}</span>{service.title}</li>
+          <li key={i}><span>{service.number}</span>{service.title}</li>
         ))}
       </ol>
     </div>
@@ -71,14 +73,14 @@ const COIL_PITCH = 30;
 
 // Left-hand page: decorative chapter opener. Everything on it is repeated on the detail page, so it is hidden from
 // assistive tech and simply not shown on mobile, where the book is a single page wide.
-function ChapterOpener({ service, chapter, c }: { service: Service; chapter: number; c: Copy }) {
+function ChapterOpener({ service, c }: { service: Service; c: Copy }) {
   return (
     <div className="sb-page sb-page--left sb-opener" aria-hidden="true">
-      <span className="sb-running">{c.bookChapterLabel || 'Chapter'} {pad(chapter)}</span>
-      <div className="sb-opener-num">{pad(chapter)}</div>
-      <div className="sb-opener-icon"><ServiceIcon iconKey={service.iconKey} size={40} /></div>
+      <span className="sb-running">{c.bookChapterLabel || 'Chapter'} {service.number}</span>
+      <div className="sb-opener-num">{service.number}</div>
+      <div className="sb-opener-icon"><ServiceIcon service={service} size={40} /></div>
       <p className="sb-opener-title">{service.title}</p>
-      <span className="sb-folio">{chapter * 2}</span>
+      <span className="sb-folio">{service.leftFolio}</span>
     </div>
   );
 }
@@ -89,10 +91,10 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
     <article className="sb-page sb-detail">
       <header className="sb-running">
         <span>{c.bookRunningHead || 'CLYX Media'}</span>
-        <span>{c.bookChapterLabel || 'Chapter'} {pad(chapter)} / {pad(services.length)}</span>
+        <span>{c.bookChapterLabel || 'Chapter'} {service.number} / {pad(services.length)}</span>
       </header>
       <div className="sb-detail-head">
-        <span className="sb-chip"><ServiceIcon iconKey={service.iconKey} size={22} /></span>
+        <span className="sb-chip"><ServiceIcon service={service} size={22} /></span>
         <h3>{service.title}</h3>
       </div>
       <p className="sb-detail-text">{service.text}</p>
@@ -103,17 +105,17 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
         ))}
       </ul>
       <footer className="sb-detail-foot">
-        <span className="sb-folio">{chapter * 2 + 1}</span>
+        <span className="sb-folio">{service.rightFolio}</span>
         {last
           ? <a className="sb-cta" href={safeHref(c.bookCtaUrl || '/contact')}>{c.bookCtaText} <ArrowUpRight size={14} aria-hidden="true" /></a>
-          : <span className="sb-next">{c.bookNextText}</span>}
+          : <span className="sb-next">{service.footer}</span>}
       </footer>
     </article>
   );
 }
 
 export default function ServiceBook({ content: c = pageDefaults('home') }: { content?: Copy }) {
-  const items = useServices();
+  const items = useServiceBook(c.bookNextText);
   const logoSrc = usePageContent('global').logoImage;
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -252,7 +254,7 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
                   </div>
                   <div className="sb-face sb-face--back">
                     {i < services.length
-                      ? <ChapterOpener service={items[i]} chapter={i + 1} c={c} />
+                      ? <ChapterOpener service={items[i]} c={c} />
                       : <div className="sb-page sb-page--left" aria-hidden="true" />}
                   </div>
                 </div>
@@ -266,12 +268,12 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
 
         <nav className="sb-progress" aria-label="Service chapters">
           <span className="sb-caption">
-            {current ? <>{pad(spread)} — {current.title}</> : (c.bookCoverLabel || 'Cover')}
+            {current ? <>{current.number} — {current.title}</> : (c.bookCoverLabel || 'Cover')}
           </span>
           <div className="sb-dots">
             {items.map((service, i) => (
               <button
-                key={service.iconKey}
+                key={i}
                 type="button"
                 className={`sb-dot${spread === i + 1 ? ' is-active' : ''}`}
                 onClick={() => goTo(i + 1)}

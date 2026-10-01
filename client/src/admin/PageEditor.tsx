@@ -183,7 +183,7 @@ export default function PageEditor({
                           wide={wide}
                           onReset={value !== f.default ? () => setValue(block, f.key, f.default) : undefined}
                         >
-                          <Control type={f.type} value={value} onChange={(v) => setValue(block, f.key, v)} />
+                          <Control type={f.type} options={f.options} value={value} onChange={(v) => setValue(block, f.key, v)} />
                         </Field>
                       );
                     })}

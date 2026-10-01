@@ -9,8 +9,8 @@ import { services } from '@/data/home';
  * Field keys ending in "Image" hold image URLs, keys ending in "Url" hold links and keys ending in "Links" hold
  * one "Label | link" per line (the backend checks all three).
  */
-export type FieldType = 'text' | 'textarea' | 'image' | 'url';
-export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string };
+export type FieldType = 'text' | 'textarea' | 'image' | 'url' | 'select';
+export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[] };
 export type SectionDef = { id: string; title: string; description?: string; block?: string; fields: FieldDef[] };
 export type CollectionName =
   | 'campaigns'
@@ -36,6 +36,7 @@ const t = (key: string, label: string, value: string, hint?: string): FieldDef =
 const long = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'textarea', default: value, hint });
 const img = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'image', default: value, hint });
 const link = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'url', default: value, hint });
+const pick = (key: string, label: string, value: string, options: string[], hint?: string): FieldDef => ({ key, label, type: 'select', default: value, options, hint });
 
 /** The hero at the top of every inner page (eyebrow, two-line title, intro card). */
 const pageHero = (eyebrow: string, title: string, highlight: string, intro: string | null): SectionDef => ({
@@ -78,6 +79,37 @@ const serviceSections: SectionDef[] = services.map((s, i) => {
       long(`service${n}Overview`, 'Service page · overview', s.overview),
       long(`service${n}Process`, 'Service page · how it works', s.process.map(([title, text]) => `${title} | ${text}`).join('\n'), PAIRS('Step title | step text')),
       long(`service${n}Faqs`, 'Service page · FAQs', s.faqs.map(([q, a]) => `${q} | ${a}`).join('\n'), PAIRS('Question | answer')),
+    ],
+  };
+});
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * One section per spread of the homepage services book, shown on the Home page in the admin. They save to the
+ * Services page block: name, description and points are the very same fields as the Services page (so both editors
+ * always agree), and the `book<n>…` fields only change the book. Read by ServiceBook through `useServiceBook`.
+ */
+const bookChapterSections: SectionDef[] = services.map((s, i) => {
+  const n = i + 1;
+  const last = n === services.length;
+  return {
+    id: `bookChapter${n}`,
+    title: `Services book · Chapter ${n}`,
+    description: `The open spread for ${s.title}: chapter opener on the left page, details on the right. Name, description and points are shared with the Services page.`,
+    block: 'page_services',
+    fields: [
+      t(`service${n}Title`, 'Name', s.title, 'Also changes the Services page.'),
+      long(`service${n}Text`, 'Description', s.text, 'Also changes the Services page.'),
+      long(`service${n}Points`, '“What’s included” points', s.points.join('\n'), `${ONE_PER_LINE} Also changes the service page.`),
+      pick(`book${n}Icon`, 'Icon', s.title, services.map((x) => x.title), 'Each option is the icon of that original service.'),
+      img(`book${n}IconImage`, 'Custom icon image (optional)', '', 'Replaces the icon above on both pages. A square PNG with a transparent background works best.'),
+      t(`book${n}Number`, 'Chapter number', pad2(n), 'The big outlined number, the “Chapter” labels and the caption under the book.'),
+      t(`book${n}LeftFolio`, 'Left page number', String(n * 2)),
+      t(`book${n}RightFolio`, 'Right page number', String(n * 2 + 1)),
+      ...(last
+        ? []
+        : [t(`book${n}Footer`, 'Footer text (right page)', '', 'Leave blank to use the shared footer hint from “Services book” above.')]),
     ],
   };
 });
@@ -309,7 +341,7 @@ export const PAGES: PageDef[] = [
       {
         id: 'services',
         title: 'Services book',
-        description: 'The six services themselves (names, descriptions, “What’s included” points) are edited on the Services page.',
+        description: 'Text shared by every page of the book. Each chapter’s own card is edited in the “Services book · Chapter” sections below.',
         fields: [
           t('servicesEyebrow', 'Eyebrow label', 'What We Run'),
           t('servicesTitle', 'Heading', 'Six disciplines. One growth engine.'),
@@ -328,6 +360,7 @@ export const PAGES: PageDef[] = [
           t('bookCoverLabel', 'Nav caption before the first page turn', 'Cover'),
         ],
       },
+      ...bookChapterSections,
       {
         id: 'methodology',
         title: 'Methodology',
@@ -1061,3 +1094,27 @@ export function useServices() {
 }
 
 export type ServiceContent = ReturnType<typeof useServices>[number];
+
+/** The services as laid out in the homepage book: the shared service copy plus the book-only fields of each chapter. */
+export function useServiceBook(footerHint: string) {
+  const items = useServices();
+  const c = usePageContent('services');
+  return useMemo(
+    () =>
+      items.map((service, i) => {
+        const n = i + 1;
+        return {
+          ...service,
+          icon: c[`book${n}Icon`] || service.iconKey,
+          iconImage: c[`book${n}IconImage`] || '',
+          number: c[`book${n}Number`] || pad2(n),
+          leftFolio: c[`book${n}LeftFolio`] ?? String(n * 2),
+          rightFolio: c[`book${n}RightFolio`] ?? String(n * 2 + 1),
+          footer: c[`book${n}Footer`] || footerHint,
+        };
+      }),
+    [items, c, footerHint],
+  );
+}
+
+export type BookChapter = ReturnType<typeof useServiceBook>[number];
