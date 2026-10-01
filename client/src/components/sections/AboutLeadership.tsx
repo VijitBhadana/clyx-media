@@ -37,11 +37,30 @@ export default function AboutLeadership({
     <section id="team" className="section-shell lead-section py-20 md:py-28">
       <div className="container">
         <div className="lead-head">
-          <Reveal>
-            <p className="lead-eyebrow">{c.leadEyebrow}</p>
-            <h2 className="display text-4xl font-bold md:text-6xl">
-              {c.leadTitle}<br /><span className="lead-accent-text">{c.leadHighlight}</span>
-            </h2>
+          <Reveal className="lead-head-main">
+            {/* Illustrative chat thread above the heading: a client asks, the founder answers directly. */}
+            <div className="lead-chat" aria-hidden="true">
+              <div className="lead-chat-row">
+                <span className="lead-chat-avatar lead-chat-you">You</span>
+                <p className="lead-chat-bubble">Can we tweak the hook on reel 3 before it goes live?</p>
+              </div>
+              <div className="lead-chat-row lead-chat-row-reply">
+                <p className="lead-chat-bubble lead-chat-bubble-reply">
+                  <span className="lead-chat-name">{founders[0]?.name.split(/\s+/)[0] || 'Founder'} · Founder</span>
+                  On it. New cut in your inbox tonight.
+                </p>
+                {founders[0]
+                  ? <Portrait member={founders[0]} className="lead-chat-avatar" />
+                  : <span className="lead-chat-avatar lead-monogram">CX</span>}
+              </div>
+              <div className="lead-chat-typing"><span /><span /><span /></div>
+            </div>
+            <div>
+              <p className="lead-eyebrow">{c.leadEyebrow}</p>
+              <h2 className="display text-4xl font-bold md:text-6xl">
+                {c.leadTitle}<br /><span className="lead-accent-text">{c.leadHighlight}</span>
+              </h2>
+            </div>
           </Reveal>
           <Reveal delay={200} className="lead-head-side">
             <div className="lead-access">
