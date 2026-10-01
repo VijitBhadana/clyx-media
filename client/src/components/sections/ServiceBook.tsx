@@ -123,20 +123,37 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
   const [coils, setCoils] = useState(16);
 
   // Transforms are written straight to the DOM on each frame; React only re-renders when the open spread changes.
+  // The track's position is measured on resize only (not per frame), the work pauses while the book is off screen,
+  // and a leaf's styles are only written when they actually change, so idle scrolling costs nothing.
   useEffect(() => {
     let frame = 0;
     const mobile = window.matchMedia('(max-width: 768px)');
+    let geo: { top: number; distance: number; stickyTop: number } | null = null;
+    const last: string[] = [];
+    let lastBook = '';
+    let near = true;
+
+    const measure = () => {
+      const track = trackRef.current;
+      const sticky = stickyRef.current;
+      if (!track || !sticky) return null;
+      return {
+        top: track.getBoundingClientRect().top + window.scrollY,
+        distance: track.offsetHeight - sticky.offsetHeight,
+        stickyTop: parseFloat(getComputedStyle(sticky).top) || 0,
+      };
+    };
 
     const update = () => {
       frame = 0;
-      const track = trackRef.current;
-      const sticky = stickyRef.current;
       const book = bookRef.current;
-      if (!track || !sticky || !book) return;
+      if (!book) return;
+      geo ??= measure();
+      if (!geo) return;
 
       // While pinned, the sticky panel's offset inside the track is exactly how far we've scrolled through the book.
-      const distance = track.offsetHeight - sticky.offsetHeight;
-      const scrolled = sticky.getBoundingClientRect().top - track.getBoundingClientRect().top;
+      const { top, distance, stickyTop } = geo;
+      const scrolled = window.scrollY + stickyTop - top;
       const progress = distance > 0 ? clamp01(scrolled / distance) * TURNS : 0;
 
       let turned = 0;
@@ -146,6 +163,9 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
         const t = i < TURNS ? easeInOut(clamp01((progress - i - TURN_START) / TURN_LENGTH)) : 0;
         if (i === 0) open = t;
         if (t >= 0.5) turned += 1;
+        const key = t.toFixed(4);
+        if (last[i] === key) return;
+        last[i] = key;
         leaf.style.transform = `rotateY(${(-180 * t).toFixed(2)}deg)`;
         // Right pile: earlier leaves on top. Left pile: later leaves on top. A leaf mid-turn sits above both.
         leaf.style.zIndex = String(t > 0 && t < 1 ? LEAVES + 1 : t >= 0.5 ? i + 1 : LEAVES - i);
@@ -153,31 +173,52 @@ export default function ServiceBook({ content: c = pageDefaults('home') }: { con
         leaf.style.setProperty('--back-shade', (Math.min((1 - t) * 2, 1) * 0.5).toFixed(3));
       });
 
-      book.style.setProperty('--open', open.toFixed(3));
-      // Closed, the cover is centred; opening slides the spine to the centre. Mobile is a single page, so no slide.
-      book.style.transform = mobile.matches ? '' : `translateX(${(-25 * (1 - open)).toFixed(2)}%)`;
+      const bookKey = `${open.toFixed(3)}|${mobile.matches}`;
+      if (bookKey !== lastBook) {
+        lastBook = bookKey;
+        book.style.setProperty('--open', open.toFixed(3));
+        // Closed, the cover is centred; opening slides the spine to the centre. Mobile is a single page, so no slide.
+        book.style.transform = mobile.matches ? '' : `translateX(${(-25 * (1 - open)).toFixed(2)}%)`;
+      }
       setSpread(turned);
     };
 
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    const onScroll = () => {
+      if (near) schedule();
+    };
+    const remeasure = () => {
+      geo = null;
+      schedule();
+    };
     // The page height depends on the viewport, so the number of spiral loops is recounted on resize.
     const onResize = () => {
       if (bookRef.current) setCoils(Math.max(8, Math.floor(bookRef.current.offsetHeight / COIL_PITCH)));
-      schedule();
+      remeasure();
     };
 
     onResize();
     update();
-    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
-    mobile.addEventListener('change', schedule);
+    mobile.addEventListener('change', remeasure);
+    // Content above the book (images, reveals) can move it down the page.
+    const resize = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(remeasure) : null;
+    resize?.observe(document.body);
+    // Leaving the screen still paints once more, so a fast scroll lands on the end position.
+    const io = typeof IntersectionObserver !== 'undefined' && trackRef.current
+      ? new IntersectionObserver(([entry]) => { near = entry.isIntersecting; schedule(); }, { rootMargin: '200px 0px' })
+      : null;
+    if (io && trackRef.current) io.observe(trackRef.current);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
-      mobile.removeEventListener('change', schedule);
+      mobile.removeEventListener('change', remeasure);
+      resize?.disconnect();
+      io?.disconnect();
     };
   }, []);
 

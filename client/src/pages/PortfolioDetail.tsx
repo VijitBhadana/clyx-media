@@ -8,10 +8,12 @@ import ServicesCTA from '@/components/sections/ServicesCTA';
 import { useCaseStudies } from '@/lib/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import { projectStory, usePortfolio } from '@/lib/portfolio';
+import { useSiteContent } from '@/lib/siteContent';
 import NotFound from './NotFound';
 import '@/styles/service-detail.css';
 import '@/styles/case-study-detail.css';
 import '@/styles/portfolio-detail.css';
+import { responsiveImage } from '@/lib/images';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -22,6 +24,7 @@ export default function PortfolioDetail() {
   const services = usePageContent('services');
   const items = usePortfolio();
   const caseStudies = useCaseStudies();
+  const { data, isFetching } = useSiteContent();
   const at = items.findIndex((item) => item.slug === slug);
   const item = items[at];
 
@@ -32,7 +35,8 @@ export default function PortfolioDetail() {
     return () => { document.title = previous; };
   }, [item?.title]);
 
-  if (!item) return <NotFound />;
+  // A project added in the CMS is only known once the list has loaded; until then the page stays blank.
+  if (!item) return data?.collections?.portfolio || !isFetching ? <NotFound /> : <div className="min-h-screen" />;
 
   const story = projectStory(item);
   const caseStudy = caseStudies.find((study) => study.slug === item.slug);
@@ -88,7 +92,7 @@ export default function PortfolioDetail() {
 
         <Reveal>
           <figure className="csd-cover">
-            <img src={item.src} alt={item.alt} decoding="async" />
+            <img {...responsiveImage(item.src, '(max-width: 1023px) 100vw, 1100px')} alt={item.alt} decoding="async" />
             <figcaption>
               {item.result && <span className="csd-cover-result">{item.result}</span>}
               <span className="csd-cover-brand">{item.title}</span>
@@ -165,7 +169,7 @@ export default function PortfolioDetail() {
             {others.map((other) => (
               <a key={other.slug} href={`/portfolio/${other.slug}`} className="csd-more-card">
                 <span className="csd-more-media">
-                  <img src={other.src} alt="" loading="lazy" decoding="async" />
+                  <img {...responsiveImage(other.src, '(max-width: 767px) 92vw, 400px')} alt="" loading="lazy" decoding="async" />
                   {other.result && <span className="csd-more-result">{other.result}</span>}
                 </span>
                 <span className="csd-more-body">

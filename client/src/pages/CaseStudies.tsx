@@ -9,6 +9,7 @@ import { useCaseStudies } from '@/lib/caseStudies';
 import type { CaseStudyItem } from '@/data/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import '@/styles/case-studies-hero.css';
+import { responsiveImage } from '@/lib/images';
 
 interface CaseCardProps {
   item: CaseStudyItem;
@@ -42,7 +43,7 @@ function CaseCard({ item, index, requestHref, requestText, detailsText, featured
         )}
       >
         <img
-          src={item.src}
+          {...responsiveImage(item.src, featured ? '(max-width: 1023px) 92vw, 680px' : '(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 420px')}
           alt={item.alt}
           loading="lazy"
           decoding="async"

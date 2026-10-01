@@ -146,6 +146,7 @@ function progressFor(root: HTMLElement, mids: number[]): number[] {
 export default function CareersValuesFlow({ label, title, highlight, intro, values }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLHeadingElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lineRefs = useRef<(SVGPathElement | null)[]>([]);
   const tipRefs = useRef<(SVGPathElement | null)[]>([]);
@@ -172,8 +173,11 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
   useLayoutEffect(() => {
     const root = rootRef.current, head = headRef.current;
     if (!root || !head) return;
+    const stacked = window.matchMedia('(max-width: 767px)');
     const measure = () => {
-      const boxes = [head, ...cardRefs.current].map(el => (el ? boxIn(el, root) : null));
+      // Stacked (phones): the first arrow drops from below the intro paragraph, not through it.
+      const from = stacked.matches && introRef.current ? introRef.current : head;
+      const boxes = [from, ...cardRefs.current].map(el => (el ? boxIn(el, root) : null));
       const next: Arrow[] = [];
       for (let i = 0; i < boxes.length - 1; i++) {
         const a = boxes[i], b = boxes[i + 1];
@@ -185,8 +189,12 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
     const ro = new ResizeObserver(measure);
     ro.observe(root);
     ro.observe(head);
+    stacked.addEventListener('change', measure);
     document.fonts?.ready.then(measure);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      stacked.removeEventListener('change', measure);
+    };
   }, [values.length]);
 
   // Rebuilt paths start at whatever progress the current scroll position calls for.
@@ -211,7 +219,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
   }, []);
 
   return (
-    <div ref={rootRef} className="values-flow relative grid gap-y-32 md:grid-cols-2 md:gap-x-12 md:gap-y-40 lg:gap-x-32 lg:gap-y-56">
+    <div ref={rootRef} className="values-flow relative grid gap-y-32 md:grid-cols-2 md:gap-x-24 md:gap-y-40 lg:gap-x-32 lg:gap-y-56">
       <svg className="values-flow-arrows" aria-hidden="true">
         {arrows.map((arrow, i) => (
           <g key={i}>
@@ -220,7 +228,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
           </g>
         ))}
       </svg>
-      <div className="md:col-start-1 md:row-start-1 md:self-center">
+      <div ref={introRef} className="md:col-start-1 md:row-start-1 md:self-center">
         <Label>{label}</Label>
         <h2 ref={headRef} className="display vf-heading w-fit text-4xl font-bold md:text-5xl lg:text-6xl">
           {title}<br /><FlowHighlight text={highlight} />

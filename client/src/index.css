@@ -101,6 +101,8 @@ button, a.inline-flex { border-radius: 12px !important; }
   .whatsapp-popup.is-visible { max-width:60vw; }
 }
 button:active,a:active{transform:scale(.97)}
+/* Sections scrolled out of view pause their looping animations (usePauseOffscreenAnimations) and resume in place. */
+.is-offscreen, .is-offscreen * { animation-play-state: paused !important; }
 .dark .invert-on-dark{filter:invert(1)}
 
 /* Header: pill-shaped controls opt out of the global 12px button radius. */
@@ -127,7 +129,7 @@ button:active,a:active{transform:scale(.97)}
 
 /* In dark mode, all blue font automatically flips to high-contrast brand yellow */
 .dark .text-blue,
-.dark .text-\[#003AA3\],
+.dark .text-\[\#003AA3\],
 .dark [class*="text-blue"],
 .dark a.text-blue,
 .dark span.text-blue,

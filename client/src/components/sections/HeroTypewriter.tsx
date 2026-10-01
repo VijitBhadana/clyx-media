@@ -74,11 +74,19 @@ export default function HeroTypewriter({ base, phrases }: { base: string; phrase
   }, [animate, base, words]);
 
   if (!animate) return <em className="accent">{base}</em>;
+  // On phones the headline wraps, so a growing/shrinking phrase changed its line count and pushed the whole page
+  // up and down. The invisible longest phrase keeps the box (and the lines) the same size there; see .tw-box.
+  const longest = words.reduce((a, b) => (b.length > a.length ? b : a), '');
   return (
     <em ref={ref} className={`accent${typing ? ' is-typing' : ''}`}>
       <span className="tw-sr">{base}</span>
-      <span className="tw-text" aria-hidden="true">{text}</span>
-      <span className="tw-caret" aria-hidden="true" />
+      <span className="tw-box" aria-hidden="true">
+        <span className="tw-ghost">{longest}</span>
+        <span className="tw-live">
+          <span className="tw-text">{text}</span>
+          <span className="tw-caret" />
+        </span>
+      </span>
     </em>
   );
 }

@@ -63,10 +63,10 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
       </div>
       <h3 className="display mt-4 text-lg font-semibold md:text-xl">{role.title}</h3>
       {role.detail&&<p className="mt-1.5 text-[13px] leading-5 text-white/65">{role.detail}</p>}
-      <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+      <div className="mt-auto flex flex-col items-start gap-3 pt-4 xl:flex-row xl:items-end xl:justify-between">
         {kind?<div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-clyx-yellow/30 bg-clyx-yellow/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-clyx-yellow"><Briefcase size={12}/>{kind}</span>
-          {places.map(place=><span key={place} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[.04] px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-white/75"><MapPin size={12}/>{place}</span>)}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-clyx-yellow/30 bg-clyx-yellow/10 whitespace-nowrap px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-clyx-yellow"><Briefcase size={12}/>{kind}</span>
+          {places.map(place=><span key={place} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[.04] whitespace-nowrap px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-white/75"><MapPin size={12}/>{place}</span>)}
         </div>:<span/>}
         <button type="button" onClick={()=>setDescRole(role)} onFocus={loadDescDialog} className="relative z-[2] inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/[.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-white transition-colors hover:border-clyx-yellow hover:bg-clyx-yellow hover:text-clyx-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clyx-yellow"><FileText size={12}/>{c.rolesDescButton}</button>
       </div>

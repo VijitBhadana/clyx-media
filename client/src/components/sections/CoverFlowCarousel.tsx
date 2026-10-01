@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { responsiveImage } from '@/lib/images';
 
 const ChevronLeftIcon = () => (
   <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -189,7 +190,7 @@ export default function CoverFlowCarousel({
       {/* Background Ambience */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <img
-          src={items[currentIndex]?.img}
+          {...responsiveImage(items[currentIndex]?.img, '50vw')}
           alt="ambience background"
           loading="lazy"
           decoding="async"
@@ -295,7 +296,7 @@ export default function CoverFlowCarousel({
               >
                 {/* Photo */}
                 <img
-                  src={item.img}
+                  {...responsiveImage(item.img, '(max-width: 767px) 80vw, 420px')}
                   alt={item.titleLine1}
                   loading="lazy"
                   decoding="async"

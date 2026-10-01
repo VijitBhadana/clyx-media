@@ -61,7 +61,7 @@ function ReadingProgress({ target }: { target: React.RefObject<HTMLElement | nul
 export default function BlogPost() {
   const { slug = '' } = useParams<{ slug: string }>();
   const posts = useBlogPosts();
-  const { data } = useSiteContent();
+  const { data, isFetching } = useSiteContent();
   const c = usePageContent('blog');
   const post = posts.find((p) => p.slug === slug);
   const blocks = useMemo(() => parseBody(post?.body ?? ''), [post?.body]);
@@ -78,7 +78,7 @@ export default function BlogPost() {
   }, [post?.title]);
 
   // A post added in the CMS is only known once the content has loaded; until then the page stays blank.
-  if (!post) return data?.collections ? <NotFound /> : <div className="blog-article min-h-screen" />;
+  if (!post) return data?.collections?.blog || !isFetching ? <NotFound /> : <div className="blog-article min-h-screen" />;
 
   return (
     <div className="blog-article min-h-screen">

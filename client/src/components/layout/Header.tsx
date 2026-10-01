@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
@@ -49,11 +49,15 @@ export default function Header() {
     return () => window.removeEventListener('clyx-theme-change', syncTheme);
   }, []);
 
+  // "Scrolled" = a 12px marker at the very top of the page has left the screen. An observer instead of a scroll
+  // listener: reading scrollY on every scroll event forced a style recalculation per event on busy pages.
+  const topMarker = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const marker = topMarker.current;
+    if (!marker || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    observer.observe(marker);
+    return () => observer.disconnect();
   }, []);
 
   // Lock page scroll while the mobile drawer is open.
@@ -73,6 +77,8 @@ export default function Header() {
   const linkTarget = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noreferrer' } : {});
 
   return (
+    <>
+    <span ref={topMarker} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-3 w-px" />
     <header className="clyx-nav fixed inset-x-0 top-0 z-50 flex justify-center">
       <div
         className={`clyx-nav-bar relative flex w-full items-center justify-between border-grid transition-all duration-500 ease-[cubic-bezier(.23,1,.32,1)] ${
@@ -230,6 +236,7 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 }
 

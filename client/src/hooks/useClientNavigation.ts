@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { prefetchPageContent } from '@/lib/siteContent';
 
 // Every history entry gets a key in history.state; its scroll position is kept under that key in sessionStorage,
 // so Back/Forward and reloads land where the visitor was, even though pages render after the URL changes.
@@ -89,7 +91,31 @@ function settleScroll({ toTopByDefault }: { toTopByDefault: boolean }) {
  */
 export function useClientNavigation() {
   const [location, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const isFirst = useRef(true);
+
+  // Pointing at, touching or tabbing to an internal link starts loading that page's content, so by the click
+  // it is usually there already. Each page only asks for its own part of the content, so this stays small.
+  useEffect(() => {
+    let last = '';
+    const onIntent = (e: Event) => {
+      const link = (e.target as Element | null)?.closest?.('a');
+      if (!(link instanceof HTMLAnchorElement) || !link.hasAttribute('href') || link.href === last) return;
+      last = link.href;
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
+      if (url.pathname.startsWith('/admin')) return;
+      prefetchPageContent(queryClient, url.pathname).catch(() => {});
+    };
+    document.addEventListener('pointerover', onIntent, { passive: true });
+    document.addEventListener('touchstart', onIntent, { passive: true });
+    document.addEventListener('focusin', onIntent);
+    return () => {
+      document.removeEventListener('pointerover', onIntent);
+      document.removeEventListener('touchstart', onIntent);
+      document.removeEventListener('focusin', onIntent);
+    };
+  }, [queryClient]);
 
   // Internal link clicks become client-side navigations.
   useEffect(() => {

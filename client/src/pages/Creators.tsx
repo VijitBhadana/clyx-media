@@ -5,6 +5,7 @@ import CreatorTypes from '@/components/sections/CreatorTypes';
 import CreatorsHeroArt from '@/components/sections/CreatorsHeroArt';
 import { useCollection } from '@/lib/siteContent';
 import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageContent';
+import { responsiveImage } from '@/lib/images';
 
 const defaultCreatorImages = [
   'https://zghkkgvsohtaqrkykycu.supabase.co/storage/v1/object/public/site-images/uploads/2026-09/8392ef01-517a-417a-a19d-7396fc756362.webp',
@@ -43,7 +44,7 @@ const Column = ({ images, y }: ColumnProps) => {
       {images.map((src, i) => (
         <div key={i} className="relative h-full w-full overflow-hidden rounded-2xl border border-grid shadow-md">
           <img
-            src={src}
+            {...responsiveImage(src, '(max-width: 767px) 50vw, 25vw')}
             alt="CLYX creator"
             loading="lazy"
             decoding="async"
@@ -170,7 +171,7 @@ function RiseCard({ progress, i, card }: { progress: MotionValue<number>; i: num
 
   return (
     <motion.figure className="cf-card" style={{ y, rotate, opacity, zIndex: i + 1 }}>
-      {card.poster && <img src={card.poster} alt="" loading="lazy" decoding="async" className="cf-card-media" />}
+      {card.poster && <img {...responsiveImage(card.poster, '(max-width: 767px) 33vw, 20vw')} alt="" loading="lazy" decoding="async" className="cf-card-media" />}
       {card.video && <video ref={video} className="cf-card-media" src={card.video} poster={card.poster || undefined} muted loop playsInline preload="metadata" />}
     </motion.figure>
   );

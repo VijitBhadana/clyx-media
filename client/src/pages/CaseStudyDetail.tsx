@@ -8,9 +8,11 @@ import ServicesCTA from '@/components/sections/ServicesCTA';
 import { storyFor } from '@/data/caseStudies';
 import { useCaseStudies } from '@/lib/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
+import { useSiteContent } from '@/lib/siteContent';
 import NotFound from './NotFound';
 import '@/styles/service-detail.css';
 import '@/styles/case-study-detail.css';
+import { responsiveImage } from '@/lib/images';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -20,6 +22,7 @@ export default function CaseStudyDetail() {
   const c = usePageContent('caseStudies');
   const services = usePageContent('services');
   const items = useCaseStudies();
+  const { data, isFetching } = useSiteContent();
   const at = items.findIndex((item) => item.slug === slug);
   const item = items[at];
 
@@ -30,7 +33,8 @@ export default function CaseStudyDetail() {
     return () => { document.title = previous; };
   }, [item?.brand]);
 
-  if (!item) return <NotFound />;
+  // A project added in the CMS is only known once the list has loaded; until then the page stays blank.
+  if (!item) return data?.collections?.caseStudies || !isFetching ? <NotFound /> : <div className="min-h-screen" />;
 
   const story = storyFor(item);
   const requestHref = safeHref(c.caseButtonUrl || '/contact');
@@ -74,7 +78,7 @@ export default function CaseStudyDetail() {
 
         <Reveal>
           <figure className="csd-cover">
-            <img src={item.src} alt={item.alt} decoding="async" />
+            <img {...responsiveImage(item.src, '(max-width: 1023px) 100vw, 1100px')} alt={item.alt} decoding="async" />
             <span className="csd-cover-accent" style={{ background: item.accent }} aria-hidden="true" />
             <figcaption>
               <span className="csd-cover-result">{item.result}</span>
@@ -250,7 +254,7 @@ export default function CaseStudyDetail() {
             {others.map((other) => (
               <a key={other.id} href={`/case-studies/${other.slug}`} className="csd-more-card">
                 <span className="csd-more-media">
-                  <img src={other.src} alt="" loading="lazy" decoding="async" />
+                  <img {...responsiveImage(other.src, '(max-width: 767px) 92vw, 400px')} alt="" loading="lazy" decoding="async" />
                   <span className="csd-more-result">{other.result}</span>
                 </span>
                 <span className="csd-more-body">

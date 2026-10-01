@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useSiteContent } from '@/lib/siteContent';
+import { useBlockData } from '@/lib/siteContent';
 import { services } from '@/data/home';
 
 /**
@@ -994,8 +994,7 @@ export function sectionDefaults(pageId: PageId, sectionId: string): Record<strin
 
 /** The page's copy: what the admin saved, and the built-in text for anything never saved. */
 export function usePageContent(id: PageId): Record<string, string> {
-  const { data } = useSiteContent();
-  const saved = data?.blocks?.[`page_${id}`];
+  const saved = useBlockData(`page_${id}`);
   // Same object until the saved copy changes, so sections receiving it do not redo work on unrelated renders.
   return useMemo(() => {
     const out = { ...pageDefaults(id) };

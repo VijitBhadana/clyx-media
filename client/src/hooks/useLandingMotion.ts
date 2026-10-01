@@ -12,6 +12,23 @@ function watchVisibility(el: Element | null, onChange?: () => void) {
   return { state, stop: () => observer.disconnect() };
 }
 
+/** CSS cubic-bezier timing function: progress (0–1) -> eased value, solved with Newton steps. */
+function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
+  const coord = (t: number, a: number, b: number) => ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
+  const slope = (t: number, a: number, b: number) => 3 * (1 - 3 * b + 3 * a) * t * t + 2 * (3 * b - 6 * a) * t + 3 * a;
+  return (x: number) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 6; i++) {
+      const d = slope(t, x1, x2);
+      if (Math.abs(d) < 1e-6) break;
+      t -= (coord(t, x1, x2) - x) / d;
+    }
+    return coord(Math.min(1, Math.max(0, t)), y1, y2);
+  };
+}
+
 /**
  * The homepage's pointer and scroll effects: hero clip parallax, the tilting laptop and the live chart bars.
  * Everything paints at most once per frame, pauses while off screen, and is torn down when the page unmounts.
@@ -61,13 +78,20 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
     const macbook = root.querySelector<HTMLElement>('.macbook-container');
     if (section && macbook) {
       const badges = Array.from(root.querySelectorAll<HTMLElement>('.floating-badge'));
+      // The section's page position is measured once and again only when the page's size changes, so a scroll
+      // frame does no layout reads of its own.
+      let box: { top: number; height: number } | null = null;
+      const measure = () => {
+        const rect = section.getBoundingClientRect();
+        box = { top: rect.top + window.scrollY, height: section.offsetHeight };
+      };
       let frame = 0;
       const paint = () => {
         frames.delete(frame);
         frame = 0;
-        const rect = section.getBoundingClientRect();
-        const totalDistance = section.offsetHeight - window.innerHeight;
-        const progress = Math.max(0, Math.min(1, -rect.top / totalDistance));
+        if (!box) measure();
+        const totalDistance = box!.height - window.innerHeight;
+        const progress = Math.max(0, Math.min(1, (window.scrollY - box!.top) / totalDistance));
         const rotateX = 26 * (1 - progress);
         const scale = 0.88 + 0.12 * progress;
         const translateY = (1 - progress) * 35;
@@ -83,6 +107,13 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       const view = watchVisibility(section, schedule);
       cleanups.push(view.stop);
       listen('scroll', () => view.state.visible && schedule(), { passive: true });
+      if (typeof ResizeObserver !== 'undefined') {
+        const resize = new ResizeObserver(() => { box = null; schedule(); });
+        resize.observe(document.body);
+        resize.observe(section);
+        cleanups.push(() => resize.disconnect());
+      }
+      listen('resize', () => { box = null; schedule(); });
       paint();
     }
 
@@ -95,7 +126,9 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       const view = watchVisibility(chart);
       cleanups.push(view.stop);
 
-      // Trace line: reads the bars' rendered heights, so it rides along with their CSS height transition.
+      // Trace line over the bar tops. The bars' heights are not read back from the page while they animate:
+      // the CSS height transition (0.9s, cubic-bezier(.45,0,.25,1)) is replayed here, and the chart's geometry is
+      // measured only when its size changes. Reading the bars every frame forced a layout per frame.
       // offset* values are used because the laptop is scaled, which would skew getBoundingClientRect.
       const svg = chart.querySelector<SVGSVGElement>('.chart-trace');
       const NS = 'http://www.w3.org/2000/svg';
@@ -108,20 +141,50 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
         return dot;
       });
       cleanups.push(() => dots.forEach((dot) => dot.remove()));
-      const drawTrace = () => {
+      const lines = svg ? Array.from(svg.querySelectorAll('.trace-line, .trace-halo')) : [];
+      const tags = (['hi', 'lo'] as const).map((kind) => {
+        const tag = svg?.querySelector(`.trace-tag-${kind}`);
+        return { level: svg?.querySelector(`.trace-level-${kind}`), text: tag?.querySelector('text'), rect: tag?.querySelector('rect') };
+      });
+
+      const TRANSITION_MS = 900;
+      const ease = cubicBezier(0.45, 0, 0.25, 1);
+      let from = [...bases];
+      let to = [...bases];
+      let movedAt = 0;
+      const heightsAt = (now: number) => {
+        const t = ease(Math.min(1, (now - movedAt) / TRANSITION_MS));
+        return to.map((target, i) => from[i] + (target - from[i]) * t);
+      };
+
+      let geo: { width: number; height: number; groups: { x: number; top: number; h: number }[]; tagWidth: number } | null = null;
+      const measure = () => {
         if (!svg) return;
-        const width = (chart as HTMLElement).offsetWidth;
-        svg.setAttribute('viewBox', `0 0 ${width} ${(chart as HTMLElement).offsetHeight}`);
-        const points = bars.map((bar) => {
-          const group = bar.parentElement as HTMLElement;
-          return {
-            x: group.offsetLeft + group.offsetWidth / 2,
-            y: group.offsetTop + group.offsetHeight - bar.offsetHeight,
-            pct: (bar.offsetHeight / group.offsetHeight) * 100,
-          };
-        });
+        const el = chart as HTMLElement;
+        const sample = tags[0].text;
+        if (sample && !sample.textContent) sample.textContent = 'H ₹0.00L';
+        geo = {
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+          groups: bars.map((bar) => {
+            const group = bar.parentElement as HTMLElement;
+            return { x: group.offsetLeft + group.offsetWidth / 2, top: group.offsetTop, h: group.offsetHeight };
+          }),
+          // "H ₹1.23L" always has the same number of characters, so one measurement fits every value.
+          tagWidth: (sample?.getComputedTextLength() ?? 52) + 12,
+        };
+        svg.setAttribute('viewBox', `0 0 ${geo.width} ${geo.height}`);
+      };
+
+      const drawTrace = (now: number) => {
+        if (!svg) return;
+        if (!geo) measure();
+        if (!geo) return;
+        const { width, groups, tagWidth } = geo;
+        const pcts = heightsAt(now);
+        const points = groups.map((g, i) => ({ x: g.x, y: g.top + g.h - (pcts[i] / 100) * g.h, pct: pcts[i] }));
         const line = points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-        svg.querySelectorAll('.trace-line, .trace-halo').forEach((el) => el.setAttribute('points', line));
+        lines.forEach((el) => el.setAttribute('points', line));
         const hi = points.reduce((best, p, i) => (p.y < points[best].y ? i : best), 0);
         const lo = points.reduce((best, p, i) => (p.y > points[best].y ? i : best), 0);
         dots.forEach((dot, i) => {
@@ -129,20 +192,16 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
           dot.setAttribute('cy', points[i].y.toFixed(1));
           dot.setAttribute('class', i === hi ? 'is-hi' : i === lo ? 'is-lo' : '');
         });
-        ([['hi', hi, 'H'], ['lo', lo, 'L']] as const).forEach(([kind, idx, letter]) => {
+        ([[0, hi, 'H'], [1, lo, 'L']] as const).forEach(([t, idx, letter]) => {
           const { y, pct } = points[idx];
-          const level = svg.querySelector(`.trace-level-${kind}`);
+          const { level, text, rect } = tags[t];
           level?.setAttribute('x1', '0');
           level?.setAttribute('x2', `${width}`);
           level?.setAttribute('y1', y.toFixed(1));
           level?.setAttribute('y2', y.toFixed(1));
-          // Price tag sits on the side away from its own bar, so it never covers the marked point.
-          const tag = svg.querySelector(`.trace-tag-${kind}`);
-          const text = tag?.querySelector('text');
-          const rect = tag?.querySelector('rect');
           if (!text || !rect) return;
+          // Price tag sits on the side away from its own bar, so it never covers the marked point.
           text.textContent = `${letter} ₹${((pct * 1.5) / 100).toFixed(2)}L`;
-          const tagWidth = text.getComputedTextLength() + 12;
           const cx = idx >= bars.length / 2 ? tagWidth / 2 + 2 : width - tagWidth / 2 - 2;
           text.setAttribute('x', cx.toFixed(1));
           text.setAttribute('y', y.toFixed(1));
@@ -154,10 +213,10 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       };
       let traceFrame = 0;
       let traceUntil = 0;
-      const followBars = () => {
+      const followBars = (now: number) => {
         frames.delete(traceFrame);
-        drawTrace();
-        traceFrame = performance.now() < traceUntil ? requestAnimationFrame(followBars) : 0;
+        drawTrace(now);
+        traceFrame = now < traceUntil ? requestAnimationFrame(followBars) : 0;
         if (traceFrame) frames.add(traceFrame);
       };
       const traceFor = (ms: number) => {
@@ -166,10 +225,12 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       };
       traceFor(0);
       if (svg && typeof ResizeObserver !== 'undefined') {
-        const resize = new ResizeObserver(() => traceFor(0));
+        const resize = new ResizeObserver(() => { geo = null; traceFor(0); });
         resize.observe(chart);
         cleanups.push(() => resize.disconnect());
       }
+      // The tag width depends on the web font.
+      document.fonts?.ready.then(() => { geo = null; traceFor(0); });
 
       // Market-style ticks: each bar keeps rising or falling for a few ticks before its trend flips,
       // with a pull back toward its starting height so the weekly shape never drifts away.
@@ -177,6 +238,8 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       const trends = bases.map(() => (Math.random() < 0.5 ? -1 : 1));
       const interval = setInterval(() => {
         if (document.hidden || !view.state.visible) return;
+        const now = performance.now();
+        from = heightsAt(now);
         bars.forEach((bar, i) => {
           if (Math.random() < 0.3) trends[i] *= -1;
           const step = trends[i] * (4 + Math.random() * 8) + (bases[i] - heights[i]) * 0.2;
@@ -184,7 +247,9 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
           if (heights[i] <= 15 || heights[i] >= 98) trends[i] *= -1;
           bar.style.height = `${heights[i].toFixed(1)}%`;
         });
-        traceFor(1000);
+        to = heights.map((h) => parseFloat(h.toFixed(1)));
+        movedAt = now;
+        traceFor(TRANSITION_MS + 50);
       }, 1000);
       cleanups.push(() => clearInterval(interval));
     }

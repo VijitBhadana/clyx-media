@@ -356,8 +356,10 @@
   line-height: 1.2;
   color: var(--text-primary);
 }
+/* 8px caps were unreadable on the 130px cards; a touch larger with tighter tracking still fits one line. */
 .lead-flank-info .lead-member-role {
-  font-size: 8px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
   margin-top: 3px;
 }
 @media (max-width: 900px) {

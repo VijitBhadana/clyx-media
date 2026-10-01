@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { primeFirstPage } from "./lib/siteContent";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -25,6 +26,9 @@ queryClient.getMutationCache().subscribe(event => {
     console.error("[API Mutation Error]", event.mutation.state.error);
   }
 });
+
+// The first page's content starts downloading now, in parallel with the page's code.
+primeFirstPage(queryClient);
 
 // The tRPC client (and superjson) is only needed by the admin panel, so it is created in admin/AdminApp.tsx
 // and downloaded with that page instead of with every visitor's first page load.

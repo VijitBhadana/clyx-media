@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageContent';
 import { usePortfolio, type PortfolioItem } from '@/lib/portfolio';
 import '@/styles/portfolio-hero.css';
+import { responsiveImage } from '@/lib/images';
 
 type PortfolioImage = PortfolioItem;
 
@@ -189,7 +190,7 @@ function HeroStack({ items, note, countLabel, total }: { items: PortfolioImage[]
           const pos = (i - front + count) % count;
           return (
             <figure key={item.code} className="pf-card" data-pos={Math.min(pos, 3)} aria-hidden={pos !== 0}>
-              <img src={item.src} alt={item.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+              <img {...responsiveImage(item.src, '320px')} alt={item.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
               <figcaption>
                 <span className="pf-card-tag">
                   {item.code} · {item.category}
@@ -295,7 +296,7 @@ function PortfolioRow({ items, delay, outcomeLabel }: { items: PortfolioImage[];
               onFocus={() => setActiveImage(index)}
             >
               <img
-                src={image.src}
+                {...responsiveImage(image.src, '(max-width: 767px) 85vw, 520px')}
                 className="h-full w-full object-cover"
                 alt={image.alt}
                 loading="lazy"
@@ -604,7 +605,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
 
       <div
         ref={containerRef}
-        className="container relative flex flex-col gap-10 py-20 md:flex-row md:items-end md:justify-between md:py-28 lg:pt-36"
+        className="container relative flex flex-col gap-10 py-20 md:py-28 lg:flex-row lg:items-end lg:justify-between lg:pt-36"
       >
         {/* Journey arrows (aura -> kulture, kulture -> button), each drawn then capped with its head.
             Always mounted (hidden until measured) so they follow the section's reveal variants. */}
@@ -769,12 +770,12 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
           </h2>
         </div>
 
-        <div className="flex flex-col items-start gap-4 md:items-end">
+        <div className="flex flex-col items-start gap-4 lg:items-end">
           {/* Handwritten note, uncovered letter by letter like a pen stroke. */}
           <p
             ref={noteRef}
             aria-hidden="true"
-            className="flex items-start gap-1 font-['Architects_Daughter',cursive] text-xl leading-none text-yellow -rotate-3 md:mr-10 md:text-[1.38rem]"
+            className="flex items-start gap-1 font-['Architects_Daughter',cursive] text-xl leading-none text-yellow -rotate-3 md:text-[1.38rem] lg:mr-10"
           >
             <span className="whitespace-pre">
               {note.split('').map((ch, i) => (

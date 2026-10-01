@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useClientNavigation } from './hooks/useClientNavigation';
+import { usePauseOffscreenAnimations } from './hooks/usePauseOffscreenAnimations';
 import './lib/introLoader';
+import { firstPageReady } from './lib/siteContent';
 
 type PageModule = { default: ComponentType<any> };
 
@@ -12,7 +14,8 @@ type PageModule = { default: ComponentType<any> };
  */
 function page(load: () => Promise<PageModule>) {
   let loaded: ComponentType<any> | undefined;
-  const fetchPage = () => load().then((m) => { loaded = m.default; return m; });
+  // The first page also waits (briefly) for its content, so it does not paint placeholder copy that then jumps.
+  const fetchPage = () => Promise.all([load(), firstPageReady()]).then(([m]) => { loaded = m.default; return m; });
   const Lazy = lazy(fetchPage);
   // Chosen once per mount, so a page that mounted through Lazy is never swapped (and remounted) mid-visit.
   function Page(props: object) {
@@ -81,6 +84,7 @@ export default function App() {
   const [location] = useLocation();
   useClientNavigation();
   usePreloadPages();
+  usePauseOffscreenAnimations();
   return (
     // Keyed by route so a page that crashed does not keep showing the error screen on the next page.
     <ErrorBoundary key={location}>
