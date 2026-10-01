@@ -426,7 +426,7 @@ export const PAGES: PageDef[] = [
           t('ctaPrimaryText', 'Primary button text', 'Book a Growth Call'),
           link('ctaPrimaryUrl', 'Primary button link', 'https://wa.me/919671430111'),
           t('ctaSecondaryText', 'Secondary button text', 'Email Founders'),
-          link('ctaSecondaryUrl', 'Secondary button link', 'mailto:hello@clyxmedia.com?subject=Growth Consultation - CLYX Media'),
+          link('ctaSecondaryUrl', 'Secondary button link', 'mailto:work@clyxmedia.com?subject=Growth Consultation - CLYX Media'),
         ],
       },
     ],
