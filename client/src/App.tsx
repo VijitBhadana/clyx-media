@@ -27,8 +27,10 @@ const About = page(() => import('./pages/About'));
 const ServicesPage = page(() => import('./pages/ServicesPage'));
 const ServiceDetail = page(() => import('./pages/ServiceDetail'));
 const Portfolio = page(() => import('./pages/Portfolio'));
+const PortfolioDetail = page(() => import('./pages/PortfolioDetail'));
 const Contact = page(() => import('./pages/Contact'));
 const CaseStudies = page(() => import('./pages/CaseStudies'));
+const CaseStudyDetail = page(() => import('./pages/CaseStudyDetail'));
 const Creators = page(() => import('./pages/Creators'));
 const Blog = page(() => import('./pages/Blog'));
 const BlogPost = page(() => import('./pages/BlogPost'));
@@ -39,7 +41,7 @@ const NotFound = page(() => import('./pages/NotFound'));
 
 // The public pages are small; fetching them while the browser is idle makes every menu click instant.
 // The admin panel is left out: visitors never need it.
-const PUBLIC_PAGES = [LandingV1, About, ServicesPage, ServiceDetail, Portfolio, CaseStudies, Creators, Blog, BlogPost, Careers, Contact, LegalPage, NotFound];
+const PUBLIC_PAGES = [LandingV1, About, ServicesPage, ServiceDetail, Portfolio, PortfolioDetail, CaseStudies, CaseStudyDetail, Creators, Blog, BlogPost, Careers, Contact, LegalPage, NotFound];
 
 function usePreloadPages() {
   useEffect(() => {
@@ -91,7 +93,9 @@ export default function App() {
           <Route path="/services" component={ServicesPage} />
           <Route path="/services/:slug" component={ServiceDetail} />
           <Route path="/portfolio" component={Portfolio} />
+          <Route path="/portfolio/:slug" component={PortfolioDetail} />
           <Route path="/case-studies" component={CaseStudies} />
+          <Route path="/case-studies/:slug" component={CaseStudyDetail} />
           <Route path="/creators" component={Creators} />
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPost} />

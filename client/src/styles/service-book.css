@@ -116,7 +116,6 @@ html:not(.dark) .sb-book {
   filter: drop-shadow(0 6px 18px rgba(255, 222, 89, 0.18));
   animation: sb-foil 6s ease-in-out infinite;
 }
-.sb-book .sb-cover-dot { color: #FFDE59; -webkit-text-fill-color: #FFDE59; }
 @keyframes sb-foil { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
 .sb-book .sb-cover-media {
   display: flex; align-items: center; gap: 14px; margin-top: 12px;

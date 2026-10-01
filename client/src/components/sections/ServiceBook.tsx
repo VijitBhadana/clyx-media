@@ -38,7 +38,7 @@ function Cover({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: str
       <span className="sb-cover-ribbon" aria-hidden="true" />
       <header className="sb-cover-kicker"><BrandLogo size={48} src={logoSrc} className="sb-cover-logo" /><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
       <div className="sb-cover-title">
-        <span className="sb-cover-clyx">{c.bookCoverBrand || 'CLYX'}<span className="sb-cover-dot">.</span></span>
+        <span className="sb-cover-clyx">{(c.bookCoverBrand || 'CLYX').replace(/\.$/, '')}</span>
         <span className="sb-cover-media">{c.bookCoverBrandSuffix || 'Media'}</span>
         <p className="sb-cover-sub">{c.bookCoverText} <em>{c.bookCoverHighlight}</em></p>
       </div>

@@ -27,7 +27,7 @@ const defaultTestimonials: Testimonial[] = [
   },
 ];
 
-// The track is filled three times over so the 15s marquee never shows a gap.
+// The track is filled three times over so the 30s marquee never shows a gap.
 const COPIES = 3;
 
 /** The homepage testimonial marquee, fed by the Testimonials list. */

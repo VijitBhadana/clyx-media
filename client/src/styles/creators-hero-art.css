@@ -84,8 +84,8 @@
   --cha-in: 1.25s; /* when the cloud first pops in */
   position: absolute;
   z-index: 2;
-  font-family: 'Caveat', cursive;
-  font-size: clamp(1.15rem, 4.06cqi, 1.45rem);
+  font-family: 'Architects Daughter', cursive;
+  font-size: clamp(0.95rem, 3.3cqi, 1.18rem);
   line-height: 1;
   color: var(--cha-note);
   animation: cha-float 5s ease-in-out infinite alternate;

@@ -8,29 +8,54 @@ export type SiteContent = {
   collections: Record<string, Array<Record<string, any>>>;
 };
 
+// `savedAt` (ms) is when the copy was taken from the backend; copies saved before it existed count as oldest.
+type SavedContent = SiteContent & { savedAt?: number };
+
 // The last successful response is kept so a return visit paints real content immediately,
-// then refreshes in the background. It is also the fallback if the backend is asleep or down.
+// then refreshes in the background. It is also a fallback if the backend is asleep or down.
 const CACHE_KEY = 'clyx_site_content_v1';
 
-function readCache(): SiteContent | undefined {
+// Copy of the content taken at build time (scripts/snapshot-content.mjs) and served with the site itself,
+// so even a first-time visitor sees the real content while the backend is down.
+const SNAPSHOT_URL = '/content-snapshot.json';
+
+function readCache(): SavedContent | undefined {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    return raw ? (JSON.parse(raw) as SiteContent) : undefined;
+    return raw ? (JSON.parse(raw) as SavedContent) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchSnapshot(): Promise<SavedContent | undefined> {
+  try {
+    const res = await fetch(SNAPSHOT_URL);
+    return res.ok ? ((await res.json()) as SavedContent) : undefined;
   } catch {
     return undefined;
   }
 }
 
 async function fetchSiteContent(): Promise<SiteContent> {
-  const res = await fetch(`${API_URL}/api/public/content`);
-  if (!res.ok) throw new Error(`Content request failed (${res.status})`);
-  const data = (await res.json()) as SiteContent;
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-  } catch {
-    // storage full or unavailable: caching is optional
+    const res = await fetch(`${API_URL}/api/public/content`);
+    if (!res.ok) throw new Error(`Content request failed (${res.status})`);
+    const data = (await res.json()) as SiteContent;
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ...data, savedAt: Date.now() }));
+    } catch {
+      // storage full or unavailable: caching is optional
+    }
+    return data;
+  } catch (err) {
+    // Backend unreachable: show the newer of this browser's saved copy and the snapshot shipped with the site.
+    const cached = readCache();
+    const snapshot = await fetchSnapshot();
+    const newest = (snapshot?.savedAt ?? 0) >= (cached?.savedAt ?? 0) ? snapshot ?? cached : cached;
+    if (newest) return newest;
+    throw err;
   }
-  return data;
 }
 
 export function useSiteContent() {

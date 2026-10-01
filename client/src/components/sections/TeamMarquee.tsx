@@ -9,7 +9,16 @@ const defaultTeam: Member[] = [
   { name: 'Manvi', role: 'Graphic Designer', img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop' },
 ];
 
-const initialsOf = (name: string) =>
+// CMS photos replaced by a hand-picked file in /public, keyed by the uploaded file's id.
+const photoOverrides: Record<string, string> = {
+  'fee567d9-5ea8-4b8a-988e-112bb318f99e': '/team/manvi.png',
+};
+const photoFor = (img?: string) => {
+  const id = img && Object.keys(photoOverrides).find((key) => img.includes(key));
+  return id ? photoOverrides[id] : img;
+};
+
+const initialsOf =(name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || 'CM';
 
 function TeamCard({ member }: { member: Member }) {
@@ -30,7 +39,7 @@ function TeamCard({ member }: { member: Member }) {
 
 /** The homepage team strip: an endless marquee of photo + name + role cards from the Team list. */
 export default function TeamMarquee() {
-  const team = useCollection<Member>('team', defaultTeam, (m) => ({ name: String(m.name ?? ''), role: String(m.role ?? ''), img: m.img }));
+  const team = useCollection<Member>('team', defaultTeam, (m) => ({ name: String(m.name ?? ''), role: String(m.role ?? ''), img: photoFor(m.img) }));
   const cards = team.map((member, i) => <TeamCard key={`${member.name}-${i}`} member={member} />);
   return (
     <div className="team-grid" id="teamGrid">

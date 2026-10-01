@@ -1,90 +1,27 @@
 import { motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
 import CaseHeroArt from '@/components/sections/CaseHeroArt';
 import { RevealWords } from '@/components/ui/ScrollMotion';
 import { cn } from '@/lib/utils';
-import { useCollection } from '@/lib/siteContent';
+import { useCaseStudies } from '@/lib/caseStudies';
+import type { CaseStudyItem } from '@/data/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import '@/styles/case-studies-hero.css';
-
-interface CaseStudyItem {
-  id: string;
-  code: string;
-  brand: string;
-  category: string;
-  headline: string;
-  result: string;
-  detail: string;
-  src: string;
-  alt: string;
-  accent: string;
-}
-
-const defaultCaseStudies: CaseStudyItem[] = [
-  {
-    id: 'kulture-skin',
-    code: '01',
-    brand: 'Kulture Skin',
-    category: 'Beauty / Creator commerce',
-    headline: 'From organic proof to paid growth.',
-    result: '3.4x ROAS',
-    detail: 'A creator-led testing system that found the hooks worth scaling, then turned them into a repeatable paid engine.',
-    src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=85',
-    alt: 'Kulture Skin Campaign',
-    accent: '#FFDE59',
-  },
-  {
-    id: 'nova-nutrition',
-    code: '02',
-    brand: 'Nova Nutrition',
-    category: 'Food / Performance',
-    headline: 'More signal. Less spend.',
-    result: '42% lower CPA',
-    detail: 'A creative refresh and landing-page loop built around clearer proof, sharper offers, and faster iteration.',
-    src: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1400&q=85',
-    alt: 'Nova Nutrition Campaign',
-    accent: '#003AA3',
-  },
-  {
-    id: 'mutha-beauty',
-    code: '03',
-    brand: 'Mutha Beauty',
-    category: 'Fashion / Social',
-    headline: 'Make the feed feel like the brand.',
-    result: '10M+ impressions',
-    detail: 'A culture-first content system that kept the brand recognizable while expanding reach across paid channels.',
-    src: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1400&q=85',
-    alt: 'Mutha Beauty Campaign',
-    accent: '#FFDE59',
-  },
-  {
-    id: 'orbit-labs',
-    code: '04',
-    brand: 'Orbit Labs',
-    category: 'Tech / Conversion CRO',
-    headline: 'Speed is a creative feature.',
-    result: '+28% CVR lift',
-    detail: 'Sub-second mobile checkout experiences and friction-free shopping architectures that capture lost demand.',
-    src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=85',
-    alt: 'Orbit Labs Campaign',
-    accent: '#003AA3',
-  },
-];
 
 interface CaseCardProps {
   item: CaseStudyItem;
   index: number;
-  href: string;
-  buttonText: string;
+  requestHref: string;
+  requestText: string;
+  detailsText: string;
   featured?: boolean;
 }
 
-function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardProps) {
+function CaseCard({ item, index, requestHref, requestText, detailsText, featured = false }: CaseCardProps) {
   return (
-    <motion.a
-      href={href}
+    <motion.article
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -93,7 +30,7 @@ function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardP
         'group relative flex overflow-hidden rounded-3xl border border-slate-200 bg-white backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.04]',
         'shadow-[0_20px_50px_-30px_rgba(15,23,42,0.35)] transition-all duration-500 dark:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]',
         'hover:-translate-y-1.5 hover:border-yellow/60 hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)] dark:hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow',
+        'has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-yellow',
         featured ? 'flex-col lg:flex-row' : 'flex-col'
       )}
     >
@@ -138,45 +75,55 @@ function CaseCard({ item, index, href, buttonText, featured = false }: CaseCardP
           {item.detail}
         </p>
 
-        {featured && (
-          <span className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-dark transition-colors group-hover:bg-blue group-hover:text-white">
-            {buttonText} <ArrowUpRight size={15} />
-          </span>
-        )}
+        <div className={cn('flex flex-wrap items-center gap-3', featured ? 'mt-8' : 'mt-auto pt-6')}>
+          {/* The details link stretches over the whole card, so clicking anywhere opens the full case study. */}
+          <a
+            href={`/case-studies/${item.slug}`}
+            className="inline-flex w-fit items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-dark transition-colors after:absolute after:inset-0 after:content-[''] focus-visible:outline-none group-hover:bg-blue group-hover:text-white"
+            aria-label={`${detailsText}: ${item.brand}`}
+          >
+            {detailsText} <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+          </a>
+          {featured && requestText && (
+            <a
+              href={requestHref}
+              className="relative z-10 inline-flex w-fit items-center gap-2 rounded-full border border-slate-300 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-800 transition-colors hover:border-yellow hover:bg-yellow hover:text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow dark:border-white/25 dark:text-white"
+            >
+              {requestText} <ArrowUpRight size={15} />
+            </a>
+          )}
+        </div>
       </div>
-    </motion.a>
+    </motion.article>
   );
 }
 
 function CaseCards({
   items,
   className,
-  buttonText,
-  buttonUrl,
+  requestText,
+  requestUrl,
+  detailsText,
 }: {
   items: CaseStudyItem[];
   className?: string;
-  buttonText: string;
-  buttonUrl: string;
+  requestText: string;
+  requestUrl: string;
+  detailsText: string;
 }) {
-  const href = safeHref(buttonUrl || '/contact');
+  const requestHref = safeHref(requestUrl || '/contact');
   const [featured, ...rest] = items;
   if (!featured) return null;
+  const shared = { requestHref, requestText, detailsText: detailsText || 'More details' };
 
   return (
     <div className={cn('relative mx-auto w-full max-w-6xl px-4 py-8', className)}>
-      <CaseCard item={featured} index={0} href={href} buttonText={buttonText} featured />
+      <CaseCard item={featured} index={0} {...shared} featured />
 
       {rest.length > 0 && (
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {rest.map((item, i) => (
-            <CaseCard
-              key={item.id}
-              item={item}
-              index={i}
-              href={href}
-              buttonText={buttonText}
-            />
+            <CaseCard key={item.id} item={item} index={i} {...shared} />
           ))}
         </div>
       )}
@@ -186,18 +133,7 @@ function CaseCards({
 
 export default function CaseStudies() {
   const c = usePageContent('caseStudies');
-  const caseStudies = useCollection<CaseStudyItem>('caseStudies', defaultCaseStudies, (item, i) => ({
-    id: item.id,
-    code: String(i + 1).padStart(2, '0'),
-    brand: item.brand,
-    category: item.category,
-    headline: item.headline,
-    result: item.result,
-    detail: item.detail,
-    src: item.image,
-    alt: `${item.brand} Campaign`,
-    accent: item.accent || '#FFDE59',
-  }));
+  const caseStudies = useCaseStudies();
 
   return (
     <PageShell
@@ -231,7 +167,12 @@ export default function CaseStudies() {
       intro={c.heroIntro}
       aside={<CaseHeroArt />}
     >
-      <CaseCards items={caseStudies} buttonText={c.caseButton} buttonUrl={c.caseButtonUrl} />
+      <CaseCards
+        items={caseStudies}
+        requestText={c.caseButton}
+        requestUrl={c.caseButtonUrl}
+        detailsText={c.caseDetailsButton}
+      />
 
       <CasePattern content={c} />
     </PageShell>

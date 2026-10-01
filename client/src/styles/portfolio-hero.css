@@ -210,8 +210,8 @@
   display: flex;
   align-items: flex-start;
   gap: 2px;
-  font-family: 'Caveat', cursive;
-  font-size: 1.45rem;
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.18rem;
   line-height: 1;
   color: var(--pf-accent);
   transform: rotate(-6deg);

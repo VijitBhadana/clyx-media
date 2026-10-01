@@ -15,61 +15,11 @@ import {
 import PageShell from '@/components/layout/PageShell';
 import { Label, Section } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
-import { useCollection } from '@/lib/siteContent';
 import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageContent';
+import { usePortfolio, type PortfolioItem } from '@/lib/portfolio';
 import '@/styles/portfolio-hero.css';
 
-interface PortfolioImage {
-  src: string;
-  alt: string;
-  code: string;
-  category: string;
-  title: string;
-  result: string;
-}
-
-// Shown only until the CMS answers (e.g. backend asleep on a first visit). Mirrors the backend seed list.
-const defaultPortfolio: PortfolioImage[] = (
-  [
-    ['Kulture Skin', 'Beauty', '3.4x ROAS', 'photo-1522337360788-8b13dee7a37e'],
-    ['Nova Nutrition', 'Food', '42% lower CPA', 'photo-1541643600914-78b084683601'],
-    ['Mutha Beauty', 'Fashion', '10M+ impressions', 'photo-1515886657613-9f3515b0c78f'],
-    ['Orbit Labs', 'Tech', '+28% CVR lift', 'photo-1460925895917-afdab827c52f'],
-    ['Halo Goods', 'D2C', '4.1x blended ROAS', 'photo-1496747611176-843222e1e57c'],
-    ['Aura Collective', 'Fashion', '+188% CTR', 'photo-1483985988355-763728e1935b'],
-    ['Glow Theory', 'Beauty', '2.8x ROAS', 'photo-1596462502278-27bfdc403348'],
-    ['Fresh Fork', 'Food', '3.1x ROAS', 'photo-1504674900247-0877df9cc836'],
-    ['Thread Society', 'Fashion', '3.8x ROAS', 'photo-1490481651871-ab68de25d43d'],
-    ['Pixel Stack', 'Tech', '+34% CVR lift', 'photo-1518770660439-4636190af475'],
-    ['Tick Theory', 'D2C', '3.6x ROAS', 'photo-1523275335684-37898b6baf30'],
-    ['Dewdrop Labs', 'Beauty', '+64% repeat orders', 'photo-1571781926291-c477ebfd024b'],
-    ['Slice House', 'Food', '+72% online orders', 'photo-1565299624946-b28f40a0ae38'],
-    ['Luxe Lane', 'Fashion', '+96% CTR', 'photo-1445205170230-053b83016050'],
-    ['DataPulse', 'Tech', '2.9x pipeline', 'photo-1551288049-bebda4e38f71'],
-    ['Stride Co', 'D2C', '+140% sales', 'photo-1542291026-7eec264c27ff'],
-    ['Blush & Co', 'Beauty', '6.2M views', 'photo-1512496015851-a90fb38ba796'],
-    ['Green Bowl Co', 'Food', '5M+ impressions', 'photo-1512621776951-a57141f2eefd'],
-    ['Muse Studio', 'Fashion', '8M+ reach', 'photo-1469334031218-e382a71b716b'],
-    ['CodeCraft', 'Tech', '45% lower CPL', 'photo-1498050108023-c5249f4df085'],
-    ['SoundNest', 'D2C', '29% lower CPA', 'photo-1505740420928-5e560c06d30e'],
-    ['Pure Ritual', 'Beauty', '38% lower CAC', 'photo-1570172619644-dfd03ed5d881'],
-    ['Harvest Kitchen', 'Food', '35% lower CPA', 'photo-1546069901-ba9599a7e63c'],
-    ['Noir Atelier', 'Fashion', '31% lower CPA', 'photo-1509631179647-0177331693ae'],
-    ['Nimbus Cloud', 'Tech', '+210% sign-ups', 'photo-1519389950473-47ba0277781c'],
-    ['Frame & Lens', 'D2C', '4.4x ROAS', 'photo-1526170375885-4d8ecf77b99f'],
-    ['Velvet Skin', 'Beauty', '+152% CTR', 'photo-1608248597279-f99d160bfcbc'],
-    ['Morning Stack', 'Food', '2.6x ROAS', 'photo-1567620905732-2d1ec7ab7445'],
-    ['Byte Wave', 'Tech', '3.2x ROAS', 'photo-1531297484001-80022131f5a1'],
-    ['Shade Club', 'D2C', '+81% CTR', 'photo-1572635196237-14b3f281503f'],
-  ] as const
-).map(([title, category, result, photo], i) => ({
-  src: `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=1000&q=85`,
-  alt: title,
-  code: `#${String(i + 1).padStart(2, '0')}`,
-  category,
-  title,
-  result,
-}));
+type PortfolioImage = PortfolioItem;
 
 // Known categories get their own icon; any new category the admin types gets a generic one.
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -298,21 +248,19 @@ function HeroTicker({ items }: { items: PortfolioImage[] }) {
 // Cards per hover-expand strip; longer lists (e.g. "All") stack into several strips.
 const ROW_SIZE = 6;
 
-type OpenHandler = (image: PortfolioImage) => void;
-
-function HoverExpandPortfolio({ items, onOpen, className, outcomeLabel }: { items: PortfolioImage[]; onOpen?: OpenHandler; className?: string; outcomeLabel: string }) {
+function HoverExpandPortfolio({ items, className, outcomeLabel }: { items: PortfolioImage[]; className?: string; outcomeLabel: string }) {
   const rows = Array.from({ length: Math.ceil(items.length / ROW_SIZE) }, (_, i) => items.slice(i * ROW_SIZE, (i + 1) * ROW_SIZE));
 
   return (
     <div className={cn('relative w-full max-w-7xl mx-auto py-8 select-none space-y-4 md:space-y-6', className)}>
       {rows.map((row, i) => (
-        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} onOpen={onOpen} outcomeLabel={outcomeLabel} />
+        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} outcomeLabel={outcomeLabel} />
       ))}
     </div>
   );
 }
 
-function PortfolioRow({ items, delay, onOpen, outcomeLabel }: { items: PortfolioImage[]; delay: number; onOpen?: OpenHandler; outcomeLabel: string }) {
+function PortfolioRow({ items, delay, outcomeLabel }: { items: PortfolioImage[]; delay: number; outcomeLabel: string }) {
   const [activeImage, setActiveImage] = useState<number | null>(0);
 
   return (
@@ -327,17 +275,24 @@ function PortfolioRow({ items, delay, onOpen, outcomeLabel }: { items: Portfolio
         {items.map((image, index) => {
           const isActive = activeImage === index;
           return (
-            <motion.div
-              key={image.title + index}
-              className="relative cursor-pointer overflow-hidden rounded-2xl md:rounded-3xl border-2 border-[#DCEBFA] shrink-0 bg-[#DCEBFA]"
+            <motion.a
+              key={image.slug}
+              href={`/portfolio/${image.slug}`}
+              aria-label={`${image.title} · ${image.category} · ${image.result}`}
+              className="relative block cursor-pointer overflow-hidden rounded-2xl md:rounded-3xl border-2 border-[#DCEBFA] shrink-0 bg-[#DCEBFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow"
               animate={{
                 width: isActive ? '24rem' : '5rem',
                 height: '24rem',
               }}
               transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              // Hover already expands the card on desktop; on touch the first tap expands and the second opens it.
-              onClick={() => (isActive && onOpen ? onOpen(image) : setActiveImage(index))}
+              // Hover already expands the card on desktop; on touch the first tap expands and the second opens its page.
+              onClick={e => {
+                if (isActive) return;
+                e.preventDefault();
+                setActiveImage(index);
+              }}
               onHoverStart={() => setActiveImage(index)}
+              onFocus={() => setActiveImage(index)}
             >
               <img
                 src={image.src}
@@ -398,7 +353,7 @@ function PortfolioRow({ items, delay, onOpen, outcomeLabel }: { items: Portfolio
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
+            </motion.a>
           );
         })}
       </div>
@@ -819,7 +774,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
           <p
             ref={noteRef}
             aria-hidden="true"
-            className="flex items-start gap-1 font-['Caveat',cursive] text-2xl leading-none text-yellow -rotate-3 md:mr-10 md:text-[1.7rem]"
+            className="flex items-start gap-1 font-['Architects_Daughter',cursive] text-xl leading-none text-yellow -rotate-3 md:mr-10 md:text-[1.38rem]"
           >
             <span className="whitespace-pre">
               {note.split('').map((ch, i) => (
@@ -867,21 +822,13 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
 
 export default function Portfolio() {
   const c = usePageContent('portfolio');
-  const portfolioImages = useCollection<PortfolioImage>('portfolio', defaultPortfolio, (item, i) => ({
-    src: item.image,
-    alt: item.title,
-    code: `#${String(i + 1).padStart(2, '0')}`,
-    category: item.category,
-    title: item.title,
-    result: item.result,
-  }));
+  const portfolioImages = usePortfolio();
   const allLabel = c.heroFilterAllLabel || 'All';
   const filters: Filter[] = [allLabel, ...Array.from(new Set(portfolioImages.map(item => item.category).filter(Boolean)))].map(label => ({
     label,
     icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
   }));
   const [filter, setFilter] = useState(allLabel);
-  // "All" is a single preview strip; picking one of its cards opens that card's category.
   const isAll = filter === allLabel;
   const filtered = isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter);
   // The hero stack deals the first project of up to four categories, so it shows some range.
@@ -912,7 +859,6 @@ export default function Portfolio() {
         <HoverExpandPortfolio
           key={filter}
           items={filtered}
-          onOpen={isAll ? image => image.category && setFilter(image.category) : undefined}
           outcomeLabel={c.outcomeLabel}
         />
       </Section>

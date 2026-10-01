@@ -1,0 +1,318 @@
+/* A single case study's page (CaseStudyDetail.tsx). Builds on service-detail.css (back link, overview grid, steps,
+   "included" card); everything here uses the site tokens so it follows light and dark mode. */
+
+/* Hero: the result tag stands out from the category tag, facts list inside the intro card. */
+.inner-hero .sd-hero-tags .csd-hero-result {
+  border-color: #FFDE59;
+  background: #FFDE59;
+  color: #050505;
+}
+.inner-hero .csd-facts { display: grid; gap: 14px; margin-bottom: 4px; }
+.inner-hero .csd-facts > div {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+.inner-hero .csd-facts > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.inner-hero .csd-facts dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #FFDE59;
+}
+.inner-hero .csd-facts dd { font-size: 15.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.88); }
+
+/* Cover image with the headline result pinned to the corner. */
+.csd-cover {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 21 / 9;
+  border-radius: 28px;
+  background: var(--bg-card);
+  box-shadow: 0 30px 60px -34px rgba(15, 23, 42, 0.55);
+}
+.csd-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.csd-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.05) 55%, transparent);
+}
+.csd-cover-accent { position: absolute; inset: 0 0 auto; height: 6px; z-index: 1; }
+.csd-cover figcaption {
+  position: absolute;
+  left: clamp(18px, 3vw, 36px);
+  bottom: clamp(18px, 3vw, 32px);
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.csd-cover-result {
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: #FFDE59;
+  color: #050505;
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+  font-weight: 800;
+  line-height: 1;
+}
+.csd-cover-brand {
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* At-a-glance numbers under the cover. */
+.csd-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+.csd-metrics > li { display: grid; }
+.csd-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 22px 20px;
+  border-radius: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+}
+.dark .csd-metric { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.12); }
+.csd-metric-value {
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--clyx-blue);
+}
+.dark .csd-metric-value { color: var(--clyx-yellow); }
+.csd-metric-label { margin-top: 6px; font-size: 14px; font-weight: 700; color: var(--foreground); }
+.csd-metric-note { font-size: 13px; line-height: 1.4; color: var(--muted); }
+
+.csd-overview { margin-top: 72px; }
+
+/* Shared body copy for challenge and execution. */
+.csd-lede {
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+/* Challenge: story and pain points on the left, numbered goals card on the right. */
+.csd-split { display: grid; gap: 40px; }
+.csd-pains { display: grid; gap: 12px; margin-top: 28px; }
+.csd-pains li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.csd-pains li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: #E5484D;
+}
+.csd-goals {
+  padding: 28px;
+  border-radius: 20px;
+  background: #FFF8D6;
+  border: 1px solid rgba(255, 222, 89, 0.9);
+  box-shadow: 0 16px 36px -18px rgba(255, 196, 0, 0.55);
+}
+.dark .csd-goals {
+  background: rgba(255, 222, 89, 0.06);
+  border-color: rgba(255, 222, 89, 0.28);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+}
+.csd-goals .sd-included-title { color: #7A5B00; }
+.dark .csd-goals .sd-included-title { color: var(--clyx-yellow); }
+.csd-goals ol { display: grid; gap: 16px; }
+.csd-goals li {
+  display: flex;
+  gap: 14px;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+.csd-goal-num {
+  flex: none;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.9;
+  color: var(--clyx-blue);
+}
+.dark .csd-goal-num { color: var(--clyx-yellow); }
+
+/* Results: a blue panel with the headline numbers, the same in light and dark mode. */
+.csd-results-panel {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px, 5vw, 64px);
+  border-radius: 28px;
+  color: #FFFFFF;
+  background:
+    radial-gradient(45% 70% at 80% 0%, rgba(255, 222, 89, 0.16), transparent 62%),
+    linear-gradient(150deg, #0247C4 0%, #013AA3 45%, #002366 100%);
+  box-shadow: 0 30px 60px -34px rgba(1, 35, 102, 0.7);
+}
+.csd-results-panel .csd-results-label { color: rgba(255, 255, 255, 0.7); }
+.csd-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px 20px;
+}
+.csd-results-grid > li { padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.2); }
+.csd-results-grid .scroll-reveal { display: flex; flex-direction: column; gap: 6px; }
+.csd-results-value {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: #FFDE59;
+}
+.csd-results-name { font-size: 15px; font-weight: 700; }
+.csd-results-note { font-size: 13.5px; line-height: 1.4; color: rgba(255, 255, 255, 0.68); }
+.csd-results-summary {
+  max-width: 52rem;
+  margin-top: 44px;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Client quote. */
+.csd-quote {
+  position: relative;
+  max-width: 56rem;
+  margin: 0 auto;
+  text-align: center;
+}
+.csd-quote-icon { margin: 0 auto 22px; color: var(--clyx-blue); }
+.dark .csd-quote-icon { color: var(--clyx-yellow); }
+.csd-quote p {
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -.015em;
+  color: var(--foreground);
+}
+.csd-quote footer {
+  margin-top: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Learnings reuse the service step cards. */
+.csd-learning-grid { display: grid; gap: 16px; }
+.csd-learning-grid > li { display: grid; }
+
+/* More case studies: image cards linking to their pages. */
+.csd-more-grid { display: grid; gap: 18px; }
+.csd-more-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  transition: transform .3s var(--ease-out), box-shadow .3s var(--ease-out), border-color .3s var(--ease-out);
+}
+.dark .csd-more-card { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.12); }
+.csd-more-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 222, 89, 0.6);
+  box-shadow: 0 24px 50px -24px rgba(255, 222, 89, 0.45);
+}
+.csd-more-card:focus-visible { outline: 2px solid var(--clyx-blue); outline-offset: 3px; }
+.dark .csd-more-card:focus-visible { outline-color: var(--clyx-yellow); }
+.csd-more-media { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+.csd-more-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s var(--ease-out);
+}
+.csd-more-card:hover .csd-more-media img { transform: scale(1.05); }
+.csd-more-result {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: #FFDE59;
+  color: #050505;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+.csd-more-body { display: flex; flex-direction: column; gap: 6px; padding: 20px 52px 22px 20px; }
+.csd-more-category {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.csd-more-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--foreground);
+}
+.csd-more-line { font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+.csd-more-arrow {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  color: var(--clyx-blue);
+  transition: transform .3s var(--ease-out);
+}
+.dark .csd-more-arrow { color: var(--clyx-yellow); }
+.csd-more-card:hover .csd-more-arrow { transform: translate(3px, -3px); }
+
+@media (min-width: 640px) {
+  .csd-more-grid { grid-template-columns: repeat(2, 1fr); }
+  .csd-learning-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .csd-metrics { grid-template-columns: repeat(4, 1fr); }
+  .csd-split { grid-template-columns: 1.25fr .9fr; gap: 64px; align-items: start; }
+  .csd-results-grid { grid-template-columns: repeat(4, 1fr); }
+  .csd-learning-grid { grid-template-columns: repeat(3, 1fr); }
+  .csd-more-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 767px) {
+  .csd-cover { aspect-ratio: 4 / 3; border-radius: 20px; }
+  .csd-overview { margin-top: 48px; }
+  .csd-goals { padding: 22px 20px; }
+  .csd-results-panel { border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .csd-more-card, .csd-more-card:hover, .csd-more-media img, .csd-more-card:hover .csd-more-media img,
+  .csd-more-arrow, .csd-more-card:hover .csd-more-arrow { transition: none; transform: none; }
+}

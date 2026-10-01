@@ -27,9 +27,9 @@
   display: flex;
   align-items: flex-start;
   gap: 2px;
-  font-family: 'Caveat', cursive;
-  font-size: 1.55rem;
-  font-weight: 600;
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.25rem;
+  font-weight: 400;
   line-height: 1;
   color: var(--she-yellow);
   transform: rotate(-4deg);

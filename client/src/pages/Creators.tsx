@@ -124,6 +124,8 @@ export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }
 
 // How far the pinned glass card sits from the top of the screen (clears the floating header).
 const FEATURE_PIN_TOP = 84;
+// How blue the stage must be (0 = white, 1 = baby blue) before the headline rises in: just after scrolling starts.
+const HEADLINE_IN_AT = 0.1;
 // Pinned-scroll timeline (0 → 1): the headline slides away over exactly the stretch in which the six video cards rise
 // one by one, so the last card lands as the lines vanish; then "See more".
 const LINES_OUT: [number, number] = [0, 0.78];
@@ -183,10 +185,12 @@ function RiseCard({ progress, i, card }: { progress: MotionValue<number>; i: num
 function FeatureStage({ content: c }: { content: Record<string, string> }) {
   const feature = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  // Blue only while the section crosses a line 40% down the screen: on page load it sits below that line, so it starts white.
-  const featureInView = useInView(feature, { margin: '-40% 0px -60% 0px' });
-  // 0 = white, 1 = baby blue. Follows the scroll: it starts tinting the moment the section's top edge enters the
-  // screen, is fully blue by the time that edge is halfway up, and fades back as the section's bottom leaves.
+  // The headline rises in as soon as the visitor starts scrolling into the section (the first bit of blue), and drops
+  // back out once the section has scrolled away, so it rises again on the way back.
+  const [featureInView, setFeatureInView] = useState(false);
+  // 0 = white, 1 = baby blue. Follows the scroll: white wherever the section sits when the visitor starts scrolling
+  // (the part peeking under the hero stays white), tints as its top edge rises to near the header, and fades back as
+  // the section's bottom leaves.
   const tint = useMotionValue(0);
   const background = useTransform(tint, [0, 1], ['#FFFFFF', '#A2D2FF']);
   // 0 when the card pins, 1 when the pinned stretch (the track's spacer) has been scrolled through.
@@ -207,9 +211,14 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
       const stage = feature.current?.getBoundingClientRect();
       if (stage) {
         const vh = window.innerHeight;
-        const enter = (vh - stage.top) / (vh * 0.5);
+        // Where the top edge is at the top of the page, or the bottom of the screen if it starts further down.
+        const from = Math.min(vh, stage.top + window.scrollY);
+        const to = vh * 0.15;
+        const enter = from > to ? (from - stage.top) / (from - to) : 1;
         const exit = (stage.bottom - vh * 0.4) / (vh * 0.2);
-        tint.set(Math.min(1, Math.max(0, Math.min(enter, exit))));
+        const value = Math.min(1, Math.max(0, Math.min(enter, exit)));
+        tint.set(value);
+        setFeatureInView(value > HEADLINE_IN_AT);
       }
       const el = track.current;
       const card = el?.firstElementChild as HTMLElement | null;

@@ -142,7 +142,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     label: 'Projects',
     singular: 'project',
     icon: LayoutGrid,
-    description: 'Project cards on the Portfolio page. Categories become the filter buttons automatically.',
+    description: 'Project cards on the Portfolio page; each card opens its own page. Categories become the filter buttons automatically.',
     position: 'end',
     titleKey: 'title',
     subtitleKey: 'result',
@@ -153,6 +153,13 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'category', label: 'Category', placeholder: 'Beauty' },
       { key: 'result', label: 'Outcome', placeholder: '3.4x ROAS', wide: true },
       { key: 'image', label: 'Image', type: 'image', wide: true },
+      {
+        key: 'detail',
+        label: 'Project story (on the project’s own page)',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Leave empty to use the standard write-up for this category.',
+      },
     ],
   },
   creators: {

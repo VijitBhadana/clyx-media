@@ -1,0 +1,59 @@
+/* A single portfolio project's page (PortfolioDetail.tsx). Builds on service-detail.css and case-study-detail.css;
+   only the outcome panel's own layout lives here. */
+
+/* Outcome: heading and big number on the left, deliverables checklist on the right. */
+.pfd-result-panel { display: grid; gap: 40px; }
+.pfd-result-value { margin-top: 28px; font-size: clamp(3rem, 8vw, 6rem); }
+.pfd-case-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: #FFDE59;
+  color: #050505;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: gap .25s var(--ease-out), background-color .25s var(--ease-out);
+}
+.pfd-case-link:hover { gap: 12px; background: #FFFFFF; }
+.pfd-case-link:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+
+.pfd-deliverables {
+  align-self: end;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.07);
+}
+.pfd-deliverables-title {
+  margin-bottom: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #FFDE59;
+}
+.pfd-deliverables ul { display: grid; gap: 14px; }
+.pfd-deliverables li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+}
+.pfd-deliverables li svg { flex: none; margin-top: 2px; color: #FFDE59; }
+
+@media (min-width: 1024px) {
+  .pfd-result-panel { grid-template-columns: 1.3fr .9fr; gap: 64px; }
+}
+@media (max-width: 767px) {
+  .pfd-deliverables { padding: 20px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pfd-case-link, .pfd-case-link:hover { transition: none; }
+}

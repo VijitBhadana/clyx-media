@@ -13,7 +13,10 @@ import { safeHref, sectionDefaults, splitLines, usePageContent } from '@/lib/pag
 import { Lines } from '@/components/ui/Lines';
 import { markIntroLoaderPlayed, shouldPlayIntroLoader } from '@/lib/introLoader';
 import { useLandingMotion } from '@/hooks/useLandingMotion';
+import { API_URL } from '@/lib/api';
 import '../styles/landing-v1.css';
+
+type NewsletterStatus = { kind: 'idle' | 'sending' | 'done' } | { kind: 'error'; message: string };
 
 const COUNT_MS = 1800;
 const NUMBER = /^(\D*?)(\d+(?:\.\d+)?)(.*)$/;
@@ -70,6 +73,7 @@ export default function LandingV1() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [showLoader] = useState(shouldPlayIntroLoader);
   const [loaderDone, setLoaderDone] = useState(false);
+  const [newsletter, setNewsletter] = useState<NewsletterStatus>({ kind: 'idle' });
   const c = usePageContent('home');
   const hero = useBlock('hero', HERO_DEFAULTS);
   // "We turn organic clips into scaled accounts." -> first line, then "into" + the highlighted (typed) phrase.
@@ -112,12 +116,22 @@ export default function LandingV1() {
     };
   }, [showLoader]);
 
-  const onNewsletterSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const input = e.currentTarget.querySelector('input');
-    if (input?.value) {
-      alert(`Thank you for subscribing! We've sent a confirmation to ${input.value}`);
-      input.value = '';
+    const form = e.currentTarget;
+    setNewsletter({ kind: 'sending' });
+    try {
+      const res = await fetch(`${API_URL}/api/public/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || c.newsletterError);
+      form.reset();
+      setNewsletter({ kind: 'done' });
+    } catch (err) {
+      setNewsletter({ kind: 'error', message: err instanceof Error && err.message !== 'Failed to fetch' ? err.message : c.newsletterNetworkError });
     }
   };
 
@@ -127,7 +141,7 @@ export default function LandingV1() {
       <div ref={rootRef} className="v1-landing-wrapper bg-[color:var(--background)] text-foreground min-h-screen transition-colors">
         {showLoader && (
           <div id="loader" className={loaderDone ? 'loaded' : undefined} role="status" aria-label="Loading CLYX">
-            <div className="loader-mark">{(c.loaderWordmark || 'CLYX.').replace(/\.$/, '')}<span>.</span></div>
+            <div className="loader-mark">{(c.loaderWordmark || 'CLYX').replace(/\.$/, '')}</div>
             <div className="loader-bar" aria-hidden="true"><span className="loader-progress" /></div>
           </div>
         )}
@@ -319,10 +333,18 @@ export default function LandingV1() {
         <p className="eyebrow">{c.newsletterEyebrow}</p>
         <h3>{c.newsletterTitle}</h3>
         <p>{c.newsletterText}</p>
-        <form id="newsletterForm" className="newsletter-form" onSubmit={onNewsletterSubmit}>
-          <input type="email" placeholder={c.newsletterPlaceholder} required />
-          <button type="submit" className="btn btn-primary">{c.newsletterButton}</button>
-        </form>
+        {newsletter.kind === 'done' ? (
+          <p role="status" className="newsletter-status newsletter-status--ok">{c.newsletterSuccess}</p>
+        ) : (
+          <form id="newsletterForm" className="newsletter-form" onSubmit={onNewsletterSubmit}>
+            <input name="email" type="email" placeholder={c.newsletterPlaceholder} required maxLength={200} autoComplete="email" aria-label={c.newsletterPlaceholder} />
+            <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="newsletter-honeypot" />
+            <button type="submit" className="btn btn-primary" disabled={newsletter.kind === 'sending'}>
+              {newsletter.kind === 'sending' ? c.newsletterSending : c.newsletterButton}
+            </button>
+          </form>
+        )}
+        {newsletter.kind === 'error' && <p role="alert" className="newsletter-status newsletter-status--error">{newsletter.message}</p>}
       </div>
     </section>
 

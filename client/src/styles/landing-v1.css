@@ -103,7 +103,6 @@ html:not(.dark) .v1-landing-wrapper .hero-title em.accent::-moz-selection {
 #loader { position: fixed; inset: 0; z-index: 99999; background: #050814 !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; transform: translateY(0); will-change: transform; transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1), visibility 0s linear 0.85s; }
 #loader.loaded { transform: translateY(-100%); visibility: hidden; pointer-events: none; }
 .loader-mark { font-family: var(--font-display); font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800; letter-spacing: -0.06em; line-height: 1; color: #FFFFFF; }
-.loader-mark span { color: #FFDE59; }
 .loader-bar { width: min(240px, 42vw); height: 4px; background: rgba(255, 255, 255, 0.14); border-radius: 4px; overflow: hidden; position: relative; }
 .loader-bar .loader-progress { position: absolute; inset: 0 auto 0 0; display: block; width: 0%; height: 100%; background: #FFDE59 !important; border-radius: inherit; transition: width 1.35s cubic-bezier(0.16, 1, 0.3, 1); }
 
@@ -782,17 +781,18 @@ html:not(.dark) .v1-landing-wrapper .founder-card .role { color: var(--clyx-blue
 html:not(.dark) .v1-landing-wrapper .founder-advisory-link { color: var(--clyx-blue); }
 
 /* ==========================================================================
-   FASTER TESTIMONIALS MARQUEE (Sped up from 36s to 15s)
+   TESTIMONIALS MARQUEE (30s loop)
    ========================================================================== */
 .testimonial-marquee { width: 100%; overflow: hidden; padding: 10px 0; }
 .testimonial-track { width: max-content;
   display: flex;
   gap: 28px;
-  animation: testimonial-roll 15s linear infinite;
+  animation: testimonial-roll 30s linear infinite;
   will-change: transform;
 }
 .testimonial-card { flex: 0 0 420px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 32px; display: flex; flex-direction: column; justify-content: space-between; }
 .testimonial-quote { font-size: 1.05rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 24px; font-style: italic; }
+.testimonial-meta { background: var(--bg-card-hover); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 18px; }
 .testimonial-meta .author { font-weight: 700; color: var(--text-primary); }
 .testimonial-meta .brand { font-size: 0.85rem; color: var(--clyx-yellow); }
 html:not(.dark) .v1-landing-wrapper .testimonial-meta .brand { color: var(--clyx-blue); }
@@ -1661,6 +1661,28 @@ html:not(.dark) .v1-landing-wrapper .career-comp {
 .newsletter-form input:focus {
   border-color: var(--clyx-yellow);
 }
+.newsletter-form .newsletter-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+.newsletter-form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.newsletter-inner .newsletter-status {
+  margin: 16px auto 0;
+  font-size: 0.95rem;
+}
+.newsletter-inner .newsletter-status--ok {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.newsletter-inner .newsletter-status--error {
+  color: #e5484d;
+}
 
 
 /* ==========================================================================
@@ -1968,9 +1990,12 @@ html:not(.dark) .v1-landing-wrapper #portfolio span.text-yellow {
   display: block;
   object-fit: cover;
   object-position: center 20%;
+  transform: scale(var(--photo-zoom, 1));
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.team-card:hover .team-card-photo img { transform: scale(1.05); }
+.team-card:hover .team-card-photo img { transform: scale(calc(var(--photo-zoom, 1) * 1.05)); }
+/* Wide-framed (passport-style) shots, zoomed in to a face crop like the rest. */
+.team-card-photo img[src$="/team/manvi.png"] { --photo-zoom: 1.2; transform-origin: 59.3% 6.6%; }
 
 .team-card-info { padding: 14px 6px 0; min-width: 0; }
 .team-card-name {
@@ -2039,7 +2064,8 @@ html:not(.dark) .v1-landing-wrapper .team-card.is-founder .team-card-role::befor
   #teamGrid { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
   .team-marquee-track { animation: none; }
   .team-marquee-set[aria-hidden="true"] { display: none; }
-  .team-card:hover, .team-card:hover .team-card-photo img { transform: none; }
+  .team-card:hover { transform: none; }
+  .team-card:hover .team-card-photo img { transform: scale(var(--photo-zoom, 1)); }
 }
 
 /* Light mode: blue instead of yellow for the hero, services, methodology and testimonials eyebrows, the methodology

@@ -15,6 +15,7 @@ export type BlogArticle = {
 export const defaultArticles: BlogArticle[] = [
   {
     title: 'Why the best creator ads do not feel like ads',
+    image: 'https://images.unsplash.com/photo-1611926653458-09294b3142bf?auto=format&fit=crop&w=1000&q=85',
     tag: 'Creator economy',
     date: '12.09.25',
     readTime: '4 min read',
@@ -57,6 +58,7 @@ An ad that does not feel like an ad is not a trick. It is respect for how people
   },
   {
     title: 'The performance creative loop, explained',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=85',
     tag: 'Performance',
     date: '04.09.25',
     readTime: '6 min read',
@@ -103,6 +105,7 @@ A campaign has a launch date and an end date. A loop has a rhythm. Ad fatigue, p
   },
   {
     title: 'From scroll-stopping hook to scalable system',
+    image: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&w=1000&q=85',
     tag: 'Growth',
     date: '28.08.25',
     readTime: '5 min read',
@@ -147,6 +150,7 @@ The goal is not to find the perfect ad. It is to build a machine that keeps find
   },
   {
     title: 'The page is part of the ad',
+    image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=1000&q=85',
     tag: 'CRO',
     date: '19.08.25',
     readTime: '3 min read',
@@ -180,6 +184,7 @@ The ad and the page are one experience. Design them together, and the budget sto
   },
   {
     title: 'What to do when everything is working a little',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1000&q=85',
     tag: 'Strategy',
     date: '11.08.25',
     readTime: '5 min read',
@@ -222,6 +227,7 @@ Working a little is not a stable state. It is slow decline disguised as comfort.
   },
   {
     title: 'Briefing for a voice, not a demographic',
+    image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1000&q=85',
     tag: 'Creators',
     date: '02.08.25',
     readTime: '4 min read',

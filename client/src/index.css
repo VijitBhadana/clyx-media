@@ -397,7 +397,7 @@ button:active,a:active{transform:scale(.97)}
 .v1-landing-wrapper .testimonial-track {
   display: flex;
   width: max-content;
-  animation: clyx-testimonial-roll 15s linear infinite !important;
+  animation: clyx-testimonial-roll 30s linear infinite !important;
   will-change: transform;
 }
 @keyframes clyx-ribbon-roll {
