@@ -22,6 +22,10 @@ export type ItemField = {
   placeholder?: string;
   default?: string;
   wide?: boolean;
+  /** Help text under the input. */
+  hint?: string;
+  /** Starts a new titled group in the edit panel (repeat-free: only set on the group's first field). */
+  section?: string;
 };
 
 /** How each repeating list is edited in the admin. Field keys match the backend schema for that list. */
@@ -214,21 +218,64 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     label: 'Open roles',
     singular: 'role',
     icon: Briefcase,
-    description: 'Open positions listed on the Careers page.',
+    description: 'Job cards on the Careers page. Each card opens a "See description" popup with the full details below.',
     position: 'end',
     titleKey: 'title',
     subtitleKey: 'detail',
     badgeKey: 'type',
     fields: [
-      { key: 'title', label: 'Role title', required: true, wide: true },
-      { key: 'type', label: 'Type / location', placeholder: 'Full-time / Remote', wide: true },
-      { key: 'detail', label: 'Short description', type: 'textarea', wide: true },
+      { key: 'title', label: 'Role title', required: true, wide: true, section: 'Card', placeholder: 'Short-form Video Editor' },
+      {
+        key: 'type',
+        label: 'Job type / location',
+        placeholder: 'Full-time / Mumbai or Remote',
+        wide: true,
+        hint: 'Job type first, then each location after a "/". Each part becomes a chip on the card.',
+      },
+      { key: 'detail', label: 'Short description (on the card)', type: 'textarea', wide: true, placeholder: 'One or two lines about the role.' },
+      {
+        key: 'status',
+        label: 'Status',
+        type: 'select',
+        options: ['Open', 'Hiring urgently', 'Closing soon'],
+        default: 'Open',
+        hint: '"Hiring urgently" and "Closing soon" show a badge on the card. Use Hide to take a role down.',
+      },
+      { key: 'department', label: 'Team / department', placeholder: 'Creative' },
+      { key: 'experience', label: 'Experience', placeholder: '2–4 years', section: 'Job details' },
+      { key: 'salary', label: 'Salary / pay', placeholder: '₹6–9 LPA' },
+      { key: 'openings', label: 'Openings', placeholder: '2' },
+      { key: 'applyBy', label: 'Apply by', placeholder: '31 Oct 2026' },
+      { key: 'skills', label: 'Skills (comma separated)', wide: true, placeholder: 'Premiere Pro, After Effects, CapCut' },
       {
         key: 'description',
-        label: 'Full description ("See description" popup)',
+        label: 'About the role',
         type: 'textarea',
         wide: true,
-        placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet. Leave empty to show the short description.',
+        section: 'Full description',
+        placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet. Leave everything here empty to show the short description.',
+      },
+      {
+        key: 'responsibilities',
+        label: 'What you will do (one point per line)',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Edit 15–20 Reels a week from raw creator footage\nCut hook variations for ad testing',
+      },
+      {
+        key: 'requirements',
+        label: 'What we are looking for (one point per line)',
+        type: 'textarea',
+        wide: true,
+        placeholder: '2+ years editing short-form video\nA portfolio of Reels or ads',
+      },
+      { key: 'niceToHave', label: 'Nice to have (one point per line)', type: 'textarea', wide: true },
+      {
+        key: 'perks',
+        label: 'Perks / what you get (one point per line)',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Direct founder access\nFlexible hours',
       },
     ],
   },

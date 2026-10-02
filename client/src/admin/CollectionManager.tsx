@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Eye, EyeOff, ImageOff, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMoveItem, useServerList, type AdminContent, type ListItem } from './useAdminData';
@@ -181,15 +181,18 @@ export default function CollectionManager({
         {editing && (
           <div className="adm-form-grid">
             {def.fields.map((f) => (
-              <Field key={f.key} label={f.label} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea'}>
-                <Control
-                  type={f.type}
-                  value={editing.draft[f.key] ?? ''}
-                  options={f.options}
-                  placeholder={f.placeholder}
-                  onChange={(v) => setEditing((e) => (e ? { ...e, draft: { ...e.draft, [f.key]: v } } : e))}
-                />
-              </Field>
+              <Fragment key={f.key}>
+                {f.section && <h4 className="adm-form-section">{f.section}</h4>}
+                <Field label={f.label} hint={f.hint} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea'}>
+                  <Control
+                    type={f.type}
+                    value={editing.draft[f.key] ?? ''}
+                    options={f.options}
+                    placeholder={f.placeholder}
+                    onChange={(v) => setEditing((e) => (e ? { ...e, draft: { ...e.draft, [f.key]: v } } : e))}
+                  />
+                </Field>
+              </Fragment>
             ))}
           </div>
         )}

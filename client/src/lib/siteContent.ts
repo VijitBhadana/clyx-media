@@ -45,7 +45,8 @@ const SCOPES: Record<string, Scope> = {
   // The article list shows cards only; the full text is fetched on the article's own page.
   blog: { blocks: [...GLOBAL, 'page_blog'], collections: { blog: ['title', 'tag', 'date', 'readTime', 'image', 'style'] } },
   blogPost: { blocks: [...GLOBAL, 'page_blog'], collections: { blog: null } },
-  careers: { blocks: [...GLOBAL, 'page_careers'], collections: { careers: ['title', 'type', 'detail', 'description'] } },
+  // Cards plus the full details for their "See description" popup.
+  careers: { blocks: [...GLOBAL, 'page_careers'], collections: { careers: null } },
   contact: { blocks: [...GLOBAL, 'page_contact'], collections: {} },
   // Legal pages, 404 and anything else with the site header and footer.
   other: { blocks: GLOBAL, collections: {} },

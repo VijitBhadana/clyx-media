@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Briefcase, FileText, MapPin, Rocket } from 'lucide-react';
+import { ArrowUpRight, Briefcase, Clock, FileText, IndianRupee, MapPin, Rocket } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import { RevealWords } from '@/components/ui/ScrollMotion';
 import CareersValuesFlow from '@/components/sections/CareersValuesFlow';
@@ -8,6 +8,7 @@ import { Label, Section } from '@/components/ui/primitives';
 import { useCollection } from '@/lib/siteContent';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import type { RoleInfo } from '@/components/sections/RoleDescriptionDialog';
 import '@/styles/careers-hero-card.css';
 // The apply form (and the dialog library under it) is only downloaded once a visitor points at or picks a role.
 const loadApplyDialog=()=>import('@/components/sections/ApplyDialog');
@@ -15,8 +16,12 @@ const ApplyDialog=lazy(loadApplyDialog);
 // Same for the "See description" popup.
 const loadDescDialog=()=>import('@/components/sections/RoleDescriptionDialog');
 const RoleDescriptionDialog=lazy(loadDescDialog);
-const defaultRoles=[{title:'Performance Marketing Lead',type:'Full-time / Remote',detail:'Own the decisions that turn winning creative into efficient growth.',description:''},{title:'Creator Partnerships Manager',type:'Full-time / Mumbai or Remote',detail:'Build the relationships and systems behind our creator network.',description:''},{title:'Conversion Designer',type:'Contract / Remote',detail:'Shape the pages, offers, and interactions that turn attention into action.',description:''}];
-export default function Careers(){const c=usePageContent('careers');const roles=useCollection('careers',defaultRoles,item=>({title:item.title,type:item.type,detail:item.detail,description:item.description||''}));const [cardIn,setCardIn]=useState(false);const showCard=useCallback(()=>setCardIn(true),[]);return <PageShell eyebrow={c.heroEyebrow} title={<span data-hero-title>{c.heroTitle}<span data-hero-baseline className="inline-block h-0 w-0"/><br/><RevealWords className="text-yellow" text={c.heroHighlight} delay={450}/></span>} intro="" heroDecor={<HeroLine onArrive={showCard}/>} aside={<HeroCard c={c} shown={cardIn}/>}><CareersHowWeWork c={c}/><RolesSection c={c} roles={roles}/><Section className="values-section"><CareersValuesFlow label={c.valuesLabel} title={c.valuesTitle} highlight={c.valuesHighlight} intro={c.valuesIntro} values={[{title:c.value1,text:c.value1Text},{title:c.value2,text:c.value2Text},{title:c.value3,text:c.value3Text}]}/></Section></PageShell>}
+type Role=RoleInfo;
+// Every text field of a role card from the CMS; missing ones become ''.
+const ROLE_KEYS=['title','type','detail','description','status','department','experience','salary','openings','applyBy','responsibilities','requirements','niceToHave','perks','skills'] as const;
+const toRole=(item:Record<string,any>):Role=>Object.fromEntries(ROLE_KEYS.map(k=>[k,typeof item[k]==='string'?item[k]:''])) as Role;
+const defaultRoles:Role[]=[{title:'Performance Marketing Lead',type:'Full-time / Remote',detail:'Own the decisions that turn winning creative into efficient growth.',description:''},{title:'Creator Partnerships Manager',type:'Full-time / Mumbai or Remote',detail:'Build the relationships and systems behind our creator network.',description:''},{title:'Conversion Designer',type:'Contract / Remote',detail:'Shape the pages, offers, and interactions that turn attention into action.',description:''}];
+export default function Careers(){const c=usePageContent('careers');const roles=useCollection<Role>('careers',defaultRoles,toRole);const [cardIn,setCardIn]=useState(false);const showCard=useCallback(()=>setCardIn(true),[]);return <PageShell eyebrow={c.heroEyebrow} title={<span data-hero-title>{c.heroTitle}<span data-hero-baseline className="inline-block h-0 w-0"/><br/><RevealWords className="text-yellow" text={c.heroHighlight} delay={450}/></span>} intro="" heroDecor={<HeroLine onArrive={showCard}/>} aside={<HeroCard c={c} shown={cardIn}/>}><CareersHowWeWork c={c}/><RolesSection c={c} roles={roles}/><Section className="values-section"><CareersValuesFlow label={c.valuesLabel} title={c.valuesTitle} highlight={c.valuesHighlight} intro={c.valuesIntro} values={[{title:c.value1,text:c.value1Text},{title:c.value2,text:c.value2Text},{title:c.value3,text:c.value3Text}]}/></Section></PageShell>}
 // Heartbeat line across the hero: runs from the left edge just above the headline, blips once past the
 // headline, then slips behind the card to the right edge. The card is revealed as the line reaches it.
 const LINE_START=250,LINE_SPEED=1.2; // ms before drawing starts, px drawn per ms
@@ -47,7 +52,6 @@ function HeroCard({c,shown}:{c:Record<string,string>;shown:boolean}){const tags=
 </a>}
 // Words rise out of a mask one by one once the heading scrolls into view.
 function AnimatedHighlight({text}:{text:string}){const ref=useRef<HTMLSpanElement>(null);const inView=useScrollReveal(ref);const words=text.split(/\s+/).filter(Boolean);return <span ref={ref} className={`roles-highlight text-clyx-yellow ${inView?'is-in':''}`}>{words.map((w,i)=><span key={i}>{i>0&&' '}<span className="rh-mask"><span className="rh-word" style={{'--i':i} as React.CSSProperties}>{w}</span></span></span>)}</span>}
-type Role={title:string;type:string;detail:string;description:string};
 function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [applyRole,setApplyRole]=useState<string|null>(null);const lastRole=useRef<string|null>(null);if(applyRole)lastRole.current=applyRole;const [descRole,setDescRole]=useState<Role|null>(null);const lastDesc=useRef<Role|null>(null);if(descRole)lastDesc.current=descRole;const preload=()=>{loadDescDialog();loadApplyDialog();};const gridRef=useRef<HTMLDivElement>(null);const gridInView=useScrollReveal(gridRef);const gridShown=useRef(false);if(gridInView)gridShown.current=true;return <section id="open-roles" className="relative scroll-mt-20 overflow-hidden bg-blue text-white">
   <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-white/[.06] blur-3xl"/>
   <div className="container relative py-10 md:py-12">
@@ -59,10 +63,13 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
       <span aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[.06] to-transparent transition-transform duration-700 group-hover:translate-x-full"/>
       <div className="flex items-center justify-between">
         <span className="display grid h-8 w-8 place-items-center rounded-lg border border-white/15 bg-white/[.06] text-xs font-semibold tabular-nums text-clyx-yellow transition-colors duration-300 group-hover:border-clyx-yellow group-hover:bg-clyx-yellow group-hover:text-clyx-dark">{String(i+1).padStart(2,'0')}</span>
+        {role.status&&role.status!=='Open'&&<span className="ml-2 mr-auto rounded-full bg-clyx-yellow px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.14em] text-clyx-dark">{role.status}</span>}
         <span className="grid h-8 w-8 place-items-center rounded-full bg-white text-clyx-blue transition-colors duration-300 group-hover:bg-clyx-yellow group-hover:text-clyx-dark" aria-hidden><ArrowUpRight size={14} className="transition-transform duration-300 group-hover:rotate-45"/></span>
       </div>
-      <h3 className="display mt-4 text-lg font-semibold md:text-xl">{role.title}</h3>
+      {role.department&&<p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">{role.department}</p>}
+      <h3 className={`display ${role.department?'mt-1':'mt-4'} text-lg font-semibold md:text-xl`}>{role.title}</h3>
       {role.detail&&<p className="mt-1.5 text-[13px] leading-5 text-white/65">{role.detail}</p>}
+      {(role.experience||role.salary)&&<p className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-white/80">{role.experience&&<span className="inline-flex items-center gap-1.5"><Clock size={12} className="text-clyx-yellow"/>{role.experience}</span>}{role.salary&&<span className="inline-flex items-center gap-1.5"><IndianRupee size={12} className="text-clyx-yellow"/>{role.salary}</span>}</p>}
       <div className="mt-auto flex flex-col items-start gap-3 pt-4 xl:flex-row xl:items-end xl:justify-between">
         {kind?<div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-clyx-yellow/30 bg-clyx-yellow/10 whitespace-nowrap px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-clyx-yellow"><Briefcase size={12}/>{kind}</span>
