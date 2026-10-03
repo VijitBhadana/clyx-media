@@ -1,9 +1,94 @@
 /* A single portfolio project's page (PortfolioDetail.tsx). Builds on service-detail.css and case-study-detail.css;
-   only the outcome panel's own layout lives here. */
+   only the intro and outcome panel's own layout lives here. */
+
+/* Intro: one card with the story on the left, a compact project image on the right and the outcome and services cards below. */
+.pfd-intro-grid {
+  display: grid;
+  gap: 40px;
+  padding: clamp(22px, 3.5vw, 44px);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 0 24px 60px -36px rgba(15, 23, 42, 0.35);
+}
+.dark .pfd-intro-grid { border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.6); }
+/* Outcome and "What we did": two cards side by side under the story and image. */
+.pfd-intro-cards { display: grid; gap: 20px; }
+.pfd-intro-cards > * { min-width: 0; }
+.pfd-intro-cards .pfd-mini-card,
+.dark .pfd-intro-cards .pfd-mini-card {
+  height: 100%;
+  padding: 24px 26px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: none;
+}
+.dark .pfd-intro-cards .pfd-mini-card { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04); }
+.pfd-intro-details { display: grid; gap: 28px; align-content: start; min-width: 0; }
+.pfd-story {
+  margin-top: 4px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.pfd-story .fmt-line[aria-hidden] { height: .7em; }
+.pfd-story .fmt-li + .fmt-li { margin-top: 6px; }
+.pfd-story .fmt-marker { color: var(--clyx-blue); font-weight: 700; }
+.dark .pfd-story .fmt-marker { color: var(--clyx-yellow); }
+
+.pfd-points ul { display: grid; gap: 12px; }
+.pfd-points li {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.pfd-intro-media { min-width: 0; }
+.csd-cover.pfd-cover { aspect-ratio: 1 / 1; max-height: 420px; border-radius: 20px; }
+.pfd-cover figcaption { right: clamp(18px, 3vw, 28px); }
+
+/* Outcome points in the hero card. */
+.pfd-fact-points { display: grid; gap: 4px; }
+.pfd-fact-points li { position: relative; padding-left: 16px; }
+.pfd-fact-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: .62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FFDE59;
+}
 
 /* Outcome: heading and big number on the left, deliverables checklist on the right. */
 .pfd-result-panel { display: grid; gap: 40px; }
 .pfd-result-value { margin-top: 28px; font-size: clamp(3rem, 8vw, 6rem); }
+.pfd-result-points { display: grid; gap: 10px; margin-top: 28px; }
+.pfd-result-points li {
+  position: relative;
+  padding-left: 26px;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: #FFDE59;
+}
+.pfd-result-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: .5em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
 .pfd-case-link {
   display: inline-flex;
   align-items: center;
@@ -49,9 +134,22 @@
 .pfd-deliverables li svg { flex: none; margin-top: 2px; color: #FFDE59; }
 
 @media (min-width: 1024px) {
+  .pfd-intro-grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, .85fr); gap: 40px 64px; align-items: start; }
   .pfd-result-panel { grid-template-columns: 1.3fr .9fr; gap: 64px; }
 }
+@media (min-width: 768px) {
+  .pfd-intro-cards { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  /* Stacked: the image comes first, at a modest size, then the details. */
+  .pfd-intro-media { order: -1; max-width: 420px; }
+}
 @media (max-width: 767px) {
+  .csd-cover.pfd-cover { aspect-ratio: 4 / 3; max-height: none; border-radius: 16px; }
+  .pfd-intro-grid { gap: 28px; border-radius: 22px; }
+  .pfd-intro-cards { gap: 14px; }
+  .pfd-intro-cards .pfd-mini-card, .dark .pfd-intro-cards .pfd-mini-card { padding: 20px 18px; }
+  .pfd-intro-media { max-width: none; }
   .pfd-deliverables { padding: 20px 18px; }
 }
 @media (prefers-reduced-motion: reduce) {

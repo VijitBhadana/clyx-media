@@ -19,6 +19,7 @@ import { pageDefaults, safeHref, splitLines, usePageContent } from '@/lib/pageCo
 import { usePortfolio, type PortfolioItem } from '@/lib/portfolio';
 import '@/styles/portfolio-hero.css';
 import { responsiveImage } from '@/lib/images';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 type PortfolioImage = PortfolioItem;
 
@@ -138,7 +139,7 @@ function HeroLead({ c }: { c: Record<string, string> }) {
 
   return (
     <div className="pf-lead">
-      {c.heroLede && <p className="pf-intro">{c.heroLede}</p>}
+      {c.heroLede && <p className="pf-intro"><FormattedText text={c.heroLede} /></p>}
       {stats.length > 0 && (
         <dl className="pf-stats">
           {stats.map((s, i) => (
@@ -249,20 +250,29 @@ function HeroTicker({ items }: { items: PortfolioImage[] }) {
 // Cards per hover-expand strip; longer lists (e.g. "All") stack into several strips.
 const ROW_SIZE = 6;
 
-function HoverExpandPortfolio({ items, className, outcomeLabel }: { items: PortfolioImage[]; className?: string; outcomeLabel: string }) {
+type ShowcaseProps = {
+  items: PortfolioImage[];
+  outcomeLabel: string;
+  // Card to open expanded instead of each strip's first one.
+  initialSlug?: string;
+  // When set, opening an expanded card calls this instead of following its link (used by "All" to jump to the card's category).
+  onSelect?: (item: PortfolioImage) => void;
+};
+
+function HoverExpandPortfolio({ items, className, ...rest }: ShowcaseProps & { className?: string }) {
   const rows = Array.from({ length: Math.ceil(items.length / ROW_SIZE) }, (_, i) => items.slice(i * ROW_SIZE, (i + 1) * ROW_SIZE));
 
   return (
     <div className={cn('relative w-full max-w-7xl mx-auto py-8 select-none space-y-4 md:space-y-6', className)}>
       {rows.map((row, i) => (
-        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} outcomeLabel={outcomeLabel} />
+        <PortfolioRow key={i} items={row} delay={0.2 + i * 0.08} {...rest} />
       ))}
     </div>
   );
 }
 
-function PortfolioRow({ items, delay, outcomeLabel }: { items: PortfolioImage[]; delay: number; outcomeLabel: string }) {
-  const [activeImage, setActiveImage] = useState<number | null>(0);
+function PortfolioRow({ items, delay, outcomeLabel, initialSlug, onSelect }: ShowcaseProps & { delay: number }) {
+  const [activeImage, setActiveImage] = useState<number | null>(() => Math.max(0, items.findIndex(item => item.slug === initialSlug)));
 
   return (
     <motion.div
@@ -286,11 +296,13 @@ function PortfolioRow({ items, delay, outcomeLabel }: { items: PortfolioImage[];
                 height: '24rem',
               }}
               transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              // Hover already expands the card on desktop; on touch the first tap expands and the second opens its page.
+              // Hover already expands the card on desktop; on touch the first tap expands and the second opens it.
               onClick={e => {
-                if (isActive) return;
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                if (isActive && !onSelect) return;
                 e.preventDefault();
-                setActiveImage(index);
+                if (isActive) onSelect?.(image);
+                else setActiveImage(index);
               }}
               onHoverStart={() => setActiveImage(index)}
               onFocus={() => setActiveImage(index)}
@@ -830,6 +842,11 @@ export default function Portfolio() {
     icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
   }));
   const [filter, setFilter] = useState(allLabel);
+  const [openSlug, setOpenSlug] = useState<string>();
+  const changeFilter = (label: string) => {
+    setOpenSlug(undefined);
+    setFilter(label);
+  };
   const isAll = filter === allLabel;
   const filtered = isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter);
   // The hero stack deals the first project of up to four categories, so it shows some range.
@@ -854,13 +871,25 @@ export default function Portfolio() {
     >
       <Section className="py-12 !pt-4 md:!pt-6">
         {/* Category Filter Pills */}
-        <FilterPills filters={filters} active={filter} onChange={setFilter} />
+        <FilterPills filters={filters} active={filter} onChange={changeFilter} />
 
-        {/* Hover-Expand Animated Showcase (remounted per filter so each strip opens on its first card) */}
+        {/* Hover-Expand Animated Showcase (remounted per filter so each strip opens on its first card).
+            In "All", clicking a card opens its category with that card expanded; there a click opens the project page. */}
         <HoverExpandPortfolio
           key={filter}
           items={filtered}
           outcomeLabel={c.outcomeLabel}
+          initialSlug={openSlug}
+          onSelect={
+            isAll
+              ? item => {
+                  // An uncategorised project has no tab to open, so go straight to its page.
+                  if (!item.category) return void (window.location.href = `/portfolio/${item.slug}`);
+                  setOpenSlug(item.slug);
+                  setFilter(item.category);
+                }
+              : undefined
+          }
         />
       </Section>
 

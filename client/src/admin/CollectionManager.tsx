@@ -183,7 +183,7 @@ export default function CollectionManager({
             {def.fields.map((f) => (
               <Fragment key={f.key}>
                 {f.section && <h4 className="adm-form-section">{f.section}</h4>}
-                <Field label={f.label} hint={f.hint} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea'}>
+                <Field label={f.label} hint={f.hint} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea' || f.type === 'richtext'}>
                   <Control
                     type={f.type}
                     value={editing.draft[f.key] ?? ''}

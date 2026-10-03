@@ -5,6 +5,7 @@ import { ICONS } from './ServiceGrid';
 import { pageDefaults, safeHref, useServiceBook, usePageContent, type BookChapter } from '@/lib/pageContent';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '../../styles/service-book.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Scroll-driven flip book for the homepage services (see service-book.css).
 // Leaf 0 is the CLYX Media cover; leaf k is service k. Each leaf's front is the right-hand page and its back becomes
@@ -97,7 +98,7 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
         <span className="sb-chip"><ServiceIcon service={service} size={22} /></span>
         <h3>{service.title}</h3>
       </div>
-      <p className="sb-detail-text">{service.text}</p>
+      <p className="sb-detail-text"><FormattedText text={service.text} /></p>
       {service.points.length > 0 && <p className="sb-label">{c.bookIncludedLabel}</p>}
       <ul className="sb-points">
         {service.points.map((point, i) => (

@@ -3,6 +3,7 @@ import { Reveal } from '@/components/ui/ScrollMotion';
 import { Lines } from '@/components/ui/Lines';
 import { pageDefaults } from '@/lib/pageContent';
 import '@/styles/operating-principle.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Four stops on the feedback loop, placed clockwise from the top. Labels come from opLoop1..4.
 const LOOP = [
@@ -29,7 +30,7 @@ export default function OperatingPrinciple({ content: c = pageDefaults('services
         </div>
 
         <div className="op-body">
-          <p className="op-text">{c.opText}</p>
+          <p className="op-text"><FormattedText text={c.opText} /></p>
           <ol className="op-steps">
             {steps.map((step, i) => (
               <li key={i} style={{ '--i': i } as React.CSSProperties}>

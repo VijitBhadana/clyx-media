@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import type { CollectionName } from '@/lib/pageContent';
 
-export type ItemFieldType = 'text' | 'textarea' | 'image' | 'url' | 'select' | 'color';
+export type ItemFieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color';
 export type ItemField = {
   key: string;
   label: string;
@@ -62,7 +62,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'roas', label: 'Headline result', placeholder: '3.4X ROAS SCALE' },
       { key: 'spend', label: 'Monthly spend', placeholder: '₹5L / mo' },
       { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Scaling', 'Optimizing', 'Completed'], default: 'Scaling' },
-      { key: 'desc', label: 'Description', type: 'textarea', wide: true },
+      { key: 'desc', label: 'Description', type: 'richtext', wide: true },
       { key: 'img', label: 'Cover image', type: 'image', wide: true },
       { key: 'ctaText', label: 'Button text', placeholder: 'View Case Study' },
       { key: 'ctaUrl', label: 'Button link', type: 'url', placeholder: '/case-studies' },
@@ -99,7 +99,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'role', label: 'Role', placeholder: 'Founder & CEO' },
       { key: 'badge', label: 'Badge', placeholder: '200+ Creators' },
       { key: 'img', label: 'Photo', type: 'image' },
-      { key: 'bio', label: 'Short bio', type: 'textarea', wide: true },
+      { key: 'bio', label: 'Short bio', type: 'richtext', wide: true },
     ],
   },
   testimonials: {
@@ -113,7 +113,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     subtitleKey: 'quote',
     badgeKey: 'brand',
     fields: [
-      { key: 'quote', label: 'Quote', type: 'textarea', required: true, wide: true },
+      { key: 'quote', label: 'Quote', type: 'richtext', required: true, wide: true },
       { key: 'name', label: 'Name', required: true },
       { key: 'role', label: 'Role', placeholder: 'Founder & CEO' },
       { key: 'brand', label: 'Brand' },
@@ -137,7 +137,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'headline', label: 'Headline', wide: true },
       { key: 'result', label: 'Result', placeholder: '3.4x ROAS' },
       { key: 'accent', label: 'Accent colour', type: 'color', default: '#FFDE59' },
-      { key: 'detail', label: 'Story', type: 'textarea', wide: true },
+      { key: 'detail', label: 'Story', type: 'richtext', wide: true },
       { key: 'image', label: 'Image', type: 'image', wide: true },
     ],
   },
@@ -160,7 +160,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       {
         key: 'detail',
         label: 'Project story (on the project’s own page)',
-        type: 'textarea',
+        type: 'richtext',
         wide: true,
         placeholder: 'Leave empty to use the standard write-up for this category.',
       },
@@ -203,11 +203,11 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'date', label: 'Date', placeholder: '12.09.25' },
       { key: 'readTime', label: 'Read time', placeholder: '4 min read' },
       { key: 'style', label: 'Card colour (used when no image is set)', type: 'select', options: ['yellow', 'blue', 'soft'], default: 'yellow' },
-      { key: 'excerpt', label: 'Intro (under the article title)', type: 'textarea', wide: true },
+      { key: 'excerpt', label: 'Intro (under the article title)', type: 'richtext', wide: true },
       {
         key: 'body',
         label: 'Article text',
-        type: 'textarea',
+        type: 'richtext',
         wide: true,
         placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet, "> " a quote. Leave empty to keep the built-in text.',
       },
@@ -232,7 +232,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
         wide: true,
         hint: 'Job type first, then each location after a "/". Each part becomes a chip on the card.',
       },
-      { key: 'detail', label: 'Short description (on the card)', type: 'textarea', wide: true, placeholder: 'One or two lines about the role.' },
+      { key: 'detail', label: 'Short description (on the card)', type: 'richtext', wide: true, placeholder: 'One or two lines about the role.' },
       {
         key: 'status',
         label: 'Status',
@@ -250,7 +250,7 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       {
         key: 'description',
         label: 'About the role',
-        type: 'textarea',
+        type: 'richtext',
         wide: true,
         section: 'Full description',
         placeholder: 'Blank line between paragraphs. "## " starts a heading, "- " a bullet. Leave everything here empty to show the short description.',

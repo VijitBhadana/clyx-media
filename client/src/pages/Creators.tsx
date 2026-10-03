@@ -30,36 +30,63 @@ const defaultFeaturePosters = [
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
 ];
 
+type GalleryCreator = { image: string; name?: string; handle?: string; platform?: string; reach?: string };
+
 type ColumnProps = {
-  images: string[];
+  creators: GalleryCreator[];
   y: MotionValue<number>;
 };
 
-const Column = ({ images, y }: ColumnProps) => {
+const Column = ({ creators, y }: ColumnProps) => {
   return (
     <motion.div
       className="relative -top-[30%] flex h-full w-1/4 min-w-[180px] sm:min-w-[220px] flex-col gap-[1.5vw] first:top-[-30%] [&:nth-child(2)]:top-[-65%] [&:nth-child(3)]:top-[-30%] [&:nth-child(4)]:top-[-50%] will-change-transform"
       style={{ y, translateZ: 0 }}
     >
-      {images.map((src, i) => (
-        <div key={i} className="relative h-full w-full overflow-hidden rounded-2xl border border-grid shadow-md">
-          <img
-            {...responsiveImage(src, '(max-width: 767px) 50vw, 25vw')}
-            alt="CLYX creator"
-            loading="lazy"
-            decoding="async"
-            className="pointer-events-none h-full w-full object-cover"
-          />
-        </div>
-      ))}
+      {creators.map(({ image, name, handle, platform, reach }, i) => {
+        const meta = [handle, reach && `${reach} reach`].filter(Boolean).join(' · ');
+        return (
+          <div key={i} className="relative h-full w-full overflow-hidden rounded-2xl border border-grid shadow-md">
+            <img
+              {...responsiveImage(image, '(max-width: 767px) 50vw, 25vw')}
+              alt={name || 'CLYX creator'}
+              loading="lazy"
+              decoding="async"
+              className="pointer-events-none h-full w-full object-cover"
+            />
+            {/* Black strap with the details filled in from the admin panel; hidden when a creator has none. */}
+            {(name || meta || platform) && (
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-black/85 px-3 py-2.5 text-white backdrop-blur-sm sm:px-4 sm:py-3">
+                <div className="min-w-0">
+                  {name && <p className="truncate text-sm font-semibold sm:text-base">{name}</p>}
+                  {meta && <p className="truncate text-[11px] text-white/70 sm:text-xs">{meta}</p>}
+                </div>
+                {platform && (
+                  <span className="shrink-0 rounded-full border border-white/25 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-yellow sm:text-[10px]">
+                    {platform}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </motion.div>
   );
 };
 
+const defaultGalleryCreators: GalleryCreator[] = defaultCreatorImages.map(image => ({ image }));
+
 export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }: { content?: Record<string, string> }) {
-  const creatorImages = useCollection<string>('creators', defaultCreatorImages, item => item.image).filter(Boolean);
+  const creatorImages = useCollection<GalleryCreator>('creators', defaultGalleryCreators, item => ({
+    image: item.image,
+    name: item.name?.trim(),
+    handle: item.handle?.trim(),
+    platform: item.platform?.trim(),
+    reach: item.reach?.trim(),
+  })).filter(item => item.image);
   // Each photo shows once: split them across the four columns as evenly as possible, earlier columns taking the extras.
-  const source = creatorImages.length ? creatorImages : defaultCreatorImages;
+  const source = creatorImages.length ? creatorImages : defaultGalleryCreators;
   const base = Math.floor(source.length / 4);
   const extra = source.length % 4;
   const columns = [0, 1, 2, 3].map(k => {
@@ -114,10 +141,10 @@ export function ParallaxCreatorGallery({ content: c = pageDefaults('creators') }
         ref={gallery}
         className="relative box-border flex h-[140vh] md:h-[160vh] gap-[2vw] overflow-hidden bg-transparent p-[2vw]"
       >
-        <Column images={columns[0]} y={y} />
-        <Column images={columns[1]} y={y2} />
-        <Column images={columns[2]} y={y3} />
-        <Column images={columns[3]} y={y4} />
+        <Column creators={columns[0]} y={y} />
+        <Column creators={columns[1]} y={y2} />
+        <Column creators={columns[2]} y={y3} />
+        <Column creators={columns[3]} y={y4} />
       </div>
     </div>
   );

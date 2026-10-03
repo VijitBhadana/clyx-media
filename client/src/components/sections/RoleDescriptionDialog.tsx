@@ -1,6 +1,7 @@
 import { ArrowUpRight, Briefcase, CalendarClock, Clock, IndianRupee, MapPin, Users, X, type LucideIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { parseBody } from '@/lib/blog';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 type Copy = Record<string, string>;
 export type RoleInfo = {
@@ -112,8 +113,8 @@ export default function RoleDescriptionDialog({ open, onOpenChange, role, onAppl
               {blocks.map((b, i) =>
                 b.kind === 'h2' ? <h3 key={i} className="display mt-2 text-lg font-semibold text-white">{b.text}</h3>
                 : b.kind === 'list' ? <ul key={i} className="grid gap-2">{b.items.map((item, j) => <li key={j} className="relative pl-5 before:absolute before:left-0 before:top-[.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-clyx-yellow">{item}</li>)}</ul>
-                : b.kind === 'quote' ? <p key={i} className="border-l-2 border-clyx-yellow pl-4 italic text-white/85">{b.text}</p>
-                : <p key={i}>{b.text}</p>
+                : b.kind === 'quote' ? <p key={i} className="border-l-2 border-clyx-yellow pl-4 italic text-white/85"><FormattedText text={b.text} /></p>
+                : <p key={i}><FormattedText text={b.text} /></p>
               )}
             </section>
           )}

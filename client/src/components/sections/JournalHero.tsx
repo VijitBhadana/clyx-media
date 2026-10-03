@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUpRight, Asterisk, PenLine } from 'lucide-react';
 import { DirectionalReveal, Reveal } from '@/components/ui/ScrollMotion';
 import type { BlogPost } from '@/lib/blog';
 import '@/styles/journal-hero.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Blog hero: a cream magazine masthead. Title and copy on the left, the latest three posts as an
 // "In this issue" index on the right, and a scrolling strip of topics along the bottom edge.
@@ -23,7 +24,7 @@ export default function JournalHero({ c, posts }: { c: Record<string, string>; p
           <Reveal className="jh-copy">
             <p className="jh-eyebrow"><PenLine size={13} aria-hidden="true" />{c.journalEyebrow}</p>
             <h1 className="jh-title">{c.journalTitle}{c.journalHighlight && <><br /><span className="jh-hl">{c.journalHighlight}</span></>}</h1>
-            {c.journalIntro && <p className="jh-intro">{c.journalIntro}</p>}
+            {c.journalIntro && <p className="jh-intro"><FormattedText text={c.journalIntro} /></p>}
           </Reveal>
 
           {latest.length > 0 && (

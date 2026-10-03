@@ -15,6 +15,7 @@ import { markIntroLoaderPlayed, shouldPlayIntroLoader } from '@/lib/introLoader'
 import { useLandingMotion } from '@/hooks/useLandingMotion';
 import { API_URL } from '@/lib/api';
 import '../styles/landing-v1.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 type NewsletterStatus = { kind: 'idle' | 'sending' | 'done' } | { kind: 'error'; message: string };
 
@@ -161,7 +162,7 @@ export default function LandingV1() {
           <span className="hero-line">{heroLine1 || 'We turn organic clips'}</span>
           {heroLine2 && <><br /><span className="hero-line">into <HeroTypewriter base={heroLine2} phrases={heroPhrases} /></span></>}
         </h1>
-        <p className="hero-sub">{hero.sub || HERO_DEFAULTS.sub}</p>
+        <p className="hero-sub"><FormattedText text={hero.sub || HERO_DEFAULTS.sub} /></p>
         <div className="hero-cta">
           <a href={safeHref(c.heroPrimaryUrl || '/contact')} className="btn btn-primary btn-large">{c.heroPrimaryText}</a>
           {c.heroSecondaryText && <a href={safeHref(c.heroSecondaryUrl || '#engine')} className="btn btn-ghost btn-large">{c.heroSecondaryText}</a>}
@@ -198,7 +199,7 @@ export default function LandingV1() {
       <div className="kinetic-header">
         <p className="eyebrow" style={{ marginBottom: "8px" }}>{c.engineEyebrow}</p>
         <h2>{c.engineTitle} <span className="kinetic-accent">{c.engineHighlight}</span></h2>
-        <p>{c.engineText}</p>
+        <p><FormattedText text={c.engineText} /></p>
       </div>
 
       <div className="kinetic-sticky-wrap">
@@ -299,7 +300,7 @@ export default function LandingV1() {
         <div className="how-copy">
           <p className="eyebrow">{c.howEyebrow}</p>
           <h2><Lines text={c.howTitle} /></h2>
-          <p className="how-text">{c.howText}</p>
+          <p className="how-text"><FormattedText text={c.howText} /></p>
         </div>
         <HowSteps content={c} />
       </div>
@@ -313,7 +314,7 @@ export default function LandingV1() {
       <div className="section-head">
         <p className="eyebrow">{c.teamEyebrow}</p>
         <h2>{c.teamTitle}</h2>
-        <p style={{ marginTop: "10px", maxWidth: "600px", color: "var(--text-secondary)" }}>{c.teamText}</p>
+        <p style={{ marginTop: "10px", maxWidth: "600px", color: "var(--text-secondary)" }}><FormattedText text={c.teamText} /></p>
       </div>
       <TeamMarquee />
     </section>
@@ -332,7 +333,7 @@ export default function LandingV1() {
       <div className="newsletter-inner">
         <p className="eyebrow">{c.newsletterEyebrow}</p>
         <h3>{c.newsletterTitle}</h3>
-        <p>{c.newsletterText}</p>
+        <p><FormattedText text={c.newsletterText} /></p>
         {newsletter.kind === 'done' ? (
           <p role="status" className="newsletter-status newsletter-status--ok">{c.newsletterSuccess}</p>
         ) : (
@@ -356,7 +357,7 @@ export default function LandingV1() {
           {c.ctaEyebrow}
         </p>
         <h2>{c.ctaTitle} <span>{c.ctaHighlight}</span></h2>
-        <p className="cta-subtext">{c.ctaText}</p>
+        <p className="cta-subtext"><FormattedText text={c.ctaText} /></p>
       </div>
       <div className="cta-actions">
         <a href={safeHref(c.ctaPrimaryUrl)} target="_blank" rel="noreferrer" className="btn btn-primary cta-btn">{c.ctaPrimaryText} <span aria-hidden="true">↗</span></a>

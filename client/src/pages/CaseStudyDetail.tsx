@@ -13,6 +13,7 @@ import NotFound from './NotFound';
 import '@/styles/service-detail.css';
 import '@/styles/case-study-detail.css';
 import { responsiveImage } from '@/lib/images';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -104,7 +105,7 @@ export default function CaseStudyDetail() {
         <div className="sd-overview-grid csd-overview">
           <Reveal>
             <Label>{c.detailOverviewLabel}</Label>
-            <p className="sd-overview-text">{story.overview}</p>
+            <p className="sd-overview-text"><FormattedText text={story.overview} /></p>
           </Reveal>
           {story.services.length > 0 && (
             <Reveal delay={150}>

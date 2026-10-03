@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { responsiveImage } from '@/lib/images';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const ChevronLeftIcon = () => (
   <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -389,7 +390,7 @@ export default function CoverFlowCarousel({
                       <p
                         className="text-xs text-white/80 max-w-[260px] m-0 mb-3 leading-relaxed"
                       >
-                        {item.desc}
+                        <FormattedText text={item.desc} />
                       </p>
                     )}
 

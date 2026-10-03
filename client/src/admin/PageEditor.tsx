@@ -174,7 +174,7 @@ export default function PageEditor({
                   <div className="adm-form-grid">
                     {section.fields.map((f) => {
                       const value = valueOf(block, f.key);
-                      const wide = f.type === 'textarea' || f.type === 'image' || f.default.length > 48;
+                      const wide = f.type === 'textarea' || f.type === 'richtext' || f.type === 'image' || f.default.length > 48;
                       return (
                         <Field
                           key={f.key}

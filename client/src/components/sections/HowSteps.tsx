@@ -1,6 +1,7 @@
 import { useRef, type CSSProperties } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { pageDefaults } from '@/lib/pageContent';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 export default function HowSteps({ content: c = pageDefaults('home') }: { content?: Record<string, string> }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -14,7 +15,7 @@ export default function HowSteps({ content: c = pageDefaults('home') }: { conten
           <span className="how-num">{String(index + 1).padStart(2, '0')}</span>
           <div>
             <h4>{step.title}</h4>
-            <p>{step.text}</p>
+            <p><FormattedText text={step.text} /></p>
           </div>
         </div>
       ))}

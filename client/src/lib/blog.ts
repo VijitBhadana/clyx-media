@@ -42,22 +42,34 @@ export type BodyBlock =
   | { kind: 'quote'; text: string }
   | { kind: 'list'; items: string[] };
 
-/** Splits an article body (blank-line separated; "## ", "> " and "- " prefixes) into renderable blocks. */
+/** A plain (unindented) "- ", "* " or "• " bullet line. */
+const BULLET = /^[-*•][ \t]+/;
+
+/**
+ * Splits an article body (blank-line separated; "## ", "> " and bullet prefixes) into renderable blocks. Paragraph
+ * and quote text keeps its line breaks, indents and bullet / numbered points for FormattedText to show as typed, and
+ * each extra blank line between paragraphs adds an empty line of space.
+ */
 export function parseBody(body: string): BodyBlock[] {
   const blocks: BodyBlock[] = [];
-  for (const chunk of body.replace(/\r\n/g, '\n').split(/\n\s*\n/)) {
-    const lines = chunk.split('\n').map((l) => l.trim()).filter(Boolean);
-    if (!lines.length) continue;
-    if (lines[0].startsWith('## ')) {
-      const text = lines[0].slice(3).trim();
+  const chunks = body.replace(/\r\n?/g, '\n').replace(/^\s*\n|\s+$/g, '').split(/\n[ \t]*\n/);
+  for (const chunk of chunks) {
+    const lines = chunk.split('\n').map((l) => l.trimEnd());
+    if (!lines.some(Boolean)) {
+      if (blocks.length) blocks.push({ kind: 'p', text: ' ' });
+      continue;
+    }
+    const first = lines[0].trim();
+    if (first.startsWith('## ')) {
+      const text = first.slice(3).trim();
       blocks.push({ kind: 'h2', text, id: slugify(text) });
-      if (lines.length > 1) blocks.push({ kind: 'p', text: lines.slice(1).join(' ') });
-    } else if (lines.every((l) => l.startsWith('- '))) {
-      blocks.push({ kind: 'list', items: lines.map((l) => l.slice(2).trim()) });
-    } else if (lines.every((l) => l.startsWith('>'))) {
-      blocks.push({ kind: 'quote', text: lines.map((l) => l.replace(/^>\s?/, '')).join(' ') });
+      if (lines.length > 1) blocks.push({ kind: 'p', text: lines.slice(1).join('\n') });
+    } else if (lines.every((l) => BULLET.test(l))) {
+      blocks.push({ kind: 'list', items: lines.map((l) => l.replace(BULLET, '').trim()) });
+    } else if (lines.every((l) => l.trimStart().startsWith('>'))) {
+      blocks.push({ kind: 'quote', text: lines.map((l) => l.trimStart().replace(/^>\s?/, '')).join('\n') });
     } else {
-      blocks.push({ kind: 'p', text: lines.join(' ') });
+      blocks.push({ kind: 'p', text: lines.join('\n') });
     }
   }
   return blocks;

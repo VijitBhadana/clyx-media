@@ -3,6 +3,7 @@ import { BarChart3, FlaskConical, RefreshCw, Rocket, Scissors, TrendingUp, type 
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults } from '@/lib/pageContent';
 import '@/styles/case-pattern.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Card icons stay fixed; the copy on each step comes from the Case Studies page content.
 const ICONS: LucideIcon[] = [TrendingUp, Scissors, FlaskConical, BarChart3, RefreshCw, Rocket];
@@ -111,7 +112,7 @@ export default function CasePattern({ content: c = pageDefaults('caseStudies') }
                   </span>
                 ))}
               </h2>
-              {c.patternText && <p className="cp-text">{c.patternText}</p>}
+              {c.patternText && <p className="cp-text"><FormattedText text={c.patternText} /></p>}
               <SignalWave />
             </Reveal>
 
@@ -125,7 +126,7 @@ export default function CasePattern({ content: c = pageDefaults('caseStudies') }
                         <div>
                           {tag && <p className="cp-step-tag"><Icon size={14} strokeWidth={2.4} aria-hidden="true" />{tag}</p>}
                           <h3 className="cp-step-title">{title}</h3>
-                          {text && <p className="cp-step-text">{text}</p>}
+                          {text && <p className="cp-step-text"><FormattedText text={text} /></p>}
                         </div>
                       </div>
                     </Reveal>

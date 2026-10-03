@@ -641,3 +641,11 @@ button:active,a:active{transform:scale(.97)}
 /* Reduced motion keeps a plain fade so the heading still visibly arrives, without the movement. */
 @media (prefers-reduced-motion: reduce) { .reveal-word > span { transform: none; filter: none; animation: reveal-word-fade .6s ease forwards; } }
 @keyframes reveal-word-fade { to { opacity: 1; } }
+
+/* FormattedText (components/ui/FormattedText.tsx): admin text shown line for line as it was typed. Blank lines keep
+   their gap, spaces and indents are kept, and bullet / numbered lines hang their wrapped text under the first word. */
+.fmt-text { display: block; }
+.fmt-line { display: block; white-space: pre-wrap; }
+.fmt-li { --fmt-marker: 1.15em; display: block; white-space: pre-wrap; padding-left: calc(var(--fmt-indent, 0ch) + var(--fmt-marker)); text-indent: calc(var(--fmt-marker) * -1); }
+.fmt-li.is-num { --fmt-marker: 1.7em; }
+.fmt-marker { display: inline-block; width: var(--fmt-marker); text-indent: 0; font-variant-numeric: tabular-nums; }

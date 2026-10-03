@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ImagePlus, Link2, Loader2, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { ImagePlus, IndentDecrease, IndentIncrease, Link2, List, ListOrdered, Loader2, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadImage } from './uploadImage';
 
-export type ControlType = 'text' | 'textarea' | 'image' | 'url' | 'select' | 'color';
+/** 'textarea' is plain multi-line text (lists the site splits per line); 'richtext' adds the bullet toolbar and shows on the site as typed. */
+export type ControlType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color';
 
 /** Label row + control + hint, shared by every form in the admin. */
 export function Field({
@@ -57,6 +58,146 @@ function AutoTextarea({ value, onChange, placeholder }: { value: string; onChang
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
     />
+  );
+}
+
+/** Same pattern as FormattedText on the site: optional indent, a bullet or "1." / "1)", then a space. */
+const LIST_LINE = /^([ \t]*)([•\-*–▪◦●]|\d{1,3}[.)])[ \t]+/;
+const INDENT = '   ';
+
+/**
+ * Writes `text` over [from, to) through the browser's own editing, so Ctrl+Z still undoes it, then selects
+ * [selFrom, selTo). Falls back to setting the value directly where execCommand is unavailable.
+ */
+function replaceRange(el: HTMLTextAreaElement, from: number, to: number, text: string, selFrom: number, selTo: number, onChange: (v: string) => void) {
+  el.focus();
+  el.setSelectionRange(from, to);
+  let done = false;
+  try {
+    done = document.execCommand('insertText', false, text);
+  } catch {
+    done = false;
+  }
+  if (!done || el.value.slice(from, from + text.length) !== text) onChange(el.value.slice(0, from) + text + el.value.slice(to));
+  requestAnimationFrame(() => el.setSelectionRange(selFrom, selTo));
+}
+
+/** The whole lines touched by the current selection: [start, end) offsets and the lines themselves. */
+function selectedLines(el: HTMLTextAreaElement) {
+  const { value, selectionStart, selectionEnd } = el;
+  const start = value.lastIndexOf('\n', selectionStart - 1) + 1;
+  const endBreak = value.indexOf('\n', selectionEnd > selectionStart && value[selectionEnd - 1] === '\n' ? selectionEnd - 1 : selectionEnd);
+  const end = endBreak === -1 ? value.length : endBreak;
+  return { start, end, lines: value.slice(start, end).split('\n') };
+}
+
+/**
+ * Multi-line text box for copy that the site shows exactly as typed (FormattedText). A small toolbar turns the
+ * selected lines into bullet or numbered points; Enter continues a list, Enter on an empty point ends it, and
+ * Tab / Shift+Tab indent or outdent points.
+ */
+function RichTextarea({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight + 2, 420)}px`;
+  }, [value]);
+
+  // Adds the marker to every selected non-empty line, or removes it when they all already have that kind.
+  const toggleList = (numbered: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    const { start, end, lines } = selectedLines(el);
+    const filled = lines.filter((l) => l.trim());
+    const isKind = (l: string) => {
+      const m = LIST_LINE.exec(l);
+      return !!m && /\d/.test(m[2]) === numbered;
+    };
+    const remove = filled.length > 0 && filled.every(isKind);
+    let n = 0;
+    const next = lines.map((line) => {
+      if (!line.trim()) return remove || lines.length > 1 ? line : numbered ? '1. ' : '• ';
+      const lead = /^[ \t]*/.exec(line)![0];
+      const body = line.replace(LIST_LINE, '').trimStart();
+      if (remove) return lead + body;
+      n += 1;
+      return `${lead}${numbered ? `${n}. ` : '• '}${body}`;
+    });
+    const text = next.join('\n');
+    const caret = lines.length === 1 ? start + text.length : start;
+    replaceRange(el, start, end, text, caret, start + text.length, onChange);
+  };
+
+  const indent = (outdent: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    const { start, end, lines } = selectedLines(el);
+    const text = lines
+      .map((line) => {
+        if (!line.trim()) return line;
+        if (!outdent) return INDENT + line;
+        return line.replace(new RegExp(`^ {1,${INDENT.length}}|^\t`), '');
+      })
+      .join('\n');
+    replaceRange(el, start, end, text, start, start + text.length, onChange);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const el = e.currentTarget;
+    if (e.nativeEvent.isComposing) return;
+    const { start, end } = selectedLines(el);
+    const line = el.value.slice(start, end);
+    const item = LIST_LINE.exec(line);
+    if (e.key === 'Tab' && item) {
+      e.preventDefault();
+      indent(e.shiftKey);
+      return;
+    }
+    if (e.key !== 'Enter' || e.shiftKey || !item || el.selectionStart !== el.selectionEnd) return;
+    e.preventDefault();
+    const caret = el.selectionStart;
+    if (!line.slice(item[0].length).trim()) {
+      // Enter on an empty point ends the list: the marker goes and the line is left blank.
+      replaceRange(el, start, end, '', start, start, onChange);
+      return;
+    }
+    const [, lead, marker] = item;
+    const num = /^(\d+)([.)])$/.exec(marker);
+    const nextMarker = num ? `${Number(num[1]) + 1}${num[2]}` : marker;
+    const insert = `\n${lead}${nextMarker} `;
+    replaceRange(el, caret, caret, insert, caret + insert.length, caret + insert.length, onChange);
+  };
+
+  return (
+    <div className="adm-rich">
+      <div className="adm-rich-bar" role="toolbar" aria-label="Text formatting">
+        <button type="button" className="adm-rich-btn" title="Bullet points" onMouseDown={(e) => e.preventDefault()} onClick={() => toggleList(false)}>
+          <List size={14} /> Bullets
+        </button>
+        <button type="button" className="adm-rich-btn" title="Numbered points" onMouseDown={(e) => e.preventDefault()} onClick={() => toggleList(true)}>
+          <ListOrdered size={14} /> Numbered
+        </button>
+        <span className="adm-rich-sep" />
+        <button type="button" className="adm-rich-btn is-icon" title="Indent (Tab)" onMouseDown={(e) => e.preventDefault()} onClick={() => indent(false)}>
+          <IndentIncrease size={14} />
+        </button>
+        <button type="button" className="adm-rich-btn is-icon" title="Outdent (Shift+Tab)" onMouseDown={(e) => e.preventDefault()} onClick={() => indent(true)}>
+          <IndentDecrease size={14} />
+        </button>
+        <span className="adm-rich-note">Line breaks, gaps and points show on the site exactly as typed</span>
+      </div>
+      <textarea
+        ref={ref}
+        className="adm-input adm-textarea"
+        value={value}
+        rows={4}
+        placeholder={placeholder}
+        onKeyDown={onKeyDown}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
   );
 }
 
@@ -157,6 +298,8 @@ export function Control({
   switch (type) {
     case 'textarea':
       return <AutoTextarea value={value} onChange={onChange} placeholder={placeholder} />;
+    case 'richtext':
+      return <RichTextarea value={value} onChange={onChange} placeholder={placeholder} />;
     case 'image':
       return <ImageInput value={value} onChange={onChange} />;
     case 'select':

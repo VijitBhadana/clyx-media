@@ -4,6 +4,7 @@ import { HeroButtons } from '@/components/layout/PageShell';
 import { DirectionalReveal, Reveal } from '@/components/ui/ScrollMotion';
 import { splitLines } from '@/lib/pageContent';
 import '@/styles/about-hero.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Card icons stay fixed; the copy comes from the About page content. The fan is built for three cards.
 const ICONS: LucideIcon[] = [Sparkles, Megaphone, Repeat];
@@ -182,7 +183,7 @@ export default function AboutHero({ content: c }: { content: Record<string, stri
           {c.heroHeadline}
           {c.heroHeadlineHighlight && <><br /><span className="ab-title-hl">{c.heroHeadlineHighlight}</span></>}
         </h1>
-        {c.heroSub && <p className="ab-sub">{c.heroSub}</p>}
+        {c.heroSub && <p className="ab-sub"><FormattedText text={c.heroSub} /></p>}
         <HeroButtons />
       </Reveal>
       {cards.length > 0 && (

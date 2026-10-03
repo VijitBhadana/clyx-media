@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { ICONS as SERVICE_ICONS } from '@/components/sections/ServiceGrid';
 import type { ServiceContent } from '@/lib/pageContent';
 import '@/styles/services-hero-engine.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Hero-sized summary of each service (short name, one-liner, tags), edited per service on the Services page.
 export default function ServicesHeroEngine({ items, note }: { items: ServiceContent[]; note: string }) {
@@ -39,7 +40,7 @@ export default function ServicesHeroEngine({ items, note }: { items: ServiceCont
                 <span className="she-card-num">{String(i + 1).padStart(2, '0')}<small>/{String(count).padStart(2, '0')}</small></span>
               </div>
               <h3 className="she-card-title">{service.title}</h3>
-              <p className="she-card-line">{service.line || service.text}</p>
+              <p className="she-card-line"><FormattedText text={service.line || service.text} /></p>
               <div className="she-card-foot">
                 <ul className="she-tags">{service.tags.map((tag, j) => <li key={j}>{tag}</li>)}</ul>
                 <ArrowUpRight className="she-card-arrow" size={20} aria-hidden="true" />

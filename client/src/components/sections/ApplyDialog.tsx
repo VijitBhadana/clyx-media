@@ -3,6 +3,7 @@ import { ArrowUpRight, CheckCircle2, ChevronDown, FileText, Loader2, UploadCloud
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { API_URL } from '@/lib/api';
 import { pageDefaults } from '@/lib/pageContent';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 export const GENERAL_ROLE = 'General application';
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -79,7 +80,7 @@ export default function ApplyDialog({ open, onOpenChange, roles, initialRole, co
           <button type="button" onClick={() => onOpenChange(false)} disabled={sending} className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-clyx-yellow hover:text-clyx-yellow disabled:opacity-40" aria-label="Close"><X size={16} /></button>
           <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-clyx-yellow">{status.kind === 'done' ? c.applySentEyebrow : c.applyEyebrow}</p>
           <DialogTitle className="display mt-2 pr-10 text-2xl font-bold leading-tight md:text-3xl">{status.kind === 'done' ? c.applySentTitle : role}</DialogTitle>
-          <DialogDescription className="mt-2 text-sm text-white/65">{status.kind === 'done' ? c.applySentText : c.applyIntroText}</DialogDescription>
+          <DialogDescription className="mt-2 text-sm text-white/65"><FormattedText text={status.kind === 'done' ? c.applySentText : c.applyIntroText} /></DialogDescription>
         </div>
 
         {status.kind === 'done' ? (

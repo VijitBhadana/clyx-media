@@ -7,13 +7,14 @@ import { Reveal } from '@/components/ui/ScrollMotion';
 import ServicesCTA from '@/components/sections/ServicesCTA';
 import { useCaseStudies } from '@/lib/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
-import { projectStory, usePortfolio } from '@/lib/portfolio';
+import { projectStory, resultPoints, usePortfolio } from '@/lib/portfolio';
 import { useSiteContent } from '@/lib/siteContent';
 import NotFound from './NotFound';
 import '@/styles/service-detail.css';
 import '@/styles/case-study-detail.css';
 import '@/styles/portfolio-detail.css';
 import { responsiveImage } from '@/lib/images';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -39,6 +40,7 @@ export default function PortfolioDetail() {
   if (!item) return data?.collections?.portfolio || !isFetching ? <NotFound /> : <div className="min-h-screen" />;
 
   const story = projectStory(item);
+  const points = resultPoints(item.result);
   const caseStudy = caseStudies.find((study) => study.slug === item.slug);
   const requestHref = safeHref(c.detailButtonUrl || '/contact');
   // Projects from the same category first (following this one, wrapping round), then the rest, three in all.
@@ -56,7 +58,7 @@ export default function PortfolioDetail() {
       lead={
         <ul className="sd-hero-tags">
           {item.category && <li>{item.category}</li>}
-          {item.result && <li className="csd-hero-result">{item.result}</li>}
+          {points.map((point) => <li key={point} className="csd-hero-result">{point}</li>)}
         </ul>
       }
       aside={
@@ -68,10 +70,14 @@ export default function PortfolioDetail() {
                 <dd>{item.category}</dd>
               </div>
             )}
-            {item.result && (
+            {points.length > 0 && (
               <div>
                 <dt>{c.detailOutcomeLabel}</dt>
-                <dd>{item.result}</dd>
+                <dd>
+                  {points.length > 1 ? (
+                    <ul className="pfd-fact-points">{points.map((point) => <li key={point}>{point}</li>)}</ul>
+                  ) : points[0]}
+                </dd>
               </div>
             )}
             <div>
@@ -87,34 +93,52 @@ export default function PortfolioDetail() {
         </div>
       }
     >
-      <Section className="csd-intro">
+      <Section className="csd-intro pfd-intro">
         <a href="/portfolio" className="sd-back"><ArrowLeft size={16} aria-hidden="true" /> {c.detailBackLabel}</a>
 
-        <Reveal>
-          <figure className="csd-cover">
-            <img {...responsiveImage(item.src, '(max-width: 1023px) 100vw, 1100px')} alt={item.alt} decoding="async" />
-            <figcaption>
-              {item.result && <span className="csd-cover-result">{item.result}</span>}
-              <span className="csd-cover-brand">{item.title}</span>
-            </figcaption>
-          </figure>
-        </Reveal>
+        {/* Story on the left, the project's image (kept compact) on the right, outcome and services cards below. */}
+        <div className="pfd-intro-grid">
+          <div className="pfd-intro-details">
+            <Reveal>
+              <Label>{c.detailOverviewLabel}</Label>
+              <p className="pfd-story"><FormattedText text={story.overview} /></p>
+            </Reveal>
+          </div>
 
-        <div className="sd-overview-grid csd-overview">
-          <Reveal>
-            <Label>{c.detailOverviewLabel}</Label>
-            <p className="sd-overview-text">{story.overview}</p>
+          <Reveal delay={80} className="pfd-intro-media">
+            <figure className="csd-cover pfd-cover">
+              <img {...responsiveImage(item.src, '(max-width: 1023px) 92vw, 460px')} alt={item.alt} decoding="async" />
+              <figcaption>
+                <span className="csd-cover-brand">{item.title}</span>
+              </figcaption>
+            </figure>
           </Reveal>
-          <Reveal delay={150}>
-            <div className="sd-included">
-              <p className="sd-included-title">{c.detailServicesLabel}</p>
-              <ul>
-                {story.services.map((service) => (
-                  <li key={service}><span className="sd-check" aria-hidden="true"><Check size={14} strokeWidth={2.6} /></span>{service}</li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
+
+          {/* Outcome and services side by side, each in its own card, across the full width of the intro. */}
+          <div className="pfd-intro-cards">
+            {points.length > 0 && (
+              <Reveal delay={100}>
+                <div className="pfd-mini-card pfd-points">
+                  <p className="sd-included-title">{c.detailOutcomeLabel}</p>
+                  <ul>
+                    {points.map((point) => (
+                      <li key={point}><span className="sd-check" aria-hidden="true"><Check size={14} strokeWidth={2.6} /></span>{point}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            )}
+            <Reveal delay={150}>
+              <div className="pfd-mini-card sd-included">
+                <p className="sd-included-title">{c.detailServicesLabel}</p>
+                <ul>
+                  {story.services.map((service) => (
+                    <li key={service}><span className="sd-check" aria-hidden="true"><Check size={14} strokeWidth={2.6} /></span>{service}</li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </Section>
 
@@ -141,7 +165,12 @@ export default function PortfolioDetail() {
           <div>
             <Label className="csd-results-label">{c.detailResultLabel}</Label>
             <h2 className="display text-4xl font-bold md:text-6xl">{c.detailResultTitle}</h2>
-            {item.result && <p className="csd-results-value display pfd-result-value">{item.result}</p>}
+            {points.length === 1 && <p className="csd-results-value display pfd-result-value">{points[0]}</p>}
+            {points.length > 1 && (
+              <ul className="pfd-result-points">
+                {points.map((point) => <li key={point} className="display">{point}</li>)}
+              </ul>
+            )}
             {caseStudy && (
               <a href={`/case-studies/${caseStudy.slug}`} className="pfd-case-link">
                 {c.detailCaseStudyLink} <ArrowUpRight size={16} aria-hidden="true" />

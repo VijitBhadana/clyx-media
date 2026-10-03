@@ -9,6 +9,7 @@ import { useSiteContent } from '@/lib/siteContent';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import NotFound from './NotFound';
 import '@/styles/blog-article.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 /**
  * Articles always read on the light theme, whatever the visitor picked elsewhere. The saved choice is left alone,
@@ -95,7 +96,7 @@ export default function BlogPost() {
                 {post.readTime && <span className="ba-read"><Clock3 size={14} aria-hidden="true" />{post.readTime}</span>}
               </div>
               <h1 className="ba-title">{post.title}</h1>
-              {post.excerpt && <p className="ba-lede">{post.excerpt}</p>}
+              {post.excerpt && <p className="ba-lede"><FormattedText text={post.excerpt} /></p>}
               <p className="ba-byline"><span className="ba-byline-mark" aria-hidden="true">C</span>{c.articleByline || 'CLYX Media · Journal'}</p>
             </Reveal>
           </div>
@@ -105,9 +106,9 @@ export default function BlogPost() {
           <article ref={articleRef} className="ba-body">
             {blocks.map((b, i) => {
               if (b.kind === 'h2') return <h2 key={i} id={b.id}>{b.text}</h2>;
-              if (b.kind === 'quote') return <blockquote key={i}>{b.text}</blockquote>;
+              if (b.kind === 'quote') return <blockquote key={i}><FormattedText text={b.text} /></blockquote>;
               if (b.kind === 'list') return <ul key={i}>{b.items.map((item, j) => <li key={j}>{item}</li>)}</ul>;
-              return <p key={i}>{b.text}</p>;
+              return <p key={i}><FormattedText text={b.text} /></p>;
             })}
           </article>
 
@@ -121,7 +122,7 @@ export default function BlogPost() {
               )}
               <div className="ba-cta">
                 <p className="ba-cta-title">{c.articleCtaTitle || 'Want this working for your brand?'}</p>
-                <p className="ba-cta-text">{c.articleCtaText || 'We run the creator ads, the testing loop and the pages that convert.'}</p>
+                <p className="ba-cta-text"><FormattedText text={c.articleCtaText || 'We run the creator ads, the testing loop and the pages that convert.'} /></p>
                 <a href={safeHref(c.articleCtaUrl || '/contact')} className="ba-cta-btn">{c.articleCtaButton || 'Talk to CLYX'} <ArrowUpRight size={16} aria-hidden="true" /></a>
               </div>
             </div>

@@ -9,6 +9,7 @@ import ServicesCTA from '@/components/sections/ServicesCTA';
 import { usePageContent, useServices } from '@/lib/pageContent';
 import NotFound from './NotFound';
 import '@/styles/service-detail.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -47,7 +48,7 @@ export default function ServiceDetail() {
       aside={
         <div className="ih-card">
           {Icon && <span className="sd-hero-icon"><Icon size={24} strokeWidth={1.8} aria-hidden="true" /></span>}
-          <p className="ih-intro">{service.text}</p>
+          <p className="ih-intro"><FormattedText text={service.text} /></p>
           <HeroButtons />
         </div>
       }
@@ -57,7 +58,7 @@ export default function ServiceDetail() {
         <div className="sd-overview-grid">
           <Reveal>
             <Label>{c.detailOverviewLabel}</Label>
-            <p className="sd-overview-text">{service.overview}</p>
+            <p className="sd-overview-text"><FormattedText text={service.overview} /></p>
           </Reveal>
           {service.points.length > 0 && (
             <Reveal delay={150}>

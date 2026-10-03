@@ -4,6 +4,7 @@ import PageShell from '@/components/layout/PageShell';
 import { Label, Section } from '@/components/ui/primitives';
 import { API_URL } from '@/lib/api';
 import { safeHref, usePageContent } from '@/lib/pageContent';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 type Status = { kind: 'idle' | 'sending' | 'done' } | { kind: 'error'; message: string };
 
@@ -37,7 +38,7 @@ export default function Contact(){
           <span className="grid h-14 w-14 place-items-center rounded-full bg-yellow text-dark"><CheckCircle2 size={28}/></span>
           <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-muted">{c.formSent}</p>
           <h2 className="display text-3xl font-bold">{c.formSentTitle}</h2>
-          <p className="text-muted">{c.formSentText}</p>
+          <p className="text-muted"><FormattedText text={c.formSentText} /></p>
           <button type="button" onClick={()=>setStatus({kind:'idle'})} className="inline-flex items-center gap-3 border border-grid px-5 py-3 text-xs font-semibold uppercase tracking-[.1em] hover:border-blue hover:text-blue">{c.formSendAnother}</button>
         </div>
       ):(

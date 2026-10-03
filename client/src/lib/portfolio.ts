@@ -180,6 +180,17 @@ const GENERIC_PLAYBOOK: (typeof PLAYBOOKS)[string] = {
   deliverables: ['Creative strategy', 'Ad creatives', 'Campaign setup', 'Performance reporting'],
 };
 
+/**
+ * The outcome split into its points: the admin can list several on one line ("2 Creators • 100K+ Views") or one per
+ * line, and each becomes its own point. A single outcome comes back as one point.
+ */
+export function resultPoints(result: string): string[] {
+  return result
+    .split(/\s*(?:\n|[•·●▪|])\s*/)
+    .map((point) => point.replace(/^[-*–]\s+/, '').trim())
+    .filter(Boolean);
+}
+
 /** The write-up shown on a project's page. */
 export function projectStory(item: PortfolioItem): ProjectStory {
   const playbook = PLAYBOOKS[item.category.trim().toLowerCase()] ?? GENERIC_PLAYBOOK;

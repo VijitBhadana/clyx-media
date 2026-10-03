@@ -3,6 +3,7 @@ import { HeartHandshake, Sparkles, Zap, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults } from '@/lib/pageContent';
 import '@/styles/creator-types.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Card icons stay fixed; the copy on each card comes from the Creators page content.
 const ICONS: LucideIcon[] = [Zap, HeartHandshake, Sparkles];
@@ -30,7 +31,7 @@ export default function CreatorTypes({ content: c = pageDefaults('creators') }: 
               </span>
             </h2>
           </div>
-          <p className="ct-intro">{c.typesIntro}</p>
+          <p className="ct-intro"><FormattedText text={c.typesIntro} /></p>
         </Reveal>
 
         <div className="ct-grid">
@@ -52,7 +53,7 @@ export default function CreatorTypes({ content: c = pageDefaults('creators') }: 
                     </Fragment>
                   ))}
                 </h3>
-                <p className="ct-card-text">{text}</p>
+                <p className="ct-card-text"><FormattedText text={text} /></p>
               </article>
             </Reveal>
           ))}

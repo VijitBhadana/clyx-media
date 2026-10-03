@@ -3,6 +3,7 @@ import { Reveal } from '@/components/ui/ScrollMotion';
 import { Lines } from '@/components/ui/Lines';
 import { pageDefaults } from '@/lib/pageContent';
 import '@/styles/about-values.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Card icons stay fixed; the copy on each card comes from the About page content.
 const ICONS: LucideIcon[] = [MessagesSquare, Sparkles, RefreshCw];
@@ -35,7 +36,7 @@ export default function AboutValues({ content = pageDefaults('about') }: { conte
               </svg>
             </div>
           </div>
-          <p className="values-intro">{c.valuesIntro}</p>
+          <p className="values-intro"><FormattedText text={c.valuesIntro} /></p>
         </Reveal>
 
         <div className="values-grid">
@@ -48,7 +49,7 @@ export default function AboutValues({ content = pageDefaults('about') }: { conte
                   <p className="values-tag">{tag}</p>
                 </div>
                 <h3 className="display values-card-title">{title}</h3>
-                <p className="values-card-text">{text}</p>
+                <p className="values-card-text"><FormattedText text={text} /></p>
                 <span className="values-bar" aria-hidden="true" />
               </div>
             </Reveal>

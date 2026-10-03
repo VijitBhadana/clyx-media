@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '@/styles/site-footer.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Opens off-site links in a new tab.
 const targetFor = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noreferrer' } : {});
@@ -65,7 +66,7 @@ export function Footer() {
                 ))}
               </div>
             </div>
-            <p className="cf-tagline">{c.footerTagline}</p>
+            <p className="cf-tagline"><FormattedText text={c.footerTagline} /></p>
           </div>
 
           {columns.map(({ title, links }, i) => (
@@ -184,7 +185,7 @@ export function CookieBar() {
         {c.cookieTitle}
       </p>
       <p className="mt-1 text-xs text-muted leading-relaxed">
-        {c.cookieText}
+        <FormattedText text={c.cookieText} />
       </p>
       <div className="mt-4 flex gap-2">
         <button

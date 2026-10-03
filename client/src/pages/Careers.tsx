@@ -10,6 +10,7 @@ import { safeHref, usePageContent } from '@/lib/pageContent';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import type { RoleInfo } from '@/components/sections/RoleDescriptionDialog';
 import '@/styles/careers-hero-card.css';
+import { FormattedText, hasLayout } from '@/components/ui/FormattedText';
 // The apply form (and the dialog library under it) is only downloaded once a visitor points at or picks a role.
 const loadApplyDialog=()=>import('@/components/sections/ApplyDialog');
 const ApplyDialog=lazy(loadApplyDialog);
@@ -47,7 +48,8 @@ function HeroLine({onArrive}:{onArrive:()=>void}){const svgRef=useRef<SVGSVGElem
 function HeroCard({c,shown}:{c:Record<string,string>;shown:boolean}){const tags=(c.heroCardTags||'').split(',').map(x=>x.trim()).filter(Boolean);return <a href="#open-roles" className={`careers-hero-card group${shown?' is-in':''}`}>
   <div className="chc-top"><span className="chc-icon" aria-hidden><Rocket size={22} strokeWidth={2}/></span></div>
   {c.heroCardTitle&&<h2 className="chc-title"><RevealWords text={c.heroCardTitle} delay={350} step={40}/></h2>}
-  {c.heroCardText&&<p className="chc-text"><span className="sr-only">{c.heroCardText}</span>{c.heroCardText.split(/\s+/).filter(Boolean).map((w,i)=><span key={i} aria-hidden="true">{i>0&&' '}<span className="chc-word" style={{animationDelay:`${650+i*45}ms`}}>{w}</span></span>)}</p>}
+  {c.heroCardText&&hasLayout(c.heroCardText)&&<p className="chc-text"><FormattedText text={c.heroCardText}/></p>}
+  {c.heroCardText&&!hasLayout(c.heroCardText)&&<p className="chc-text"><span className="sr-only">{c.heroCardText}</span>{c.heroCardText.split(/\s+/).filter(Boolean).map((w,i)=><span key={i} aria-hidden="true">{i>0&&' '}<span className="chc-word" style={{animationDelay:`${650+i*45}ms`}}>{w}</span></span>)}</p>}
   <div className="chc-foot"><ul className="chc-tags">{tags.map(tag=><li key={tag}>{tag}</li>)}</ul><span className="chc-arrow" aria-hidden><ArrowUpRight size={18} strokeWidth={2.4}/></span></div>
 </a>}
 // Words rise out of a mask one by one once the heading scrolls into view.
@@ -68,7 +70,7 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
       </div>
       {role.department&&<p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">{role.department}</p>}
       <h3 className={`display ${role.department?'mt-1':'mt-4'} text-lg font-semibold md:text-xl`}>{role.title}</h3>
-      {role.detail&&<p className="mt-1.5 text-[13px] leading-5 text-white/65">{role.detail}</p>}
+      {role.detail&&<p className="mt-1.5 text-[13px] leading-5 text-white/65"><FormattedText text={role.detail} /></p>}
       {(role.experience||role.salary)&&<p className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-white/80">{role.experience&&<span className="inline-flex items-center gap-1.5"><Clock size={12} className="text-clyx-yellow"/>{role.experience}</span>}{role.salary&&<span className="inline-flex items-center gap-1.5"><IndianRupee size={12} className="text-clyx-yellow"/>{role.salary}</span>}</p>}
       <div className="mt-auto flex flex-col items-start gap-3 pt-4 xl:flex-row xl:items-end xl:justify-between">
         {kind?<div className="flex flex-wrap items-center gap-2">
@@ -78,7 +80,7 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
         <button type="button" onClick={()=>setDescRole(role)} onFocus={loadDescDialog} className="relative z-[2] inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/[.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-white transition-colors hover:border-clyx-yellow hover:bg-clyx-yellow hover:text-clyx-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clyx-yellow"><FileText size={12}/>{c.rolesDescButton}</button>
       </div>
     </div>})}</div>
-    {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-white/70">{c.rolesNote}</p><a href={safeHref(c.applyUrl||'mailto:work@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-clyx-yellow hover:text-white md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
+    {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-white/70"><FormattedText text={c.rolesNote} /></p><a href={safeHref(c.applyUrl||'mailto:hr@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-clyx-yellow hover:text-white md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
   </div>
   {lastDesc.current&&<Suspense fallback={null}><RoleDescriptionDialog open={descRole!==null} onOpenChange={o=>!o&&setDescRole(null)} role={lastDesc.current} onApply={()=>{const title=lastDesc.current!.title;setDescRole(null);setApplyRole(title);}} content={c}/></Suspense>}
   {lastRole.current&&<Suspense fallback={null}><ApplyDialog open={applyRole!==null} onOpenChange={o=>!o&&setApplyRole(null)} roles={roles.map(r=>r.title)} initialRole={lastRole.current} content={c}/></Suspense>}

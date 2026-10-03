@@ -5,6 +5,7 @@ import { CookieBar, Footer, WhatsAppButton } from './Footer';
 import { DirectionalReveal, Reveal } from '@/components/ui/ScrollMotion';
 import { isExternalHref, safeHref, usePageContent } from '@/lib/pageContent';
 import '@/styles/inner-hero.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // The intro card's two buttons, edited under "Header & Footer" in the admin panel.
 export function HeroButtons(){const c=usePageContent('global');const buttons=[{text:c.heroPrimaryText,href:safeHref(c.heroPrimaryUrl),cls:'ih-btn-primary'},{text:c.heroSecondaryText,href:safeHref(c.heroSecondaryUrl),cls:'ih-btn-ghost'}].filter(b=>b.text);if(!buttons.length)return null;return <div className="ih-actions">{buttons.map(b=><a key={b.cls} href={b.href} className={`ih-btn ${b.cls}`} {...(isExternalHref(b.href)?{target:'_blank',rel:'noreferrer'}:{})}>{b.text} <ArrowUpRight size={16}/></a>)}</div>}
@@ -24,7 +25,7 @@ export default function PageShell({children, eyebrow, title, intro, tone='light'
       </Reveal>
       <DirectionalReveal direction="right" delay={420}>
         {aside ?? <div className="ih-card">
-          <p className="ih-intro">{intro}</p>
+          <p className="ih-intro"><FormattedText text={intro} /></p>
           <HeroButtons/>
         </div>}
       </DirectionalReveal>

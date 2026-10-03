@@ -3,6 +3,7 @@ import { Sparkles, Target, Users, type LucideIcon } from 'lucide-react';
 import { Label, Section } from '@/components/ui/primitives';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import '@/styles/careers-how.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Chip icons stay fixed by position; chip text and flow steps come from the Careers page content (comma separated).
 const POINT_ICONS: LucideIcon[] = [Users, Target, Sparkles];
@@ -47,8 +48,8 @@ export default function CareersHowWeWork({ c }: { c: Record<string, string> }) {
           )}
         </div>
         <div className="space-y-6 text-base leading-7 text-muted md:pt-10">
-          {c.howText1 && <p>{c.howText1}</p>}
-          {c.howText2 && <p>{c.howText2}</p>}
+          {c.howText1 && <p><FormattedText text={c.howText1} /></p>}
+          {c.howText2 && <p><FormattedText text={c.howText2} /></p>}
           {steps.length > 1 && (
             <ol className="how-flow" style={{ '--n': steps.length } as CSSProperties}>
               {steps.map((step, i) => (

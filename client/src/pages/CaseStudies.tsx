@@ -10,6 +10,7 @@ import type { CaseStudyItem } from '@/data/caseStudies';
 import { safeHref, usePageContent } from '@/lib/pageContent';
 import '@/styles/case-studies-hero.css';
 import { responsiveImage } from '@/lib/images';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 interface CaseCardProps {
   item: CaseStudyItem;
@@ -73,7 +74,7 @@ function CaseCard({ item, index, requestHref, requestText, detailsText, featured
           {item.headline}
         </h4>
         <p className="mt-1.5 font-['Poppins',sans-serif] text-lg font-normal leading-[1.65] tracking-normal text-slate-600 dark:text-white/70">
-          {item.detail}
+          <FormattedText text={item.detail} />
         </p>
 
         <div className={cn('flex flex-wrap items-center gap-3', featured ? 'mt-8' : 'mt-auto pt-6')}>
@@ -154,7 +155,7 @@ export default function CaseStudies() {
       }
       lead={
         <>
-          {c.heroIntro && <p className="ih-intro">{c.heroIntro}</p>}
+          {c.heroIntro && <p className="ih-intro"><FormattedText text={c.heroIntro} /></p>}
           <div className="cs-proof">
             {caseStudies.slice(0, 3).map((item) => (
               <span key={item.id} className="cs-chip">

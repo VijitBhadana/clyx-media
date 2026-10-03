@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults, safeHref } from '@/lib/pageContent';
 import '@/styles/about-leadership.css';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 export type TeamMember = { name: string; role: string; bio?: string; metric?: string; img?: string };
 
@@ -75,9 +76,11 @@ export default function AboutLeadership({
               </div>
               <p className="lead-access-title">{c.leadCardTitle}</p>
               <p className="lead-access-text">
-                {(c.leadAccessText || 'No account-manager relay. {foundersPhrase} {count}-person core team, one conversation.')
-                  .replace(/\{foundersPhrase\}/g, founders.length > 0 ? `${founders.length} founders and a` : 'A')
-                  .replace(/\{count\}/g, String(members.length))}
+                <FormattedText
+                  text={(c.leadAccessText || 'No account-manager relay. {foundersPhrase} {count}-person core team, one conversation.')
+                    .replace(/\{foundersPhrase\}/g, founders.length > 0 ? `${founders.length} founders and a` : 'A')
+                    .replace(/\{count\}/g, String(members.length))}
+                />
               </p>
               <a href={safeHref(c.leadCardButtonUrl || '/contact')} className="lead-access-cta">{c.leadCardButton} <ArrowUpRight size={16} /></a>
             </div>
@@ -105,7 +108,7 @@ export default function AboutLeadership({
                         <p>{m.role}</p>
                       </div>
                     </div>
-                    {m.bio && <p className="lead-founder-bio">{m.bio}</p>}
+                    {m.bio && <p className="lead-founder-bio"><FormattedText text={m.bio} /></p>}
                   </div>
                 </Reveal>
               ))}

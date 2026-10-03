@@ -212,7 +212,6 @@
   border-bottom: 1px solid rgba(1, 58, 163, 0.1);
 }
 .svc-cta-chat-name { font-size: .9rem; font-weight: 600; }
-.svc-cta-chat-status { font-size: .75rem; color: #5B6B86; }
 
 .svc-cta-thread {
   display: flex;

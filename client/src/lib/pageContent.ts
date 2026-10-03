@@ -9,7 +9,7 @@ import { services } from '@/data/home';
  * Field keys ending in "Image" hold image URLs, keys ending in "Url" hold links and keys ending in "Links" hold
  * one "Label | link" per line (the backend checks all three).
  */
-export type FieldType = 'text' | 'textarea' | 'image' | 'url' | 'select';
+export type FieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select';
 export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[] };
 export type SectionDef = { id: string; title: string; description?: string; block?: string; fields: FieldDef[] };
 export type CollectionName =
@@ -33,7 +33,10 @@ export type PageDef = {
 };
 
 const t = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, default: value, hint });
-const long = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'textarea', default: value, hint });
+/** Free text the site shows exactly as typed: line breaks, blank-line gaps, indents and bullet / numbered points. */
+const long = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'richtext', default: value, hint });
+/** Plain multi-line text the site splits up itself (one item per line, "Label | link", heading lines...). */
+const list = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'textarea', default: value, hint });
 const img = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'image', default: value, hint });
 const link = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'url', default: value, hint });
 const pick = (key: string, label: string, value: string, options: string[], hint?: string): FieldDef => ({ key, label, type: 'select', default: value, options, hint });
@@ -72,13 +75,13 @@ const serviceSections: SectionDef[] = services.map((s, i) => {
     fields: [
       t(`service${n}Title`, 'Name', s.title),
       long(`service${n}Text`, 'Description', s.text),
-      long(`service${n}Points`, '“What’s included” points (homepage book and service page)', s.points.join('\n'), ONE_PER_LINE),
+      list(`service${n}Points`, '“What’s included” points (homepage book and service page)', s.points.join('\n'), ONE_PER_LINE),
       t(`service${n}Short`, 'Short name (Services hero tab)', s.short),
       t(`service${n}Line`, 'One-liner (Services hero card and service page)', s.line),
       t(`service${n}Tags`, 'Tags (Services hero card and service page)', s.tags.join(', '), 'Separate with commas.'),
       long(`service${n}Overview`, 'Service page · overview', s.overview),
-      long(`service${n}Process`, 'Service page · how it works', s.process.map(([title, text]) => `${title} | ${text}`).join('\n'), PAIRS('Step title | step text')),
-      long(`service${n}Faqs`, 'Service page · FAQs', s.faqs.map(([q, a]) => `${q} | ${a}`).join('\n'), PAIRS('Question | answer')),
+      list(`service${n}Process`, 'Service page · how it works', s.process.map(([title, text]) => `${title} | ${text}`).join('\n'), PAIRS('Step title | step text')),
+      list(`service${n}Faqs`, 'Service page · FAQs', s.faqs.map(([q, a]) => `${q} | ${a}`).join('\n'), PAIRS('Question | answer')),
     ],
   };
 });
@@ -101,7 +104,7 @@ const bookChapterSections: SectionDef[] = services.map((s, i) => {
     fields: [
       t(`service${n}Title`, 'Name', s.title, 'Also changes the Services page.'),
       long(`service${n}Text`, 'Description', s.text, 'Also changes the Services page.'),
-      long(`service${n}Points`, '“What’s included” points', s.points.join('\n'), `${ONE_PER_LINE} Also changes the service page.`),
+      list(`service${n}Points`, '“What’s included” points', s.points.join('\n'), `${ONE_PER_LINE} Also changes the service page.`),
       pick(`book${n}Icon`, 'Icon', s.title, services.map((x) => x.title), 'Each option is the icon of that original service.'),
       img(`book${n}IconImage`, 'Custom icon image (optional)', '', 'Replaces the icon above on both pages. A square PNG with a transparent background works best.'),
       t(`book${n}Number`, 'Chapter number', pad2(n), 'The big outlined number, the “Chapter” labels and the caption under the book.'),
@@ -127,7 +130,7 @@ export const PAGES: PageDef[] = [
         title: 'Navigation bar',
         fields: [
           img('logoImage', 'Site logo', '/clyx-logo.png', 'Shown in the header and footer.'),
-          long('navLinks', 'Menu links', 'Home | /\nAbout | /about\nServices | /services\nPortfolio | /portfolio\nCase Studies | /case-studies\nCreators | /creators\nBlog | /blog\nCareers | /careers', LINKS),
+          list('navLinks', 'Menu links', 'Home | /\nAbout | /about\nServices | /services\nPortfolio | /portfolio\nCase Studies | /case-studies\nCreators | /creators\nBlog | /blog\nCareers | /careers', LINKS),
           t('headerCtaText', 'Button text', 'Start a project'),
           link('headerCtaUrl', 'Button link', '/contact'),
         ],
@@ -169,11 +172,11 @@ export const PAGES: PageDef[] = [
         title: 'Footer · link columns',
         fields: [
           t('footerCol1Title', 'Column 1 · heading', 'Company'),
-          long('footerCol1Links', 'Column 1 · links', 'About | /about\nCreators | /creators\nCareers | /careers', LINKS),
+          list('footerCol1Links', 'Column 1 · links', 'About | /about\nCreators | /creators\nCareers | /careers', LINKS),
           t('footerCol2Title', 'Column 2 · heading', 'Work'),
-          long('footerCol2Links', 'Column 2 · links', 'Services | /services\nPortfolio | /portfolio\nCase studies | /case-studies', LINKS),
+          list('footerCol2Links', 'Column 2 · links', 'Services | /services\nPortfolio | /portfolio\nCase studies | /case-studies', LINKS),
           t('footerCol3Title', 'Column 3 · heading', 'Contact'),
-          long('footerCol3Links', 'Column 3 · links', 'work@clyxmedia.com | mailto:work@clyxmedia.com\nWhatsApp | https://wa.me/919671430111\nCalendly | /contact#contact-form', LINKS),
+          list('footerCol3Links', 'Column 3 · links', 'work@clyxmedia.com | mailto:work@clyxmedia.com\nWhatsApp | https://wa.me/919671430111\nCalendly | /contact#contact-form', LINKS),
         ],
       },
       {
@@ -181,7 +184,7 @@ export const PAGES: PageDef[] = [
         title: 'Footer · bottom bar',
         fields: [
           t('footerCopyright', 'Copyright text', 'CLYX Media. All rights reserved.', '“© <current year>” is added in front automatically.'),
-          long('footerLegalLinks', 'Small links', 'Privacy | /privacy\nTerms | /terms\nAdmin | /admin', LINKS),
+          list('footerLegalLinks', 'Small links', 'Privacy | /privacy\nTerms | /terms\nAdmin | /admin', LINKS),
           t('footerTopText', '“Back to top” button', 'Back to top'),
           t('footerWordmark', 'Giant wordmark', 'CLYX'),
         ],
@@ -245,7 +248,7 @@ export const PAGES: PageDef[] = [
         title: 'Hero typing words',
         description: 'After the highlighted headline line, these phrases are typed in one after another.',
         fields: [
-          long('heroRotating', 'Phrases', 'winning ads.\nrevenue engines.\nloyal customers.\nreal growth.', `${ONE_PER_LINE} Leave empty to turn the typing effect off.`),
+          list('heroRotating', 'Phrases', 'winning ads.\nrevenue engines.\nloyal customers.\nreal growth.', `${ONE_PER_LINE} Leave empty to turn the typing effect off.`),
         ],
       },
       {
@@ -271,7 +274,7 @@ export const PAGES: PageDef[] = [
         id: 'marquee',
         title: 'Scrolling marquee strip',
         fields: [
-          long('marqueeItems', 'Marquee items', '50+ D2C BRANDS SCALED\n₹45CR+ AD SPEND MANAGED\n3.4X AVG ROAS LIFT\n250+ CREATORS IN NETWORK\nCREATOR WHITELISTING ENGINE', 'One item per line.'),
+          list('marqueeItems', 'Marquee items', '50+ D2C BRANDS SCALED\n₹45CR+ AD SPEND MANAGED\n3.4X AVG ROAS LIFT\n250+ CREATORS IN NETWORK\nCREATOR WHITELISTING ENGINE', 'One item per line.'),
         ],
       },
       {
@@ -313,7 +316,7 @@ export const PAGES: PageDef[] = [
           ),
           t('dashChartTitle', 'Chart title', 'Daily Attributed Revenue vs Ad Spend (Live)'),
           t('dashChartNote', 'Chart note', 'Advantage+ Creative Optimization'),
-          long('dashChartDays', 'Chart · day labels', 'Mon\nTue\nWed\nThu\nFri\nSat\nSun', ONE_PER_LINE),
+          list('dashChartDays', 'Chart · day labels', 'Mon\nTue\nWed\nThu\nFri\nSat\nSun', ONE_PER_LINE),
         ],
       },
       {
@@ -366,7 +369,7 @@ export const PAGES: PageDef[] = [
         title: 'Methodology',
         fields: [
           t('howEyebrow', 'Eyebrow label', 'The CLYX Methodology'),
-          long('howTitle', 'Heading', "A one-off post doesn't sell.\nA whitelisted ad, run on data, does.", LINES),
+          list('howTitle', 'Heading', "A one-off post doesn't sell.\nA whitelisted ad, run on data, does.", LINES),
           long('howText', 'Body text', "Instead of paying for a single influencer post that disappears in 24 hours, we run the creator's own organic content as a paid ad through their handle — it reads as a genuine recommendation, not a sponsored pitch, earning instant trust. From there, performance analytics decide which hooks get scaled."),
           ...numbered(
             [
@@ -448,7 +451,7 @@ export const PAGES: PageDef[] = [
           t('heroHeadline', 'Heading (first line)', 'Where culture'),
           t('heroHeadlineHighlight', 'Heading highlight (blue second line)', 'meets performance.'),
           long('heroSub', 'Intro paragraph', 'CLYX is a performance creative studio for brands that want to move faster than the feed. We connect creator instinct, paid distribution, and the systems that make growth repeatable.'),
-          long('heroPillars', 'Hanging cards (right side)', 'Creator instinct | Ideas that feel native to the feed\nPaid distribution | Media that finds the right people\nRepeatable systems | Testing loops that turn wins into process', 'Up to three cards, one per line, written as: Title | short line.'),
+          list('heroPillars', 'Hanging cards (right side)', 'Creator instinct | Ideas that feel native to the feed\nPaid distribution | Media that finds the right people\nRepeatable systems | Testing loops that turn wins into process', 'Up to three cards, one per line, written as: Title | short line.'),
         ],
       },
       {
@@ -456,7 +459,7 @@ export const PAGES: PageDef[] = [
         title: 'Intro statement',
         fields: [
           t('introLabel', 'Label', 'Built for the brave'),
-          long('introTitle', 'Heading', 'The ad should feel like culture. The result should feel like math.'),
+          list('introTitle', 'Heading', 'The ad should feel like culture. The result should feel like math.'),
           long('introText', 'Body text', 'Most agencies choose between creative and performance. We do not. CLYX connects the instinct that makes people stop with the systems that make brands grow.'),
         ],
       },
@@ -465,7 +468,7 @@ export const PAGES: PageDef[] = [
         title: 'Principles band (yellow)',
         fields: [
           t('valuesEyebrow', 'Eyebrow label', 'How we work'),
-          long('valuesTitle', 'Heading', 'Three principles.\nZero fluff.', LINES),
+          list('valuesTitle', 'Heading', 'Three principles.\nZero fluff.', LINES),
           long('valuesIntro', 'Intro text', 'The rules every brief, creative and campaign at CLYX runs on, from the first call to the tenth scaled ad.'),
           t('value1Tag', 'Card 1 · tag', 'How we talk'),
           t('value1Title', 'Card 1 · title', 'Directness'),
@@ -551,7 +554,7 @@ export const PAGES: PageDef[] = [
           t('opStep3Title', 'Step 3 · title', 'Put budget behind proof.'),
           t('opStep3Text', 'Step 3 · text', 'Spend follows ROAS, not opinions.'),
           t('opNote', 'Handwritten note', 'the whole game, really'),
-          long('opCore', 'Loop centre text', 'Growth\ncompounds', LINES),
+          list('opCore', 'Loop centre text', 'Growth\ncompounds', LINES),
           t('opLoop1', 'Loop · top', 'Stop the scroll'),
           t('opLoop2', 'Loop · right', 'Click'),
           t('opLoop3', 'Loop · bottom', 'Convert'),
@@ -579,8 +582,6 @@ export const PAGES: PageDef[] = [
         title: 'Mini chat (inside the call-to-action)',
         fields: [
           t('chatScribble', 'Handwritten hint', 'psst… tap one'),
-          t('chatHeaderText', 'Name shown above the status', '{name} from CLYX', '{name} becomes the first name of the first team member.'),
-          t('chatStatus', 'Status under the name', 'Usually replies same day'),
           t('chatGreeting', 'First message', 'Hey 👋 I’m {name}.', '{name} becomes the first name of the first team member.'),
           t('chatQuestion', 'Second message', 'What’s slowing your growth right now?'),
           ...numbered(
@@ -613,7 +614,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('heroTag', 'Eyebrow label', 'Selected work'),
           t('heroHeadline', 'Title (first line)', 'Work that'),
-          long('heroWords', 'Rotating words (yellow second line)', 'sells\nscales\nconverts\nsticks', ONE_PER_LINE),
+          list('heroWords', 'Rotating words (yellow second line)', 'sells\nscales\nconverts\nsticks', ONE_PER_LINE),
           long('heroLede', 'Intro paragraph', 'Campaigns, creators and storefronts built to turn attention into revenue. Every project below comes with the number it moved.'),
           ...numbered(
             [
@@ -641,7 +642,7 @@ export const PAGES: PageDef[] = [
           t('ctaNote', 'Handwritten note', 'the real numbers live here'),
           t('ctaBadge', 'Spinning badge text', 'case studies • real results •'),
           t('ctaIncludesTitle', 'Checklist heading', 'Inside every case study'),
-          long('ctaIncludes', 'Checklist items', 'The brief & starting numbers\nCreative that moved the metric\nSpend, ROAS & next steps', ONE_PER_LINE),
+          list('ctaIncludes', 'Checklist items', 'The brief & starting numbers\nCreative that moved the metric\nSpend, ROAS & next steps', ONE_PER_LINE),
           t('ctaStat1Value', 'Floating chip 1 · result', '3.4x ROAS'),
           t('ctaStat1Label', 'Floating chip 1 · brand', 'Kulture Skin'),
           t('ctaStat2Value', 'Floating chip 2 · result', '+188% CTR'),
@@ -687,7 +688,7 @@ export const PAGES: PageDef[] = [
         title: 'Recurring pattern (blue panel)',
         fields: [
           t('patternLabel', 'Label', 'The recurring pattern'),
-          long('patternTitle', 'Heading', 'Find the signal\nScale the signal', LINES),
+          list('patternTitle', 'Heading', 'Find the signal\nScale the signal', LINES),
           long('patternText', 'Body text', 'The best results rarely come from one perfect post. They come from building a system that knows what to keep, what to cut, and what to try next.'),
           t('patternStep1Tag', 'Card 1 · tag', 'Keep'),
           t('patternStep1Title', 'Card 1 · title', 'Double down on what holds.'),
@@ -743,8 +744,8 @@ export const PAGES: PageDef[] = [
     collections: ['creators'],
     sections: [
       withFields(pageHero('Creators', 'People make', 'the difference.', null), [
-        long('heroCloudLeft', 'Left cloud notes', 'say cheese!\nhold that pose…\nthat’s the one!', `${ONE_PER_LINE} The two clouds take turns showing their next note each time the camera flashes.`),
-        long('heroCloudRight', 'Right cloud notes', 'real voices only\nmade for the feed\none more take', ONE_PER_LINE),
+        list('heroCloudLeft', 'Left cloud notes', 'say cheese!\nhold that pose…\nthat’s the one!', `${ONE_PER_LINE} The two clouds take turns showing their next note each time the camera flashes.`),
+        list('heroCloudRight', 'Right cloud notes', 'real voices only\nmade for the feed\none more take', ONE_PER_LINE),
       ]),
       {
         id: 'feature',
@@ -812,7 +813,7 @@ export const PAGES: PageDef[] = [
           long('journalIntro', 'Intro paragraph', 'What we learn running creator ads, testing hooks and building pages that convert, written down while it is still fresh.'),
           t('journalIndexLabel', '"In this issue" heading', 'In this issue'),
           t('journalIndexButton', 'Button under the list', 'Browse all articles'),
-          long('journalTopics', 'Scrolling topics strip', 'Creator culture, Performance creative, Hook rate, Conversion, Landing pages, Testing loops, Creator briefs, Scaling', 'Comma separated.'),
+          list('journalTopics', 'Scrolling topics strip', 'Creator culture, Performance creative, Hook rate, Conversion, Landing pages, Testing loops, Creator briefs, Scaling', 'Comma separated.'),
         ],
       },
       {
@@ -888,7 +889,7 @@ export const PAGES: PageDef[] = [
           t('rolesHighlight', 'Heading highlight', 'at the table.'),
           long('rolesNote', 'Footer note', 'Don’t see your role? Send us the work you are proudest of anyway.'),
           t('rolesNoteLink', 'Footer link text', 'Get in touch'),
-          link('applyUrl', 'Footer link (Get in touch)', 'mailto:work@clyxmedia.com?subject=Careers'),
+          link('applyUrl', 'Footer link (Get in touch)', 'mailto:hr@clyxmedia.com?subject=Careers'),
           t('rolesDescButton', '"See description" button (on each card)', 'See description'),
           t('rolesDescLabel', 'Label (description popup)', 'About the role'),
           t('rolesDescApply', 'Apply button (description popup)', 'Apply for this role'),

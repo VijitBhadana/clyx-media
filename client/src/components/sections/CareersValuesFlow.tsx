@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Hammer, MessageSquareQuote, TrendingUp } from 'lucide-react';
 import { Label } from '@/components/ui/primitives';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const ICONS = [Hammer, MessageSquareQuote, TrendingUp];
 // Tablet/desktop zigzag: heading sits top-left, cards go top-right → bottom-right → bottom-left.
@@ -233,7 +234,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
         <h2 ref={headRef} className="display vf-heading w-fit text-4xl font-bold md:text-5xl lg:text-6xl">
           {title}<br /><FlowHighlight text={highlight} />
         </h2>
-        {intro && <p className="mt-6 max-w-md text-base leading-7 text-muted">{intro}</p>}
+        {intro && <p className="mt-6 max-w-md text-base leading-7 text-muted"><FormattedText text={intro} /></p>}
       </div>
       {values.map((value, i) => {
         const Icon = ICONS[i % ICONS.length];
@@ -248,7 +249,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
             </div>
             <div className="mt-auto pt-5">
               <h3 className="display text-3xl font-bold md:text-4xl">{value.title}</h3>
-              {value.text && <p className="mt-3 max-w-md text-sm leading-6 text-muted">{value.text}</p>}
+              {value.text && <p className="mt-3 max-w-md text-sm leading-6 text-muted"><FormattedText text={value.text} /></p>}
             </div>
           </div>
         );

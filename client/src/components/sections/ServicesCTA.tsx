@@ -5,6 +5,7 @@ import { useCollection } from '@/lib/siteContent';
 import { pageDefaults, safeHref } from '@/lib/pageContent';
 import '@/styles/services-cta.css';
 import { hasRevealed, revealThresholds } from '@/lib/reveal';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2);
 const firstName = (name: string) => name.split(' ')[0];
@@ -76,7 +77,7 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
               ))}
             </span>
           </h2>
-          <p className="svc-cta-lede">{c.ctaText}</p>
+          <p className="svc-cta-lede"><FormattedText text={c.ctaText} /></p>
 
           {leaders.length > 0 && <div className="svc-cta-people">
             <div className="svc-cta-avatars" aria-hidden="true">
@@ -100,10 +101,7 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
           <div className="svc-cta-chat" role="group" aria-label="Chat with the CLYX team">
             <div className="svc-cta-chat-head">
               <span className="svc-cta-avatar tone-0 is-sm" aria-hidden="true">{initials(leaders[0]?.name ?? 'CLYX')}<i /></span>
-              <div>
-                <p className="svc-cta-chat-name">{(c.chatHeaderText || '{name} from CLYX').replace(/\{name\}/g, host)}</p>
-                <p className="svc-cta-chat-status">{c.chatStatus}</p>
-              </div>
+              <p className="svc-cta-chat-name">{host}</p>
             </div>
 
             <div className="svc-cta-thread" aria-live="polite">
@@ -111,7 +109,7 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
               <p className="svc-cta-bubble is-them" style={{ '--d': '0.7s' } as React.CSSProperties}>{c.chatQuestion}</p>
               {topic && <p key={`q${picked}`} className="svc-cta-bubble is-me">{topic.label}</p>}
               {topic && typing && <p className="svc-cta-bubble is-them is-typing" aria-label="Typing"><span /><span /><span /></p>}
-              {topic && !typing && <p key={`a${picked}`} className="svc-cta-bubble is-them">{topic.reply}</p>}
+              {topic && !typing && <p key={`a${picked}`} className="svc-cta-bubble is-them"><FormattedText text={topic.reply} /></p>}
             </div>
 
             {topic === null ? (

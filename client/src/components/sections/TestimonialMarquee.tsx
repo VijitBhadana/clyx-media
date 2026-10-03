@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { useCollection } from '@/lib/siteContent';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 type Testimonial = { quote: string; author: string; role?: string; brand?: string; metrics?: string };
 
@@ -46,7 +47,7 @@ export default function TestimonialMarquee() {
           <Fragment key={copy}>
             {items.map((t, i) => (
               <div key={i} className="testimonial-card" aria-hidden={copy > 0 || undefined}>
-                <p className="testimonial-quote">“{t.quote}”</p>
+                <p className="testimonial-quote"><FormattedText text={`“${t.quote}”`} /></p>
                 <div className="testimonial-meta">
                   <div className="author">{t.author}</div>
                   <div className="brand">

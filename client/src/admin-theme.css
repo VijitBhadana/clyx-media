@@ -584,6 +584,17 @@
 .adm-input:hover { border-color: color-mix(in srgb, var(--a-brand) 30%, var(--a-border-strong)); }
 .adm-input:focus { border-color: var(--a-brand); background: var(--a-surface); box-shadow: var(--a-ring); }
 .adm-textarea { height: auto; min-height: 88px; padding: 11px 14px; resize: vertical; line-height: 1.55; }
+.adm-textarea { tab-size: 4; }
+/* Rich text box: formatting toolbar sitting on top of the textarea (RichTextarea in admin/fields.tsx). */
+.adm-rich { display: flex; flex-direction: column; }
+.adm-rich-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 6px; border: 1px solid var(--a-border-strong); border-bottom: 0; border-radius: 12px 12px 0 0; background: var(--a-surface); }
+.adm-rich .adm-textarea { border-top-left-radius: 0; border-top-right-radius: 0; }
+.adm-rich-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--a-text); font: inherit; font-size: 12.5px; font-weight: 500; }
+.adm-rich-btn.is-icon { width: 28px; padding: 0; justify-content: center; }
+.adm-rich-btn:hover { background: var(--a-surface-2); color: var(--a-brand); }
+.adm-rich-sep { width: 1px; height: 16px; margin: 0 2px; background: var(--a-border-strong); }
+.adm-rich-note { margin-left: auto; padding: 0 6px; font-size: 11.5px; color: var(--a-muted); }
+@media (max-width: 640px) { .adm-rich-note { display: none; } }
 select.adm-input { appearance: auto; }
 .adm-input-icon { position: relative; }
 .adm-input-icon > svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--a-muted); pointer-events: none; }

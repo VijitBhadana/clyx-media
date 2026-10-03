@@ -3,6 +3,7 @@ import { Infinity as MetaIcon, Instagram, Search, Youtube, ShoppingBag, MessageC
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { pageDefaults } from '@/lib/pageContent';
 import { RevealWords } from '@/components/ui/ScrollMotion';
+import { FormattedText } from '@/components/ui/FormattedText';
 
 // Tile icons stay fixed by position; names and details come from the Home page content.
 const ICONS: LucideIcon[] = [MetaIcon, Instagram, Search, Youtube, ShoppingBag, MessageCircle];
@@ -24,7 +25,7 @@ export default function ChannelStrip({ content: c = pageDefaults('home') }: { co
         {/* RevealWords animates on mount, so it only mounts once the strip is in view (the intro is hidden until then). */}
         <h2 id="channel-strip-title">{title}{' '}
           <span className="kinetic-accent">{visible ? <RevealWords text={c.channelsHighlight ?? ''} delay={350} step={35} /> : c.channelsHighlight}</span></h2>
-        <p>{c.channelsText}</p>
+        <p><FormattedText text={c.channelsText} /></p>
       </div>
       <ul className="channel-grid">
         {channels.map(({ icon: Icon, name, detail }, i) => (
