@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useClientNavigation } from './hooks/useClientNavigation';
+import { useCanonicalUrl } from './hooks/usePageMeta';
 import { usePauseOffscreenAnimations } from './hooks/usePauseOffscreenAnimations';
 import './lib/introLoader';
 import { firstPageReady } from './lib/siteContent';
@@ -38,13 +39,14 @@ const Creators = page(() => import('./pages/Creators'));
 const Blog = page(() => import('./pages/Blog'));
 const BlogPost = page(() => import('./pages/BlogPost'));
 const Careers = page(() => import('./pages/Careers'));
+const Courses = page(() => import('./pages/Courses'));
 const LegalPage = page(() => import('./pages/LegalPage'));
 const Admin = lazy(() => import('./admin/AdminApp'));
 const NotFound = page(() => import('./pages/NotFound'));
 
 // The public pages are small; fetching them while the browser is idle makes every menu click instant.
 // The admin panel is left out: visitors never need it.
-const PUBLIC_PAGES = [LandingV1, About, ServicesPage, ServiceDetail, Portfolio, PortfolioDetail, CaseStudies, CaseStudyDetail, Creators, Blog, BlogPost, Careers, Contact, LegalPage, NotFound];
+const PUBLIC_PAGES = [LandingV1, About, ServicesPage, ServiceDetail, Portfolio, PortfolioDetail, CaseStudies, CaseStudyDetail, Creators, Blog, BlogPost, Careers, Courses, Contact, LegalPage, NotFound];
 
 function usePreloadPages() {
   useEffect(() => {
@@ -83,6 +85,7 @@ function RouteFallback() {
 export default function App() {
   const [location] = useLocation();
   useClientNavigation();
+  useCanonicalUrl(location);
   usePreloadPages();
   usePauseOffscreenAnimations();
   return (
@@ -104,6 +107,7 @@ export default function App() {
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPost} />
           <Route path="/careers" component={Careers} />
+          <Route path="/courses" component={Courses} />
           <Route path="/contact" component={Contact} />
           <Route path="/privacy" component={LegalPage} />
           <Route path="/terms" component={LegalPage} />

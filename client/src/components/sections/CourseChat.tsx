@@ -1,0 +1,476 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ArrowLeftRight, Copy, MessageCircle, RotateCcw, SendHorizontal, Smartphone, X } from 'lucide-react';
+import BrandLogo from '@/components/ui/BrandLogo';
+import { API_URL } from '@/lib/api';
+import { qrSvgPath } from '@/lib/qr';
+import { coursePrice, formatRupees, type Course } from '@/data/courses';
+
+type Copy = Record<string, string>;
+type Step = 'name' | 'course' | 'utr' | 'phone' | 'saving' | 'done' | 'failed' | 'nopay';
+type Picked = { id: string; title: string; price: number };
+type Msg =
+  | { id: number; from: 'bot' | 'user'; type: 'text'; text: string }
+  | { id: number; from: 'bot'; type: 'qr'; ref: string; amount: number; course: string }
+  | { id: number; from: 'bot'; type: 'whatsapp'; href: string };
+type WithoutId<T> = T extends unknown ? Omit<T, 'id'> : never;
+type NewMsg = WithoutId<Msg>;
+type Saved = { v: 1; at: number; step: Step; msgs: Msg[]; name: string; course: Picked | null; ref: string; utr: string; phone: string };
+
+// The chat survives a reload or the phone switching to the UPI app and back (mobile browsers often reload the tab).
+const STORE_KEY = 'clyx_course_chat_v1';
+const STORE_TTL_MS = 12 * 60 * 60 * 1000;
+const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function loadSaved(): Saved | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null') as Saved | null;
+    return saved?.v === 1 && Date.now() - saved.at < STORE_TTL_MS && Array.isArray(saved.msgs) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function store(saved: Omit<Saved, 'v' | 'at'>) {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 1, at: Date.now(), ...saved }));
+  } catch {
+    // storage unavailable: the chat just starts over after a reload
+  }
+}
+
+/** Order ID made before payment so it can ride along in the UPI note; the backend keeps it unless it is taken. */
+function newRef() {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return `CLX-${Array.from(bytes, (b) => REF_ALPHABET[b % REF_ALPHABET.length]).join('')}`;
+}
+
+/** Fills {name}, {course}… in a message. Lines whose placeholder has no value are dropped (e.g. no UTR yet). */
+function fill(template: string, values: Record<string, string>) {
+  return template
+    .split('\n')
+    .filter((line) => !Array.from(line.matchAll(/\{(\w+)\}/g)).some(([, key]) => key in values && !values[key]))
+    .map((line) => line.replace(/\{(\w+)\}/g, (all, key) => (key in values ? values[key] : all)))
+    .join('\n');
+}
+
+function upiLink(upiId: string, payee: string, amount: number, ref: string) {
+  const q = (v: string) => encodeURIComponent(v).replace(/%40/g, '@');
+  return `upi://pay?pa=${q(upiId)}&pn=${q(payee || 'CLYX Media')}&am=${amount.toFixed(2)}&cu=INR&tn=${q(`CLYX ${ref}`)}`;
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+type SaveResult = { ok: true; ref: string } | { ok: false; status: number; error?: string };
+
+/** Saves the order, retrying network failures and server errors (a sleeping free backend can take ~50s to wake). */
+async function postOrder(body: Record<string, unknown>): Promise<SaveResult> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const timeout = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(attempt === 0 ? 60_000 : 25_000) : undefined;
+      const res = await fetch(`${API_URL}/api/public/course-orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: timeout,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) return { ok: true, ref: typeof data.ref === 'string' ? data.ref : String(body.ref) };
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) return { ok: false, status: res.status, error: data.error };
+    } catch {
+      // network error or timeout: retry
+    }
+    if (attempt < 2) await wait(1500 * (attempt + 1));
+  }
+  return { ok: false, status: 0 };
+}
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function CopyChip({ label, value }: { label: string; value: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <button
+      type="button"
+      className="cc-copy"
+      onClick={async () => {
+        if (await copyText(value)) {
+          setDone(true);
+          setTimeout(() => setDone(false), 1500);
+        }
+      }}
+    >
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <span className="cc-copy-state">{done ? 'Copied' : <Copy size={12} />}</span>
+    </button>
+  );
+}
+
+/** The payment card: QR with the exact amount (or the uploaded QR image), order ID, and a pay button on phones. */
+function QrCard({ msg, c }: { msg: Extract<Msg, { type: 'qr' }>; c: Copy }) {
+  const upiId = (c.upiId || '').trim();
+  const link = upiId ? upiLink(upiId, c.upiName, msg.amount, msg.ref) : '';
+  const qr = useMemo(() => (link ? qrSvgPath(link, 3) : null), [link]);
+  return (
+    <div className="cc-qr">
+      <div className="cc-qr-code">
+        {qr ? (
+          <svg viewBox={`0 0 ${qr.size} ${qr.size}`} role="img" aria-label={`UPI QR code to pay ${formatRupees(msg.amount)}`} shapeRendering="crispEdges">
+            <rect width={qr.size} height={qr.size} fill="#fff" />
+            <path d={qr.path} fill="#050505" />
+          </svg>
+        ) : (
+          c.qrImage && <img src={c.qrImage} alt="UPI QR code" />
+        )}
+      </div>
+      <p className="cc-qr-amount">{formatRupees(msg.amount)}</p>
+      <p className="cc-qr-course">{msg.course}</p>
+      <div className="cc-qr-rows">
+        {upiId && <CopyChip label="UPI ID" value={upiId} />}
+        <CopyChip label="Order ID" value={msg.ref} />
+      </div>
+      {link && (
+        <a href={link} className="cc-qr-pay">
+          <Smartphone size={16} /> {c.chatPayButton}
+        </a>
+      )}
+      {c.chatPayMobile && <p className="cc-qr-hint">{c.chatPayMobile}</p>}
+    </div>
+  );
+}
+
+const typingDelay = (msg: NewMsg) => (msg.type === 'text' ? Math.min(1100, 380 + msg.text.length * 10) : 700);
+
+/**
+ * Checkout chat for the Courses page. It slides in from the right, asks the buyer's name, lets them pick a course,
+ * shows a UPI QR for the exact price, takes the UTR / transaction ID and WhatsApp number, saves the order, and hands
+ * the buyer over to the team on WhatsApp with everything prefilled. No payment gateway or paid service is involved.
+ */
+export default function CourseChat({ open, onClose, courses, preferredId, content: c }: { open: boolean; onClose: () => void; courses: Course[]; preferredId?: string; content: Copy }) {
+  const reduce = useReducedMotion();
+  const [saved] = useState(loadSaved);
+  const [msgs, setMsgs] = useState<Msg[]>(saved?.msgs ?? []);
+  const [step, setStep] = useState<Step>(saved?.step ?? 'name');
+  const [name, setName] = useState(saved?.name ?? '');
+  const [course, setCourse] = useState<Picked | null>(saved?.course ?? null);
+  const [ref, setRef] = useState(saved?.ref ?? '');
+  const [utr, setUtr] = useState(saved?.utr ?? '');
+  const [phone, setPhone] = useState(saved?.phone ?? '');
+  const [typing, setTyping] = useState(false);
+  const [draft, setDraft] = useState('');
+  const nextId = useRef(msgs.reduce((max, m) => Math.max(max, m.id), 0) + 1);
+  const timers = useRef<number[]>([]);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const started = useRef(msgs.length > 0);
+  const warmed = useRef(false);
+
+  const whatsappNumber = (c.whatsappNumber || '').replace(/\D/g, '');
+  const hasPayment = !!((c.upiId || '').trim() || c.qrImage);
+
+  useEffect(() => store({ step: step === 'saving' ? 'phone' : step, msgs, name, course, ref, utr, phone }), [step, msgs, name, course, ref, utr, phone]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  const add = useCallback((msg: NewMsg) => setMsgs((list) => [...list, { ...msg, id: nextId.current++ } as Msg]), []);
+
+  /** Bot messages appear one after another with a typing indicator, then the chat moves to `next`. */
+  const say = useCallback(
+    (items: NewMsg[], next: Step) => {
+      setTyping(true);
+      let at = 0;
+      items.forEach((item, i) => {
+        at += reduce ? 120 : i === 0 ? 450 : typingDelay(item);
+        timers.current.push(
+          window.setTimeout(() => {
+            add(item);
+            if (i === items.length - 1) {
+              setTyping(false);
+              setStep(next);
+            }
+          }, at),
+        );
+      });
+    },
+    [add, reduce],
+  );
+
+  const text = (t: string): NewMsg => ({ from: 'bot', type: 'text', text: t });
+  const whatsapp = (values: Record<string, string>): NewMsg => ({
+    from: 'bot',
+    type: 'whatsapp',
+    href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fill(c.chatWhatsappMessage, values))}`,
+  });
+
+  const begin = useCallback(
+    (knownName: string) => {
+      setMsgs([]);
+      setCourse(null);
+      setRef('');
+      setUtr('');
+      setPhone('');
+      if (knownName) say([text(fill(c.chatWelcomeBack, { name: knownName })), text(c.chatAskCourse)], 'course');
+      else say([text(c.chatHello), text(c.chatAskName)], 'name');
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [say, c],
+  );
+
+  // First open: greet, and wake the backend early (a free instance sleeps) so saving the order later is quick.
+  useEffect(() => {
+    if (!open) return;
+    if (!warmed.current) {
+      warmed.current = true;
+      fetch(`${API_URL}/health`).catch(() => {});
+    }
+    if (!started.current) {
+      started.current = true;
+      begin('');
+    }
+  }, [open, begin]);
+
+  // Esc closes; the page behind does not scroll while the chat is open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    const html = document.documentElement;
+    const before = html.style.overflow;
+    html.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      html.style.overflow = before;
+    };
+  }, [open, onClose]);
+
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (body) body.scrollTo({ top: body.scrollHeight, behavior: reduce ? 'auto' : 'smooth' });
+  }, [msgs, typing, step, reduce]);
+
+  const needsInput = step === 'name' || step === 'utr' || step === 'phone';
+  useEffect(() => {
+    if (open && needsInput && !typing) inputRef.current?.focus({ preventScroll: true });
+  }, [open, needsInput, typing]);
+
+  const amountText = course ? formatRupees(course.price) : '';
+
+  const submit = useCallback(
+    async (order: { name: string; course: Picked; ref: string; utr: string; phone: string }) => {
+      setStep('saving');
+      setTyping(true);
+      const result = await postOrder({
+        ref: order.ref,
+        name: order.name,
+        phone: order.phone,
+        courseId: order.course.id,
+        courseTitle: order.course.title,
+        amount: order.course.price,
+        paymentRef: order.utr,
+      });
+      setTyping(false);
+      const values = { name: order.name, course: order.course.title, amount: formatRupees(order.course.price), utr: order.utr };
+      if (result.ok) {
+        setRef(result.ref);
+        say([text(fill(c.chatSaved, { ...values, ref: result.ref })), text(c.chatDone), whatsapp({ ...values, ref: result.ref })], 'done');
+      } else if (result.status === 409) {
+        say([text(c.chatDuplicate)], 'utr');
+      } else if (result.status === 400) {
+        say([text(result.error || c.chatBadUtr), text(c.chatAskUtr)], 'utr');
+      } else {
+        say([text(c.chatSaveError), whatsapp({ ...values, ref: order.ref })], 'failed');
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [say, c, whatsappNumber],
+  );
+
+  const pick = (item: Course) => {
+    if (typing || step !== 'course') return;
+    const picked = { id: item.id, title: item.title, price: coursePrice(item) };
+    add({ from: 'user', type: 'text', text: `${item.title} · ${formatRupees(picked.price)}` });
+    setCourse(picked);
+    const orderRef = newRef();
+    setRef(orderRef);
+    if (!hasPayment) {
+      say([text(c.chatNoPayment), whatsapp({ name, course: picked.title, amount: formatRupees(picked.price), ref: '', utr: '' })], 'nopay');
+      return;
+    }
+    say(
+      [
+        { from: 'bot', type: 'qr', ref: orderRef, amount: picked.price, course: picked.title },
+        text(fill(c.chatPay, { amount: formatRupees(picked.price), course: picked.title })),
+        text(c.chatAskUtr),
+      ],
+      'utr',
+    );
+  };
+
+  const send = (e: FormEvent) => {
+    e.preventDefault();
+    const value = draft.trim();
+    if (!value || typing || !needsInput) return;
+    setDraft('');
+    add({ from: 'user', type: 'text', text: value });
+    if (step === 'name') {
+      const clean = value.replace(/\s+/g, ' ').slice(0, 60);
+      // At least two letters (Latin or Devanagari), so "a" or "123" is asked again.
+      if (clean.replace(/[^A-Za-zÀ-ɏऀ-ॿ]/g, '').length < 2) return say([text(c.chatBadName)], 'name');
+      setName(clean);
+      say([text(fill(c.chatWelcome, { name: clean })), text(c.chatAskCourse)], 'course');
+    } else if (step === 'utr') {
+      const id = value.replace(/\s+/g, '').toUpperCase();
+      if (!/^[A-Z0-9]{6,40}$/.test(id)) return say([text(c.chatBadUtr)], 'utr');
+      setUtr(id);
+      say([text(c.chatAskPhone)], 'phone');
+    } else if (step === 'phone') {
+      const number = value.replace(/[\s()-]/g, '');
+      if (!/^\+?\d{10,15}$/.test(number)) return say([text(c.chatBadPhone)], 'phone');
+      setPhone(number);
+      if (course) void submit({ name, course, ref, utr, phone: number });
+    }
+  };
+
+  // A reload while saving: send the same order again (the backend treats a repeat as the same order).
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (!open || resumed.current) return;
+    resumed.current = true;
+    if (saved?.step === 'phone' && saved.phone && saved.course && saved.utr) {
+      void submit({ name: saved.name, course: saved.course, ref: saved.ref, utr: saved.utr, phone: saved.phone });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // The course the visitor clicked "Purchase" on is offered first.
+  const options = useMemo(() => {
+    const list = courses.filter((item) => item.title);
+    const i = list.findIndex((item) => item.id === preferredId);
+    return i > 0 ? [list[i], ...list.slice(0, i), ...list.slice(i + 1)] : list;
+  }, [courses, preferredId]);
+
+  const placeholder = step === 'name' ? c.chatNamePlaceholder : step === 'utr' ? c.chatUtrPlaceholder : step === 'phone' ? c.chatPhonePlaceholder : step === 'course' ? c.chatPickHint : '';
+  const chips: { label: string; icon: typeof RotateCcw; run: () => void }[] = [];
+  if (!typing && (step === 'utr' || step === 'phone') && course) chips.push({ label: c.chatChange, icon: ArrowLeftRight, run: () => say([text(c.chatAskCourse)], 'course') });
+  if (!typing && step === 'failed' && course) chips.push({ label: c.chatRetry, icon: RotateCcw, run: () => void submit({ name, course, ref, utr, phone }) });
+  if (!typing && (step === 'done' || step === 'failed' || step === 'nopay')) chips.push({ label: c.chatRestart, icon: RotateCcw, run: () => begin(name) });
+
+  const bubble = reduce ? {} : { initial: { opacity: 0, y: 10, scale: 0.97 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } };
+
+  // Portalled to <body>: the page content sits in a transformed reveal wrapper, which would trap a fixed panel.
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <div className="cc-root">
+          <motion.div className="cc-backdrop" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} />
+          <motion.aside
+            className="cc-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={c.chatTitle}
+            initial={reduce ? { opacity: 0 } : { x: '104%' }}
+            animate={reduce ? { opacity: 1 } : { x: 0 }}
+            exit={reduce ? { opacity: 0 } : { x: '104%' }}
+            transition={{ type: 'spring', stiffness: 260, damping: 30, mass: 0.9 }}
+          >
+            <header className="cc-head">
+              <span className="cc-avatar">
+                <BrandLogo size={40} />
+                <span className="cc-online" aria-hidden="true" />
+              </span>
+              <div className="cc-head-text">
+                <strong>{c.chatTitle}</strong>
+                <small>{typing ? 'typing…' : c.chatStatus}</small>
+              </div>
+              <button type="button" className="cc-close" onClick={onClose} aria-label="Close chat">
+                <X size={18} />
+              </button>
+            </header>
+
+            <div ref={bodyRef} className="cc-body" aria-live="polite">
+              {msgs.map((m) =>
+                m.type === 'qr' ? (
+                  <motion.div key={m.id} className="cc-row is-bot" {...bubble}>
+                    <QrCard msg={m} c={c} />
+                  </motion.div>
+                ) : m.type === 'whatsapp' ? (
+                  <motion.div key={m.id} className="cc-row is-bot" {...bubble}>
+                    <a href={m.href} target="_blank" rel="noreferrer" className="cc-wa">
+                      <MessageCircle size={18} /> {c.chatWhatsappButton}
+                    </a>
+                  </motion.div>
+                ) : (
+                  <motion.div key={m.id} className={`cc-row ${m.from === 'bot' ? 'is-bot' : 'is-user'}`} {...bubble}>
+                    <p className="cc-bubble">{m.text}</p>
+                  </motion.div>
+                ),
+              )}
+              {step === 'course' && !typing && (
+                <motion.div className="cc-options" {...bubble}>
+                  {options.map((item) => (
+                    <button key={item.id} type="button" className="cc-option" onClick={() => pick(item)}>
+                      <span className="cc-option-text">
+                        <strong>{item.title}</strong>
+                        {item.id === preferredId && options.length > 1 && <small>{c.chatPicked}</small>}
+                      </span>
+                      <span className="cc-option-price">{formatRupees(coursePrice(item))}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+              {typing && (
+                <div className="cc-row is-bot">
+                  <p className="cc-bubble cc-typing" aria-label={step === 'saving' ? c.chatSaving : 'typing'}>
+                    <span />
+                    <span />
+                    <span />
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <footer className="cc-foot">
+              {chips.length > 0 && (
+                <div className="cc-chips">
+                  {chips.map(({ label, icon: Icon, run }) => (
+                    <button key={label} type="button" className="cc-chip" onClick={run}>
+                      <Icon size={13} /> {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <form className="cc-form" onSubmit={send}>
+                <input
+                  ref={inputRef}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder={placeholder || (step === 'saving' ? c.chatSaving : '')}
+                  disabled={!needsInput || typing}
+                  maxLength={60}
+                  inputMode={step === 'phone' ? 'tel' : 'text'}
+                  autoComplete={step === 'name' ? 'name' : step === 'phone' ? 'tel' : 'off'}
+                  autoCapitalize={step === 'utr' ? 'characters' : step === 'name' ? 'words' : 'off'}
+                  aria-label={placeholder || 'Message'}
+                />
+                <button type="submit" className="cc-send" disabled={!needsInput || typing || !draft.trim()} aria-label="Send">
+                  <SendHorizontal size={18} />
+                </button>
+              </form>
+              {amountText && step !== 'done' && step !== 'nopay' && course && <p className="cc-summary">{course.title} · {amountText}</p>}
+            </footer>
+          </motion.aside>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}

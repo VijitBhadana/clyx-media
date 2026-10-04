@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageMeta';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import {
@@ -834,6 +835,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
 }
 
 export default function Portfolio() {
+  usePageTitle('Portfolio | CLYX Media');
   const c = usePageContent('portfolio');
   const portfolioImages = usePortfolio();
   const allLabel = c.heroFilterAllLabel || 'All';

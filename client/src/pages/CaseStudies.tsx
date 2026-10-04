@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageMeta';
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
@@ -134,6 +135,7 @@ function CaseCards({
 }
 
 export default function CaseStudies() {
+  usePageTitle('Case Studies | CLYX Media');
   const c = usePageContent('caseStudies');
   const caseStudies = useCaseStudies();
 

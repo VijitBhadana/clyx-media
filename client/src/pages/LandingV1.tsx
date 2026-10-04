@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageMeta';
 import React, { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import Header from '../components/layout/Header';
 import { Footer, WhatsAppButton, CookieBar } from '../components/layout/Footer';
@@ -71,6 +72,7 @@ const LOADER_MS = 1450;
 const HERO_DEFAULTS = sectionDefaults('home', 'hero');
 
 export default function LandingV1() {
+  usePageTitle('CLYX Media — Performance Creative & Creator Ads');
   const rootRef = useRef<HTMLDivElement>(null);
   const [showLoader] = useState(shouldPlayIntroLoader);
   const [loaderDone, setLoaderDone] = useState(false);

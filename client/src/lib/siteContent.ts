@@ -47,6 +47,8 @@ const SCOPES: Record<string, Scope> = {
   blogPost: { blocks: [...GLOBAL, 'page_blog'], collections: { blog: null } },
   // Cards plus the full details for their "See description" popup.
   careers: { blocks: [...GLOBAL, 'page_careers'], collections: { careers: null } },
+  // Cards plus everything the details popup and the purchase chat need.
+  courses: { blocks: [...GLOBAL, 'page_courses'], collections: { courses: null } },
   contact: { blocks: [...GLOBAL, 'page_contact'], collections: {} },
   // Legal pages, 404 and anything else with the site header and footer.
   other: { blocks: GLOBAL, collections: {} },
@@ -64,6 +66,7 @@ export function scopeForPath(path: string): Scope {
     case 'creators': return SCOPES.creators;
     case 'blog': return second ? SCOPES.blogPost : SCOPES.blog;
     case 'careers': return SCOPES.careers;
+    case 'courses': return SCOPES.courses;
     case 'contact': return SCOPES.contact;
     default: return SCOPES.other;
   }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
-import { ExternalLink, Images, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from 'lucide-react';
+import { ExternalLink, GraduationCap, Images, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from 'lucide-react';
 import { adminToken, ADMIN_LOGOUT_EVENT } from '@/lib/api';
 import { trpc } from '@/lib/trpc';
 import { PAGES, pageById, type PageId } from '@/lib/pageContent';
@@ -9,21 +9,23 @@ import LoginScreen from '@/admin/LoginScreen';
 import Dashboard from '@/admin/Dashboard';
 import PageEditor from '@/admin/PageEditor';
 import MediaLibrary from '@/admin/MediaLibrary';
+import CourseOrders from '@/admin/CourseOrders';
 import { PAGE_ICONS } from '@/admin/nav';
 import { Confirm } from '@/admin/ui';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '../admin-theme.css';
 
-type View = { kind: 'dashboard' } | { kind: 'media' } | { kind: 'page'; id: PageId };
+type View = { kind: 'dashboard' } | { kind: 'media' } | { kind: 'orders' } | { kind: 'page'; id: PageId };
 
 // The open screen lives in the URL hash (#/page/about), so a reload keeps you where you were.
 function viewFromHash(): View {
   const [, kind, id] = window.location.hash.replace(/^#/, '').split('/');
   if (kind === 'media') return { kind: 'media' };
+  if (kind === 'orders') return { kind: 'orders' };
   if (kind === 'page' && PAGES.some((p) => p.id === id)) return { kind: 'page', id: id as PageId };
   return { kind: 'dashboard' };
 }
-const hashFor = (view: View) => (view.kind === 'page' ? `#/page/${view.id}` : view.kind === 'media' ? '#/media' : '#/');
+const hashFor = (view: View) => (view.kind === 'page' ? `#/page/${view.id}` : view.kind === 'media' ? '#/media' : view.kind === 'orders' ? '#/orders' : '#/');
 const sameView = (a: View, b: View) => hashFor(a) === hashFor(b);
 
 type Theme = 'light' | 'dark';
@@ -124,7 +126,7 @@ function Console({ theme, onToggleTheme, onLogout }: { theme: Theme; onToggleThe
     );
   };
 
-  const title = view.kind === 'page' ? pageById(view.id).label : view.kind === 'media' ? 'Media' : 'Dashboard';
+  const title = view.kind === 'page' ? pageById(view.id).label : view.kind === 'media' ? 'Media' : view.kind === 'orders' ? 'Course orders' : 'Dashboard';
 
   return (
     <div className={`adm-shell${menuOpen ? ' menu-open' : ''}`}>
@@ -142,6 +144,9 @@ function Console({ theme, onToggleTheme, onLogout }: { theme: Theme; onToggleThe
         <nav className="adm-nav">
           <p className="adm-nav-title">Overview</p>
           {navItem({ kind: 'dashboard' }, 'Dashboard', LayoutDashboard)}
+
+          <p className="adm-nav-title">Sales</p>
+          {navItem({ kind: 'orders' }, 'Course orders', GraduationCap)}
 
           <p className="adm-nav-title">Website pages</p>
           {PAGES.filter((p) => p.id !== 'global').map((p) => navItem({ kind: 'page', id: p.id }, p.label, PAGE_ICONS[p.id], p.route))}
@@ -216,6 +221,8 @@ function Console({ theme, onToggleTheme, onLogout }: { theme: Theme; onToggleThe
             <Dashboard content={content} onOpenPage={(id) => go({ kind: 'page', id })} />
           ) : view.kind === 'media' ? (
             <MediaLibrary />
+          ) : view.kind === 'orders' ? (
+            <CourseOrders />
           ) : (
             <PageEditor page={pageById(view.id)} content={content} refetch={refetch} saveBlock={saveBlock} onDirtyChange={onDirtyChange} />
           )}

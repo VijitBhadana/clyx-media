@@ -1,9 +1,11 @@
+import { usePageTitle } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function NotFound() {
+  usePageTitle("Page not found | CLYX Media", { noindex: true });
   const [, setLocation] = useLocation();
 
   const handleGoHome = () => {

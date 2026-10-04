@@ -1,20 +1,30 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Hammer, MessageSquareQuote, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, Hammer, MonitorPlay, TrendingUp } from 'lucide-react';
 import { Label } from '@/components/ui/primitives';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { FormattedText } from '@/components/ui/FormattedText';
 
-const ICONS = [Hammer, MessageSquareQuote, TrendingUp];
+const ICONS = [MonitorPlay, Hammer, TrendingUp];
 // Tablet/desktop zigzag: heading sits top-left, cards go top-right → bottom-right → bottom-left.
 const PLACEMENT = [
   'md:col-start-2 md:row-start-1 md:justify-self-end md:self-center',
   'md:col-start-2 md:row-start-2 md:justify-self-end',
   'md:col-start-1 md:row-start-2 md:justify-self-start',
 ];
+// The optional button after the last card. Phones: under the last card. Tablet/desktop: in the empty space above the
+// last card (bottom-left), nudged down from the end of the heading's row into the middle of the row gap
+// (gap / 2 + half the button's height), so a short arrow rises from the card's top centre to it. The box is as wide
+// as the card (same max width and alignment), so the button and its arrow line up with the card's centre.
+const CTA_PLACEMENT =
+  '-mt-12 flex w-full max-w-[420px] justify-center md:relative md:col-start-1 md:row-start-1 md:mt-0 md:self-end md:justify-self-start md:top-[107px] lg:top-[139px]';
 // Arrows are scrubbed by scroll: each draws over SPAN px of scrolling, in order, as its midpoint passes
 // TRIGGER (a fraction of the viewport height from the top).
-const SPAN = 240;
-const TRIGGER = 0.78;
+const SPAN = 180;
+const TRIGGER = 0.85;
+// Once the button's spot is this far up the screen (fraction of the viewport height from the top), every arrow
+// still drawing finishes on its own, so the last card, its short arrow and the button are in by the time the
+// reader gets there instead of only after scrolling past.
+const CTA_TRIGGER = 0.85;
 
 type Box = { x: number; y: number; w: number; h: number };
 type Arrow = { d: string; head: string; mid: number };
@@ -89,6 +99,29 @@ function arrowBetween(a: Box, b: Box, flip: boolean): Arrow {
 }
 
 /**
+ * A short arrow with a gentle S-bend from the centre of box `a` (the last card) to the centre of box `b` (the button
+ * row): rising from the card's top edge when the button sits above it, dropping from its bottom edge when below.
+ * Same open chevron head as the long arrows.
+ */
+function shortArrow(a: Box, b: Box): Arrow {
+  const up = b.y + b.h / 2 < a.y + a.h / 2;
+  const s = up ? -1 : 1;
+  const p0 = { x: a.x + a.w / 2, y: up ? a.y - 12 : a.y + a.h + 12 };
+  const p1 = { x: b.x + b.w / 2, y: up ? b.y + b.h + 14 : b.y - 14 };
+  const dy = Math.max(24, Math.abs(p1.y - p0.y));
+  const c1 = { x: p0.x + 26, y: p0.y + s * dy * 0.45 };
+  const c2 = { x: p1.x - 26, y: p1.y - s * dy * 0.45 };
+  const f = (p: { x: number; y: number }) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+  const len = Math.hypot(p1.x - c2.x, p1.y - c2.y) || 1;
+  const dirX = (p1.x - c2.x) / len, dirY = (p1.y - c2.y) / len;
+  const wing = (angle: number) => {
+    const c = Math.cos(angle), sn = Math.sin(angle);
+    return `${(p1.x - 16 * (dirX * c - dirY * sn)).toFixed(1)} ${(p1.y - 16 * (dirX * sn + dirY * c)).toFixed(1)}`;
+  };
+  return { d: `M ${f(p0)} C ${f(c1)} ${f(c2)} ${f(p1)}`, head: `M ${wing(0.6)} L ${f(p1)} L ${wing(-0.6)}`, mid: (p0.y + p1.y) / 2 };
+}
+
+/**
  * The heading's highlight: once it scrolls into view its letters rise out of per-word masks one by one.
  */
 function FlowHighlight({ text }: { text: string }) {
@@ -117,6 +150,8 @@ type Props = {
   highlight: string;
   intro?: string;
   values: { title: string; text?: string }[];
+  /** Button after the last card, reached by one more (short) arrow. */
+  cta?: { label: string; href: string };
 };
 
 /**
@@ -144,14 +179,16 @@ function progressFor(root: HTMLElement, mids: number[]): number[] {
   return spans.map(([a, b]) => Math.min(1, Math.max(0, (t - a) / (b - a))));
 }
 
-export default function CareersValuesFlow({ label, title, highlight, intro, values }: Props) {
+export default function CareersValuesFlow({ label, title, highlight, intro, values, cta }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLHeadingElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
+  // The cards, then the button (if any) as the last arrow's target.
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lineRefs = useRef<(SVGPathElement | null)[]>([]);
   const tipRefs = useRef<(SVGPathElement | null)[]>([]);
   const [arrows, setArrows] = useState<Arrow[]>([]);
+  const hasCta = !!cta;
   const arrowsRef = useRef<Arrow[]>([]);
   arrowsRef.current = arrows;
   // Scrubbing writes straight to the DOM so scrolling never re-renders React.
@@ -159,16 +196,30 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
   paint.current = () => {
     const root = rootRef.current;
     if (!root) return;
-    const mids = arrowsRef.current.map(a => a.mid);
+    // Only the card arrows are scrubbed. The button's short arrow (index values.length) is not: on wide screens the
+    // button sits above the last card, so it would only finish once it had scrolled away. It plays with the last card.
+    const mids = arrowsRef.current.slice(0, values.length).map(a => a.mid);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const progress = reduced ? mids.map(() => 1) : progressFor(root, mids);
+    const ctaEl = arrowsRef.current.length > values.length ? cardRefs.current[values.length] : null;
+    const ctaReached = !!ctaEl && ctaEl.getBoundingClientRect().top <= window.innerHeight * CTA_TRIGGER;
+    const progress = reduced || ctaReached ? mids.map(() => 1) : progressFor(root, mids);
     progress.forEach((p, i) => {
       const done = p >= 0.98;
       const line = lineRefs.current[i];
-      if (line) line.style.strokeDashoffset = String(1 - p);
+      if (line) {
+        // A jump to "finished" glides instead of snapping.
+        line.classList.toggle('is-finishing', ctaReached && !reduced);
+        line.style.strokeDashoffset = String(1 - p);
+      }
       tipRefs.current[i]?.classList.toggle('is-on', done);
       cardRefs.current[i]?.classList.toggle('is-in', done);
     });
+    if (arrowsRef.current.length > values.length) {
+      const done = progress.length > 0 && progress[progress.length - 1] >= 0.98;
+      lineRefs.current[values.length]?.classList.toggle('is-drawn', done);
+      tipRefs.current[values.length]?.classList.toggle('is-on', done);
+      cardRefs.current[values.length]?.classList.toggle('is-in', done);
+    }
   };
 
   useLayoutEffect(() => {
@@ -178,11 +229,12 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
     const measure = () => {
       // Stacked (phones): the first arrow drops from below the intro paragraph, not through it.
       const from = stacked.matches && introRef.current ? introRef.current : head;
-      const boxes = [from, ...cardRefs.current].map(el => (el ? boxIn(el, root) : null));
+      const targets = cardRefs.current.slice(0, values.length + (hasCta ? 1 : 0));
+      const boxes = [from, ...targets].map(el => (el ? boxIn(el, root) : null));
       const next: Arrow[] = [];
       for (let i = 0; i < boxes.length - 1; i++) {
         const a = boxes[i], b = boxes[i + 1];
-        if (a && b) next.push(arrowBetween(a, b, i === 1));
+        if (a && b) next.push(i === values.length ? shortArrow(a, b) : arrowBetween(a, b, i === 1));
       }
       setArrows(next);
     };
@@ -196,7 +248,7 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
       ro.disconnect();
       stacked.removeEventListener('change', measure);
     };
-  }, [values.length]);
+  }, [values.length, hasCta]);
 
   // Rebuilt paths start at whatever progress the current scroll position calls for.
   useLayoutEffect(() => paint.current(), [arrows]);
@@ -224,8 +276,8 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
       <svg className="values-flow-arrows" aria-hidden="true">
         {arrows.map((arrow, i) => (
           <g key={i}>
-            <path ref={el => { lineRefs.current[i] = el; }} className="values-flow-line" d={arrow.d} pathLength={1} />
-            <path ref={el => { tipRefs.current[i] = el; }} className="values-flow-head" d={arrow.head} />
+            <path ref={el => { lineRefs.current[i] = el; }} className={`values-flow-line${i === values.length ? ' is-auto' : ''}`} d={arrow.d} pathLength={1} />
+            <path ref={el => { tipRefs.current[i] = el; }} className={`values-flow-head${i === values.length ? ' is-auto' : ''}`} d={arrow.head} />
           </g>
         ))}
       </svg>
@@ -254,6 +306,14 @@ export default function CareersValuesFlow({ label, title, highlight, intro, valu
           </div>
         );
       })}
+      {cta && (
+        <div ref={el => { cardRefs.current[values.length] = el; }} className={`values-flow-cta ${CTA_PLACEMENT}`}>
+          <a href={cta.href} className="vf-cta-btn">
+            {cta.label}
+            <span className="vf-cta-icon" aria-hidden="true"><ArrowUpRight size={16} strokeWidth={2.4} /></span>
+          </a>
+        </div>
+      )}
     </div>
   );
 }

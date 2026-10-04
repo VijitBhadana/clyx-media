@@ -1,3 +1,4 @@
+import { usePageTitle } from '@/hooks/usePageMeta';
 import { motion, MotionValue, useInView, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import PageShell from '@/components/layout/PageShell';
@@ -296,6 +297,7 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
 }
 
 export default function Creators() {
+  usePageTitle('Creators | CLYX Media');
   const c = usePageContent('creators');
   return (
     <PageShell

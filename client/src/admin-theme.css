@@ -1148,3 +1148,42 @@ select.adm-input { appearance: auto; }
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* Course orders (CourseOrders.tsx): one card per purchase, coloured edge by status. */
+.adm-orders { display: grid; gap: 12px; }
+.adm-order {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: var(--a-radius);
+  border: 1px solid var(--a-border);
+  border-left: 4px solid var(--a-warn);
+  background: var(--a-surface);
+  box-shadow: var(--a-shadow);
+  animation: adm-rise 0.35s var(--a-ease);
+}
+.adm-order.is-skeleton { min-height: 130px; border-left-color: var(--a-border); }
+.adm-order.is-verified { border-left-color: var(--a-brand-2); }
+.adm-order.is-link_sent { border-left-color: var(--a-live); }
+.adm-order.is-rejected { border-left-color: var(--a-danger); opacity: 0.75; }
+.adm-order-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.adm-order-top small { margin-left: auto; color: var(--a-muted); font-size: 12px; }
+.adm-order-ref { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; letter-spacing: 0.04em; }
+.adm-order-status { padding: 3px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: color-mix(in srgb, var(--a-warn) 16%, transparent); color: color-mix(in srgb, var(--a-warn) 70%, var(--a-text)); }
+.adm-order-status.is-verified { background: var(--a-brand-soft); color: var(--a-brand-2); }
+.adm-order-status.is-link_sent { background: color-mix(in srgb, var(--a-live) 14%, transparent); color: var(--a-live); }
+.adm-order-status.is-rejected { background: var(--a-danger-soft); color: var(--a-danger); }
+.adm-order h3 { margin-top: 8px; font-size: 17px; font-weight: 700; }
+.adm-order-course { margin-top: 2px; color: var(--a-text-2); }
+.adm-order-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.adm-order-facts button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: var(--a-surface-3); color: var(--a-text-2); font-size: 12px; }
+.adm-order-facts button:hover { color: var(--a-brand); }
+.adm-order-facts strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--a-text); font-size: 12.5px; }
+.adm-order-side { display: grid; gap: 8px; align-content: start; }
+.adm-order-wa { justify-content: center; }
+.adm-order-note { font-size: 12.5px; }
+.adm-orders-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; color: var(--a-muted); }
+@media (max-width: 720px) {
+  .adm-order { grid-template-columns: 1fr; }
+}
