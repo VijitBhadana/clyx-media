@@ -986,6 +986,11 @@ export const PAGES: PageDef[] = [
         ],
       },
       {
+        id: 'seo',
+        title: 'Browser tab title',
+        fields: [t('pageTitle', 'Title in the browser tab and Google', 'Courses | CLYX Media')],
+      },
+      {
         id: 'hero',
         title: 'Hero banner',
         description: 'The top of the Courses page. Every “Enroll” button on the page opens the purchase chat.',
@@ -1054,6 +1059,7 @@ export const PAGES: PageDef[] = [
           list('certPoints', 'Points', 'Get a certificate that shows real skills\nShare it on your profiles\nAdd it to your resume and portfolio', 'One per line.'),
           t('certButton', 'Button', 'Enroll Now'),
           img('certImage', 'Certificate image (optional)', '', 'Upload your real certificate to replace the drawn sample.'),
+          t('certBrand', 'Sample · name under the logo', 'CLYX Media', 'The logo itself is the Site logo from Header & Footer.'),
           t('certHeading', 'Sample · title', 'Certificate'),
           t('certSubheading', 'Sample · subtitle', 'of completion'),
           t('certLead', 'Sample · small line', 'This is to certify that:'),
@@ -1069,6 +1075,8 @@ export const PAGES: PageDef[] = [
         fields: [
           t('testLabel', 'Label', 'Students'),
           t('testTitle', 'Heading', 'Testimonials'),
+          t('testPrev', 'Previous arrow (screen readers)', 'Previous'),
+          t('testNext', 'Next arrow (screen readers)', 'Next'),
           list('testimonials', 'Videos', '', 'One per line, written as: Name | video link | cover image link. YouTube / Shorts links and .mp4 files play on the page; a YouTube video gets its cover automatically.'),
         ],
       },
@@ -1135,8 +1143,13 @@ export const PAGES: PageDef[] = [
       {
         id: 'footer',
         title: 'Footer',
-        description: 'The slim footer of this page. The email address comes from Header & Footer → “Big email address”.',
-        fields: [t('footerText', 'Text before the email', 'Got a question? Please reach us at')],
+        description: 'The slim footer of this page. The logo is the Site logo from Header & Footer.',
+        fields: [
+          t('footerBrand', 'Name next to the logo', 'CLYX Media'),
+          t('footerText', 'Text before the email', 'Got a question? Please reach us at', 'Leave empty to hide the line.'),
+          t('footerEmail', 'Email address', '', 'Leave empty to use “Big email address” from Header & Footer.'),
+          t('footerCopy', 'Copyright line ({year} = current year)', 'Copyright © {year} CLYX Media.'),
+        ],
       },
       {
         id: 'details',
@@ -1159,6 +1172,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('chatTitle', 'Chat name', 'CLYX Courses'),
           t('chatStatus', 'Status under the name', 'Online · replies instantly'),
+          t('chatTyping', 'Status while the bot is typing', 'typing…'),
           t('chatHello', 'Message 1', 'Hi there 👋 Welcome to CLYX Courses.'),
           t('chatAskName', 'Ask for name', 'What’s your name?'),
           t('chatWelcome', 'Welcome', 'Great to meet you, {name}! 🎉'),

@@ -164,7 +164,7 @@ const typingDelay = (msg: NewMsg) => (msg.type === 'text' ? Math.min(1100, 380 +
  * shows a UPI QR for the exact price, takes the UTR / transaction ID and WhatsApp number, saves the order, and hands
  * the buyer over to the team on WhatsApp with everything prefilled. No payment gateway or paid service is involved.
  */
-export default function CourseChat({ open, onClose, courses, preferredId, content: c }: { open: boolean; onClose: () => void; courses: Course[]; preferredId?: string; content: Copy }) {
+export default function CourseChat({ open, onClose, courses, preferredId, content: c, logo }: { open: boolean; onClose: () => void; courses: Course[]; preferredId?: string; content: Copy; logo?: string }) {
   const reduce = useReducedMotion();
   const [saved] = useState(loadSaved);
   const [msgs, setMsgs] = useState<Msg[]>(saved?.msgs ?? []);
@@ -387,12 +387,12 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
           >
             <header className="cc-head">
               <span className="cc-avatar">
-                <BrandLogo size={40} />
+                <BrandLogo size={40} src={logo} />
                 <span className="cc-online" aria-hidden="true" />
               </span>
               <div className="cc-head-text">
                 <strong>{c.chatTitle}</strong>
-                <small>{typing ? 'typing…' : c.chatStatus}</small>
+                <small>{typing ? c.chatTyping || 'typing…' : c.chatStatus}</small>
               </div>
               <button type="button" className="cc-close" onClick={onClose} aria-label="Close chat">
                 <X size={18} />

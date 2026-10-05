@@ -37,8 +37,9 @@ const parts = (text: string | undefined) => splitLines(text).map((line) => line.
  * The page keeps its own navy / cream / lime look in both site themes.
  */
 export default function Courses() {
-  usePageTitle('Courses | CLYX Media');
   const c = usePageContent('courses');
+  const g = usePageContent('global');
+  usePageTitle(c.pageTitle || 'Courses | CLYX Media');
   const courses = useCollection<Course>('courses', defaultCourses, toCourse);
   const [details, setDetails] = useState<Course | null>(null);
   const lastDetails = useRef<Course | null>(null);
@@ -61,7 +62,7 @@ export default function Courses() {
   if (c.problemLine1 || splitLines(c.problemPoints).length) numbered.push(['problem', (n) => <Problem key="problem" n={n} c={c} />]);
   numbered.push(['courses', (n) => <CourseList key="courses" n={n} c={c} courses={courses} onDetails={setDetails} onBuy={buy} onEnroll={enroll} />]);
   if (parsePairs(c.currModules).length) numbered.push(['curriculum', (n) => <Curriculum key="curriculum" n={n} c={c} />]);
-  if (c.certTitle) numbered.push(['certificate', (n) => <Certificate key="certificate" n={n} c={c} onEnroll={enroll} />]);
+  if (c.certTitle) numbered.push(['certificate', (n) => <Certificate key="certificate" n={n} c={c} logo={g.logoImage} onEnroll={enroll} />]);
   if (parts(c.testimonials).length) numbered.push(['testimonials', (n) => <Testimonials key="testimonials" n={n} c={c} />]);
   if (c.mentorTitle) numbered.push(['mentor', (n) => <Mentor key="mentor" n={n} c={c} />]);
   if (parsePairs(c.faqs).length) numbered.push(['faq', (n) => <Faq key="faq" n={n} c={c} />]);
@@ -91,7 +92,7 @@ export default function Courses() {
       )}
       {chatMounted && (
         <Suspense fallback={null}>
-          <CourseChat open={chatOpen} onClose={closeChat} courses={courses} preferredId={preferred} content={c} />
+          <CourseChat open={chatOpen} onClose={closeChat} courses={courses} preferredId={preferred} content={c} logo={g.logoImage} />
         </Suspense>
       )}
     </div>
@@ -308,7 +309,7 @@ function Curriculum({ n, c }: { n: number; c: Copy }) {
 
 /* ---------- 04 Certificate ---------- */
 
-function Certificate({ n, c, onEnroll }: { n: number; c: Copy; onEnroll: () => void }) {
+function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: string; onEnroll: () => void }) {
   const points = splitLines(c.certPoints);
   return (
     <section className="cr-sec cr-navy cr-cert-sec">
@@ -324,7 +325,7 @@ function Certificate({ n, c, onEnroll }: { n: number; c: Copy; onEnroll: () => v
           <EnrollButton label={c.certButton} onClick={onEnroll} className="cr-btn-lime cr-cert-btn" />
         </div>
         <div className="cr-cert-wrap">
-          {c.certImage ? <img className="cr-cert-img" src={c.certImage} alt="" loading="lazy" decoding="async" /> : <CertificateArt c={c} />}
+          {c.certImage ? <img className="cr-cert-img" src={c.certImage} alt="" loading="lazy" decoding="async" /> : <CertificateArt c={c} logo={logo} />}
         </div>
       </Reveal>
     </section>
@@ -332,13 +333,13 @@ function Certificate({ n, c, onEnroll }: { n: number; c: Copy; onEnroll: () => v
 }
 
 /** A sample CLYX certificate drawn in HTML, shown unless an image is set in the admin. Sized in container units. */
-function CertificateArt({ c }: { c: Copy }) {
+function CertificateArt({ c, logo }: { c: Copy; logo?: string }) {
   const signers = parsePairs(c.certSigners);
   return (
     <div className="cr-cert" aria-hidden="true">
       <div className="cr-cert-side">
-        <BrandLogo size={56} className="cr-cert-logo" />
-        <span>CLYX Media</span>
+        <BrandLogo size={56} src={logo} className="cr-cert-logo" />
+        {c.certBrand && <span>{c.certBrand}</span>}
         <i className="cr-tri is-a" /><i className="cr-tri is-b" /><i className="cr-tri is-c" />
       </div>
       <div className="cr-cert-main">
@@ -402,8 +403,8 @@ function Testimonials({ n, c }: { n: number; c: Copy }) {
             <h2 className="cr-h2">{c.testTitle}</h2>
           </div>
           <div className="cr-arrows">
-            <button type="button" onClick={() => step(-1)} disabled={edge.start} aria-label="Previous"><ChevronLeft size={20} /></button>
-            <button type="button" onClick={() => step(1)} disabled={edge.end} aria-label="Next"><ChevronRight size={20} /></button>
+            <button type="button" onClick={() => step(-1)} disabled={edge.start} aria-label={c.testPrev || 'Previous'}><ChevronLeft size={20} /></button>
+            <button type="button" onClick={() => step(1)} disabled={edge.end} aria-label={c.testNext || 'Next'}><ChevronRight size={20} /></button>
           </div>
         </div>
         <div ref={reel} className="cr-reel" onScroll={update}>
@@ -570,13 +571,14 @@ function CtaBand({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
 /** The page's own slim footer (the reference look) instead of the site-wide blue one. */
 function CourseFooter({ c }: { c: Copy }) {
   const g = usePageContent('global');
-  const email = g.footerEmail || 'work@clyxmedia.com';
+  const email = c.footerEmail || g.footerEmail || 'work@clyxmedia.com';
+  const copy = (c.footerCopy || '').replace('{year}', String(new Date().getFullYear()));
   return (
     <footer className="cr-footer">
       <div className="cr-wrap cr-footer-row">
-        <a href="/" className="cr-footer-brand"><BrandLogo size={36} />CLYX Media</a>
+        <a href="/" className="cr-footer-brand"><BrandLogo size={36} src={g.logoImage} />{c.footerBrand}</a>
         {c.footerText && <p className="cr-footer-text">{c.footerText} <a href={`mailto:${email}`}>{email}</a></p>}
-        <p className="cr-footer-copy">Copyright © {new Date().getFullYear()} CLYX Media.</p>
+        {copy && <p className="cr-footer-copy">{copy}</p>}
       </div>
     </footer>
   );
