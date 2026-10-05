@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeftRight, Copy, MessageCircle, RotateCcw, SendHorizontal, Smartphone, X } from 'lucide-react';
+import { ArrowLeftRight, Copy, MessageCircle, QrCode, ReceiptText, RotateCcw, SendHorizontal, Smartphone, X } from 'lucide-react';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { API_URL } from '@/lib/api';
 import { qrSvgPath } from '@/lib/qr';
@@ -12,11 +12,11 @@ type Step = 'name' | 'course' | 'utr' | 'phone' | 'saving' | 'done' | 'failed' |
 type Picked = { id: string; title: string; price: number };
 type Msg =
   | { id: number; from: 'bot' | 'user'; type: 'text'; text: string }
-  | { id: number; from: 'bot'; type: 'qr'; amount: number; course: string }
+  | { id: number; from: 'bot'; type: 'qr'; amount: number; course: string; ref?: string }
   | { id: number; from: 'bot'; type: 'whatsapp'; href: string };
 type WithoutId<T> = T extends unknown ? Omit<T, 'id'> : never;
 type NewMsg = WithoutId<Msg>;
-type Saved = { v: 2; at: number; step: Step; msgs: Msg[]; name: string; course: Picked | null; utr: string; phone: string };
+type Saved = { v: 2; at: number; step: Step; msgs: Msg[]; name: string; course: Picked | null; utr: string; phone: string; session?: string; orderRef?: string };
 
 // The chat survives a reload or the phone switching to the UPI app and back (mobile browsers often reload the tab).
 const STORE_KEY = 'clyx_course_chat_v2';
@@ -38,6 +38,49 @@ function store(saved: Omit<Saved, 'v' | 'at'>) {
     // storage unavailable: the chat just starts over after a reload
   }
 }
+
+/** One finished purchase in this browser, listed under "Your purchases" (the order ID is never shown). */
+type Purchase = { title: string; amount: number; utr: string; status: 'saved' | 'pending' };
+/** A finished chat (paid, failed to save, or no payment set up), kept so the buyer can scroll back through it. */
+type Session = { id: string; at: number; msgs: Msg[]; purchase?: Purchase };
+type History = { v: 1; name: string; sessions: Session[] };
+
+// Past chats and purchases stay much longer than the in-progress chat above.
+const HISTORY_KEY = 'clyx_course_history_v1';
+const HISTORY_TTL_MS = 365 * 24 * 60 * 60 * 1000;
+const HISTORY_MAX = 20;
+const emptyHistory = (): History => ({ v: 1, name: '', sessions: [] });
+
+function loadHistory(): History {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || 'null') as History | null;
+    if (saved?.v !== 1 || !Array.isArray(saved.sessions)) return emptyHistory();
+    return { ...saved, sessions: saved.sessions.filter((x) => x && Array.isArray(x.msgs) && Date.now() - x.at < HISTORY_TTL_MS) };
+  } catch {
+    return emptyHistory();
+  }
+}
+
+function storeHistory(history: History) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // storage full or blocked: history just is not kept
+  }
+}
+
+// No 0/O or 1/I, same as the backend, so an order ID read out over the phone is never misheard.
+const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+/** A new order ID such as "CLX-7KQ2M9". Made before the QR is shown so it can travel in the UPI payment note. */
+function newOrderRef() {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return `CLX-${Array.from(bytes, (b) => REF_ALPHABET[b % REF_ALPHABET.length]).join('')}`;
+}
+const newSessionId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+const when = (at: number) =>
+  new Date(at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 /**
  * The order ID lives only in the database and the admin panel. Older saved copy still mentions it ("Order ID: {ref}"),
@@ -65,9 +108,15 @@ function fill(template: string, values: Record<string, string>) {
     .join('\n');
 }
 
-function upiLink(upiId: string, payee: string, amount: number) {
+/**
+ * The UPI payment request behind the QR and the "Pay with UPI app" button. The order ID goes in the payment note
+ * (`tn`), which the receiving UPI app shows next to the payment, so the team can match it to the order in the admin.
+ * (`tr` is left out on purpose: several UPI apps refuse it for personal, non-merchant UPI IDs.)
+ */
+function upiLink(upiId: string, payee: string, amount: number, ref?: string) {
   const q = (v: string) => encodeURIComponent(v).replace(/%40/g, '@');
-  return `upi://pay?pa=${q(upiId)}&pn=${q(payee || 'CLYX Media')}&am=${amount.toFixed(2)}&cu=INR&tn=${q('CLYX Course')}`;
+  const note = ref ? `${ref} CLYX Course` : 'CLYX Course';
+  return `upi://pay?pa=${q(upiId)}&pn=${q(payee || 'CLYX Media')}&am=${amount.toFixed(2)}&cu=INR&tn=${q(note)}`;
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -128,7 +177,7 @@ function CopyChip({ label, value }: { label: string; value: string }) {
 /** The payment card: QR with the exact amount (or the uploaded QR image), the UPI ID, and a pay button on phones. */
 function QrCard({ msg, c }: { msg: Extract<Msg, { type: 'qr' }>; c: Copy }) {
   const upiId = (c.upiId || '').trim();
-  const link = upiId ? upiLink(upiId, c.upiName, msg.amount) : '';
+  const link = upiId ? upiLink(upiId, c.upiName, msg.amount, msg.ref) : '';
   const qr = useMemo(() => (link ? qrSvgPath(link, 3) : null), [link]);
   return (
     <div className="cc-qr">
@@ -157,6 +206,35 @@ function QrCard({ msg, c }: { msg: Extract<Msg, { type: 'qr' }>; c: Copy }) {
   );
 }
 
+/** "Your purchases": every course bought from this browser, newest first. */
+function PurchaseList({ sessions, c }: { sessions: Session[]; c: Copy }) {
+  const bought = sessions.filter((x) => x.purchase).reverse();
+  if (!bought.length) return null;
+  return (
+    <section className="cc-history" aria-label={c.chatHistoryTitle}>
+      <p className="cc-history-title"><ReceiptText size={14} aria-hidden="true" />{c.chatHistoryTitle}</p>
+      <ul>
+        {bought.map(({ id, at, purchase }) => (
+          <li key={id}>
+            <span className="cc-history-text">
+              <strong>{purchase!.title}</strong>
+              <small>{fill(c.chatHistoryMeta, { utr: purchase!.utr, date: when(at) })}</small>
+            </span>
+            <span className="cc-history-side">
+              <b>{formatRupees(purchase!.amount)}</b>
+              <em className={purchase!.status === 'saved' ? 'is-saved' : 'is-pending'}>{purchase!.status === 'saved' ? c.chatHistorySaved : c.chatHistoryPending}</em>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function Divider({ label }: { label: string }) {
+  return <p className="cc-divider"><span>{label}</span></p>;
+}
+
 const typingDelay = (msg: NewMsg) => (msg.type === 'text' ? Math.min(1100, 380 + msg.text.length * 10) : 700);
 
 /**
@@ -173,6 +251,9 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const [course, setCourse] = useState<Picked | null>(saved?.course ?? null);
   const [utr, setUtr] = useState(saved?.utr ?? '');
   const [phone, setPhone] = useState(saved?.phone ?? '');
+  const [orderRef, setOrderRef] = useState(saved?.orderRef ?? '');
+  const [session, setSession] = useState(() => saved?.session ?? newSessionId());
+  const [history, setHistory] = useState(loadHistory);
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState('');
   const nextId = useRef(msgs.reduce((max, m) => Math.max(max, m.id), 0) + 1);
@@ -185,7 +266,21 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const whatsappNumber = (c.whatsappNumber || '').replace(/\D/g, '');
   const hasPayment = !!((c.upiId || '').trim() || c.qrImage);
 
-  useEffect(() => store({ step: step === 'saving' ? 'phone' : step, msgs, name, course, utr, phone }), [step, msgs, name, course, utr, phone]);
+  useEffect(() => store({ step: step === 'saving' ? 'phone' : step, msgs, name, course, utr, phone, session, orderRef }), [step, msgs, name, course, utr, phone, session, orderRef]);
+  useEffect(() => storeHistory(history), [history]);
+
+  // A finished chat (and its purchase) goes into the history, so "Buy another course" never loses it. Re-running for
+  // the same chat (a retry that then saves) just updates its entry.
+  useEffect(() => {
+    if (typing || !msgs.length || (step !== 'done' && step !== 'failed' && step !== 'nopay')) return;
+    const purchase: Purchase | undefined =
+      course && utr && step !== 'nopay' ? { title: course.title, amount: course.price, utr, status: step === 'done' ? 'saved' : 'pending' } : undefined;
+    setHistory((h) => {
+      const entry: Session = { id: session, at: h.sessions.find((x) => x.id === session)?.at ?? Date.now(), msgs, purchase };
+      const sessions = [...h.sessions.filter((x) => x.id !== session), entry].slice(-HISTORY_MAX);
+      return { v: 1, name: name || h.name, sessions };
+    });
+  }, [step, typing, msgs, course, utr, name, session]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const add = useCallback((msg: NewMsg) => setMsgs((list) => [...list, { ...msg, id: nextId.current++ } as Msg]), []);
@@ -220,7 +315,10 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
 
   const begin = useCallback(
     (knownName: string) => {
+      // The chat that just ended is already in the history (shown above), so the new one starts empty.
       setMsgs([]);
+      setSession(newSessionId());
+      setOrderRef('');
       setCourse(null);
       setUtr('');
       setPhone('');
@@ -240,8 +338,10 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     }
     if (!started.current) {
       started.current = true;
-      begin('');
+      begin(history.name);
+      if (history.name) setName(history.name);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, begin]);
 
   // Esc closes; the page behind does not scroll while the chat is open.
@@ -271,7 +371,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const amountText = course ? formatRupees(course.price) : '';
 
   const submit = useCallback(
-    async (order: { name: string; course: Picked; utr: string; phone: string }) => {
+    async (order: { name: string; course: Picked; utr: string; phone: string; ref: string }) => {
       setStep('saving');
       setTyping(true);
       const result = await postOrder({
@@ -281,6 +381,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
         courseTitle: order.course.title,
         amount: order.course.price,
         paymentRef: order.utr,
+        ref: order.ref || undefined,
       });
       setTyping(false);
       const values = { name: order.name, course: order.course.title, amount: formatRupees(order.course.price), utr: order.utr };
@@ -303,13 +404,16 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     const picked = { id: item.id, title: item.title, price: coursePrice(item) };
     add({ from: 'user', type: 'text', text: `${item.title} · ${formatRupees(picked.price)}` });
     setCourse(picked);
+    // One order ID per purchase; changing the course keeps it. It rides along in the QR's payment note.
+    const ref = orderRef || newOrderRef();
+    setOrderRef(ref);
     if (!hasPayment) {
       say([text(c.chatNoPayment), whatsapp({ name, course: picked.title, amount: formatRupees(picked.price), utr: '' })], 'nopay');
       return;
     }
     say(
       [
-        { from: 'bot', type: 'qr', amount: picked.price, course: picked.title },
+        { from: 'bot', type: 'qr', amount: picked.price, course: picked.title, ref },
         text(fill(c.chatPay, { amount: formatRupees(picked.price), course: picked.title })),
         text(c.chatAskUtr),
       ],
@@ -339,7 +443,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
       const number = value.replace(/[\s()-]/g, '');
       if (!/^\+?\d{10,15}$/.test(number)) return say([text(c.chatBadPhone)], 'phone');
       setPhone(number);
-      if (course) void submit({ name, course, utr, phone: number });
+      if (course) void submit({ name, course, utr, phone: number, ref: orderRef });
     }
   };
 
@@ -349,7 +453,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     if (!open || resumed.current) return;
     resumed.current = true;
     if (saved?.step === 'phone' && saved.phone && saved.course && saved.utr) {
-      void submit({ name: saved.name, course: saved.course, utr: saved.utr, phone: saved.phone });
+      void submit({ name: saved.name, course: saved.course, utr: saved.utr, phone: saved.phone, ref: saved.orderRef ?? '' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -364,10 +468,37 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const placeholder = step === 'name' ? c.chatNamePlaceholder : step === 'utr' ? c.chatUtrPlaceholder : step === 'phone' ? c.chatPhonePlaceholder : step === 'course' ? c.chatPickHint : '';
   const chips: { label: string; icon: typeof RotateCcw; run: () => void }[] = [];
   if (!typing && (step === 'utr' || step === 'phone') && course) chips.push({ label: c.chatChange, icon: ArrowLeftRight, run: () => say([text(c.chatAskCourse)], 'course') });
-  if (!typing && step === 'failed' && course) chips.push({ label: c.chatRetry, icon: RotateCcw, run: () => void submit({ name, course, utr, phone }) });
+  if (!typing && step === 'failed' && course) chips.push({ label: c.chatRetry, icon: RotateCcw, run: () => void submit({ name, course, utr, phone, ref: orderRef }) });
   if (!typing && (step === 'done' || step === 'failed' || step === 'nopay')) chips.push({ label: c.chatRestart, icon: RotateCcw, run: () => begin(name) });
 
   const bubble = reduce ? {} : { initial: { opacity: 0, y: 10, scale: 0.97 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } };
+
+  // Earlier chats from this browser, oldest first. The current chat is drawn live below them, not from the history.
+  const past = history.sessions.filter((x) => x.id !== session);
+
+  /** One message. In an old chat the QR becomes a one-line note, so nobody pays for an old order by mistake. */
+  const renderMsg = (m: Msg, key: string, old: boolean) =>
+    m.type === 'qr' ? (
+      old ? (
+        <div key={key} className="cc-row is-bot">
+          <p className="cc-bubble cc-qr-note"><QrCode size={14} aria-hidden="true" /> {fill(c.chatQrNote, { amount: formatRupees(m.amount), course: m.course })}</p>
+        </div>
+      ) : (
+        <motion.div key={key} className="cc-row is-bot" {...bubble}>
+          <QrCard msg={m} c={c} />
+        </motion.div>
+      )
+    ) : m.type === 'whatsapp' ? (
+      <motion.div key={key} className="cc-row is-bot" {...(old ? {} : bubble)}>
+        <a href={m.href} target="_blank" rel="noreferrer" className="cc-wa">
+          <MessageCircle size={18} /> {c.chatWhatsappButton}
+        </a>
+      </motion.div>
+    ) : (
+      <motion.div key={key} className={`cc-row ${m.from === 'bot' ? 'is-bot' : 'is-user'}`} {...(old ? {} : bubble)}>
+        <p className="cc-bubble">{m.text}</p>
+      </motion.div>
+    );
 
   // Portalled to <body>: the page content sits in a transformed reveal wrapper, which would trap a fixed panel.
   return createPortal(
@@ -400,23 +531,15 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
             </header>
 
             <div ref={bodyRef} className="cc-body" aria-live="polite">
-              {msgs.map((m) =>
-                m.type === 'qr' ? (
-                  <motion.div key={m.id} className="cc-row is-bot" {...bubble}>
-                    <QrCard msg={m} c={c} />
-                  </motion.div>
-                ) : m.type === 'whatsapp' ? (
-                  <motion.div key={m.id} className="cc-row is-bot" {...bubble}>
-                    <a href={m.href} target="_blank" rel="noreferrer" className="cc-wa">
-                      <MessageCircle size={18} /> {c.chatWhatsappButton}
-                    </a>
-                  </motion.div>
-                ) : (
-                  <motion.div key={m.id} className={`cc-row ${m.from === 'bot' ? 'is-bot' : 'is-user'}`} {...bubble}>
-                    <p className="cc-bubble">{m.text}</p>
-                  </motion.div>
-                ),
-              )}
+              <PurchaseList sessions={history.sessions} c={c} />
+              {past.map((x) => (
+                <div key={x.id} className="cc-past">
+                  <Divider label={fill(c.chatEarlier, { date: when(x.at) })} />
+                  {x.msgs.map((m) => renderMsg(m, `${x.id}-${m.id}`, true))}
+                </div>
+              ))}
+              {past.length > 0 && msgs.length > 0 && <Divider label={c.chatNewChat} />}
+              {msgs.map((m) => renderMsg(m, String(m.id), false))}
               {step === 'course' && !typing && (
                 <motion.div className="cc-options" {...bubble}>
                   {options.map((item) => (

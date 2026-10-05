@@ -1168,7 +1168,7 @@ export const PAGES: PageDef[] = [
       {
         id: 'chat',
         title: 'Purchase chat',
-        description: 'The chat that slides in from the right after “Purchase”. {name}, {course}, {amount} and {utr} are filled in for each buyer. The order ID is never shown to buyers; it is saved with the order (see Course orders).',
+        description: 'The chat that slides in from the right after “Purchase”. {name}, {course}, {amount} and {utr} are filled in for each buyer. The order ID (e.g. CLX-7KQ2M9) is never shown on the website: it goes in the UPI payment note, so it shows next to the payment in your UPI app, and it is saved with the order (see Course orders). Each buyer’s earlier chats and purchases stay in their browser and show at the top of the chat.',
         fields: [
           t('chatTitle', 'Chat name', 'CLYX Courses'),
           t('chatStatus', 'Status under the name', 'Online · replies instantly'),
@@ -1202,6 +1202,13 @@ export const PAGES: PageDef[] = [
           t('chatChange', '“Change course” button', 'Change course'),
           t('chatRestart', '“New purchase” button', 'Buy another course'),
           t('chatRetry', '“Try again” button', 'Try again'),
+          t('chatHistoryTitle', 'History · “Your purchases” heading', 'Your purchases'),
+          t('chatHistoryMeta', 'History · line under each course ({utr}, {date})', 'UTR {utr} · {date}'),
+          t('chatHistorySaved', 'History · tag when the details were saved', 'Details saved'),
+          t('chatHistoryPending', 'History · tag when saving failed', 'Send on WhatsApp'),
+          t('chatEarlier', 'History · divider above an earlier chat ({date})', 'Earlier chat · {date}'),
+          t('chatNewChat', 'History · divider above the current chat', 'New purchase'),
+          t('chatQrNote', 'History · old QR shown as ({amount}, {course})', 'UPI QR for {amount} · {course}'),
         ],
       },
     ],
