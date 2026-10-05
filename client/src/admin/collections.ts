@@ -38,7 +38,9 @@ export type CollectionDef = {
   description: string;
   /** New cards go to the top ("start") or the bottom ("end") of the list. */
   position: 'start' | 'end';
-  titleKey: string;
+  titleKey?: string;
+  /** Card title when there is no titleKey or it is empty, numbered by position (e.g. "Photo 3"). */
+  fallbackTitle?: string;
   subtitleKey?: string;
   badgeKey?: string;
   imageKey?: string;
@@ -174,15 +176,9 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     icon: Star,
     description: 'Photos in the parallax creator gallery.',
     position: 'end',
-    titleKey: 'name',
-    subtitleKey: 'handle',
-    badgeKey: 'platform',
+    fallbackTitle: 'Photo',
     imageKey: 'image',
     fields: [
-      { key: 'name', label: 'Name' },
-      { key: 'handle', label: 'Handle', placeholder: '@creator' },
-      { key: 'platform', label: 'Platform', placeholder: 'Instagram' },
-      { key: 'reach', label: 'Reach', placeholder: '500K' },
       { key: 'image', label: 'Photo', type: 'image', wide: true },
     ],
   },

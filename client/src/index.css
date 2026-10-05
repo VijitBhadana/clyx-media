@@ -529,137 +529,184 @@ button:active,a:active{transform:scale(.97)}
   .direction-reveal.service-row-reveal { opacity: 1; transform: none; transition: none; }
 }
 
-/* Careers values: three tiles joined by hand-drawn arrows (see CareersValuesFlow.tsx). */
-.value-tile {
+/* Careers courses teaser: a two-card bento (see CareersValuesFlow.tsx). The main card is a deep brand panel in both
+   themes; the side card follows the page surface. Both fade up once the section is in view. */
+.learn-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 220px;
-  padding: 28px;
-  border-radius: 24px;
   overflow: hidden;
-  background: linear-gradient(160deg, #FFFFFF 0%, #EDF2FC 100%);
-  border: 1.5px solid rgba(1, 58, 163, 0.28);
-  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.04), 0 14px 32px -16px rgba(1, 58, 163, 0.28);
-  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+  isolation: isolate;
+  border-radius: 28px;
+  padding: 28px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s var(--ease-out), transform .7s var(--ease-out), box-shadow .35s var(--ease-out), border-color .35s var(--ease-out);
 }
-.value-tile:hover {
-  transform: translateY(-4px);
-  border-color: rgba(1, 58, 163, 0.45);
-  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.06), 0 24px 48px -20px rgba(1, 58, 163, 0.4);
-}
-.dark .value-tile { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: none; }
-.dark .value-tile:hover { border-color: rgba(255, 222, 89, 0.35); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6); }
-.value-tile::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 3px;
-  background: #013AA3;
-  transition: width 0.45s var(--ease-out);
-}
-.dark .value-tile::after { background: #FFDE59; }
-.value-tile:hover::after { width: 100%; }
-.value-tile .service-row-index svg { transition: transform 0.3s var(--ease-out); }
-.value-tile:hover .service-row-index svg { transform: scale(1.1) rotate(-6deg); }
-@media (max-width: 767px) {
-  .value-tile { min-height: 200px; padding: 22px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .value-tile, .value-tile::after { transition: none; }
-  .value-tile:hover { transform: none; }
+.learn-bento.is-in .learn-card { opacity: 1; transform: none; }
+.learn-bento.is-in .learn-card-side { transition-delay: .12s, .12s, 0s, 0s; }
+@media (min-width: 768px) { .learn-card { padding: 44px; } }
+@media (min-width: 1024px) {
+  .learn-card { min-height: 480px; }
+  .learn-card-main { padding: 56px; }
 }
 
-/* Arrows are scrubbed by scroll (CareersValuesFlow sets stroke-dashoffset over a normalised pathLength);
-   the head and the card switch on once an arrow completes, and back off if the reader scrolls up. */
-.values-flow-arrows { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; color: #013AA3; }
-.dark .values-flow-arrows { color: #FFDE59; }
-.values-flow-line, .values-flow-head { fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-.values-flow-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
-.values-flow-head { opacity: 0; transition: opacity .15s ease; }
-.values-flow-head.is-on { opacity: 1; }
-.values-flow-card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 420px;
-  min-height: 0;
-  padding: 24px;
-  opacity: 0;
-  transform: translateY(20px) scale(.97);
-  transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .3s var(--ease-out), border-color .3s var(--ease-out);
+.learn-card-main {
+  color: #fff;
+  background:
+    radial-gradient(110% 85% at 100% 0%, rgba(255, 222, 89, .18), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgba(10, 71, 194, .55), transparent 60%),
+    linear-gradient(150deg, #0A47C2 0%, #013AA3 45%, #002366 100%);
+  box-shadow: 0 40px 80px -40px rgba(1, 58, 163, .65), inset 0 1px 0 rgba(255, 255, 255, .14);
 }
-.values-flow-card.is-in { opacity: 1; transform: none; }
-.values-flow-card.is-in:hover { transform: translateY(-4px); }
-/* The button's short arrow is not scrubbed: it draws itself once the last card is in, then its head and the button
-   follow. Scrolling back up runs it in reverse. */
-.values-flow-line.is-finishing { transition: stroke-dashoffset .45s var(--ease-out); }
-.values-flow-line.is-auto { transition: stroke-dashoffset .45s var(--ease-out) .15s; }
-.values-flow-line.is-auto.is-drawn { stroke-dashoffset: 0; }
-.values-flow-head.is-auto.is-on { transition-delay: .55s; }
-/* Button after the last card (e.g. "View courses"): appears once the short arrow to it has drawn. */
-.values-flow-cta {
-  position: relative;
-  z-index: 1;
-  opacity: 0;
-  transform: translateY(14px) scale(.96);
-  transition: opacity .4s var(--ease-out), transform .4s var(--ease-out);
+.dark .learn-card-main {
+  background:
+    radial-gradient(110% 85% at 100% 0%, rgba(255, 222, 89, .13), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgba(1, 58, 163, .45), transparent 60%),
+    linear-gradient(155deg, #0E1A3D 0%, #0A1230 50%, #070B1E 100%);
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .06);
 }
-.values-flow-cta.is-in { opacity: 1; transform: none; transition-delay: .55s; }
-.vf-cta-btn {
+/* Fine grid that fades out from the top-right corner. */
+.learn-card-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, .07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, .07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 85% 10%, #000 10%, transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 80% at 85% 10%, #000 10%, transparent 70%);
+}
+/* Soft spotlight that follows the pointer (--mx / --my, set in CareersValuesFlow). */
+.learn-card-glow, .learn-card-side::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .35s var(--ease-out);
+  background: radial-gradient(460px circle at var(--mx, 70%) var(--my, 20%), rgba(255, 222, 89, .16), transparent 60%);
+}
+.learn-card:hover .learn-card-glow, .learn-card-side:hover::before { opacity: 1; }
+.learn-card-main .learn-highlight { color: #FFDE59; }
+
+.learn-pill {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  height: 54px;
-  padding: 0 8px 0 26px;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 14px;
   border-radius: 999px;
-  background: #013AA3;
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(255, 255, 255, .06);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .85);
+}
+.learn-pill-dot { position: relative; width: 8px; height: 8px; border-radius: 999px; background: #FFDE59; }
+.learn-pill-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: #FFDE59; animation: learn-ping 2s var(--ease-out) infinite; }
+@keyframes learn-ping { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(3); opacity: 0; } }
+
+.learn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 58px;
+  padding: 0 8px 0 28px;
+  border-radius: 999px;
+  background: #FFDE59;
+  color: #050505;
   font-size: .8rem;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  box-shadow: 0 14px 30px -14px rgba(1, 58, 163, .7);
+  box-shadow: 0 0 0 6px rgba(255, 222, 89, .12), 0 18px 40px -16px rgba(255, 222, 89, .6);
   transition: transform .25s var(--ease-out), box-shadow .25s var(--ease-out), background .25s var(--ease-out);
 }
-.vf-cta-icon {
+.learn-cta-icon {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
-  background: #FFDE59;
-  color: #050505;
+  background: #050505;
+  color: #FFDE59;
+  transition: transform .35s var(--ease-out);
+}
+.learn-cta:hover { transform: translateY(-2px); background: #FADB48; box-shadow: 0 0 0 9px rgba(255, 222, 89, .16), 0 24px 46px -16px rgba(255, 222, 89, .75); }
+.learn-cta:hover .learn-cta-icon { transform: rotate(45deg); }
+.learn-cta:focus-visible { outline: 2px solid #FFDE59; outline-offset: 4px; }
+
+.learn-card-side {
+  padding: 10px;
+  background: #FFFFFF;
+  border: 1px solid rgba(1, 58, 163, .14);
+  box-shadow: 0 30px 60px -36px rgba(1, 58, 163, .35);
+}
+@media (min-width: 768px) { .learn-card-side { padding: 14px; } }
+.learn-card-side::before { background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(1, 58, 163, .07), transparent 60%); }
+.dark .learn-card-side { background: rgba(255, 255, 255, .035); border-color: rgba(255, 255, 255, .08); box-shadow: none; }
+.dark .learn-card-side::before { background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 222, 89, .07), transparent 60%); }
+.learn-card-side:hover { border-color: rgba(1, 58, 163, .28); }
+.dark .learn-card-side:hover { border-color: rgba(255, 222, 89, .25); }
+
+.learn-point {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  align-content: center;
+  gap: 18px;
+  padding: 22px 18px;
+  border-radius: 20px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .6s var(--ease-out), transform .6s var(--ease-out), background .25s var(--ease-out);
+}
+.learn-bento.is-in .learn-point { opacity: 1; transform: none; transition-delay: var(--d, 0s), var(--d, 0s), 0s; }
+.learn-point + .learn-point::before { content: ''; position: absolute; top: 0; left: 18px; right: 18px; height: 1px; background: var(--border-subtle); }
+.learn-point:hover { background: rgba(1, 58, 163, .045); }
+.dark .learn-point:hover { background: rgba(255, 255, 255, .035); }
+@media (min-width: 1024px) { .learn-point { padding: 24px 22px; } }
+.learn-point-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(1, 58, 163, .08);
+  color: #013AA3;
   transition: transform .3s var(--ease-out);
 }
-.vf-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 38px -14px rgba(1, 58, 163, .85); }
-.vf-cta-btn:hover .vf-cta-icon { transform: rotate(45deg); }
-.vf-cta-btn:focus-visible { outline: 2px solid #013AA3; outline-offset: 4px; }
-.dark .vf-cta-btn { background: #FFDE59; color: #050505; box-shadow: 0 0 0 6px rgba(255, 222, 89, .1), 0 18px 40px -16px rgba(255, 222, 89, .55); }
-.dark .vf-cta-btn:hover { box-shadow: 0 0 0 8px rgba(255, 222, 89, .14), 0 22px 44px -16px rgba(255, 222, 89, .7); }
-.dark .vf-cta-icon { background: #050505; color: #FFDE59; }
-.dark .vf-cta-btn:focus-visible { outline-color: #FFDE59; }
-@media (prefers-reduced-motion: reduce) {
-  .values-flow-head, .values-flow-card, .values-flow-cta, .values-flow-line.is-auto, .values-flow-line.is-finishing { transition: none; }
-  .values-flow-head.is-auto.is-on, .values-flow-cta.is-in { transition-delay: 0s; }
+.dark .learn-point-icon { background: rgba(255, 222, 89, .1); color: #FFDE59; }
+.learn-point:hover .learn-point-icon { transform: scale(1.06) rotate(-6deg); }
+.learn-point-num { padding-top: 4px; font-size: 12px; font-weight: 600; letter-spacing: .12em; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 479px) {
+  .learn-point { grid-template-columns: auto 1fr; gap: 14px; padding: 18px 14px; }
+  .learn-point-num { display: none; }
+  .learn-cta { height: 54px; padding-left: 22px; gap: 12px; }
 }
-/* Careers values heading: Urbanist bold instead of the display font. */
+@media (prefers-reduced-motion: reduce) {
+  .learn-card, .learn-point { opacity: 1; transform: none; transition: none; }
+  .learn-pill-dot::after { animation: none; }
+  .learn-cta, .learn-cta-icon, .learn-point-icon { transition: none; }
+}
+/* Courses teaser heading: Urbanist bold instead of the display font. */
 .display.vf-heading { font-family: 'Urbanist', sans-serif; font-weight: 700; letter-spacing: -.03em; }
-/* Values heading highlight (FlowHighlight): letters rise and sharpen out of per-word masks.
-   Everything resets off-screen so it replays on return. */
-.vf-highlight { position: relative; display: inline-block; }
-.vf-word { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: top; padding: .08em .04em .22em; margin: -.08em -.04em -.22em; }
-.vf-ch { display: inline-block; opacity: 0; transform: translateY(110%) rotate(8deg); filter: blur(6px); transition: opacity .6s var(--ease-out), transform .75s var(--ease-out), filter .6s var(--ease-out); }
-.vf-highlight.is-in .vf-ch { opacity: 1; transform: none; filter: blur(0); transition-delay: calc(150ms + var(--i) * 40ms); }
-@media (prefers-reduced-motion: reduce) {
-  .vf-ch { transform: none; filter: none; transition: opacity .6s ease; }
-  .vf-highlight.is-in .vf-ch { transition-delay: 0s; }
-}
-/* The arrows carry the rhythm here, so the values section needs less padding than a standard section. */
-.section-shell.values-section { padding-block: 3rem; }
-@media (min-width: 768px) { .section-shell.values-section { padding-block: 3.5rem; } }
+/* Sand heading (DustHeading): the text goes transparent while its canvas copy plays. */
+.dust-heading { position: relative; }
+.dust-word { transition: opacity .12s linear; }
+.dust-heading.is-dust .dust-word { opacity: 0; transition: none; }
+.dust-canvas { position: absolute; z-index: 1; pointer-events: none; }
+.section-shell.values-section { padding-block: 3.5rem 4.5rem; }
+@media (min-width: 768px) { .section-shell.values-section { padding-block: 4rem 6rem; } }
 
 /* Careers role cards: on desktop the first row slides in from the left and the next from the right, one card
    after another (--d is set per card). Entrance uses `transform`; the hover lift uses Tailwind's separate `translate`. */

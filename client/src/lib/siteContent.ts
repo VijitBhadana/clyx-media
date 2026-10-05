@@ -41,7 +41,7 @@ const SCOPES: Record<string, Scope> = {
   },
   caseStudies: { blocks: [...GLOBAL, 'page_caseStudies'], collections: { caseStudies: null } },
   caseStudyDetail: { blocks: [...GLOBAL, 'page_caseStudies', 'page_services'], collections: { caseStudies: null, ...TEAM_NAMES } },
-  creators: { blocks: [...GLOBAL, 'page_creators'], collections: { creators: ['name', 'handle', 'platform', 'reach', 'image'] } },
+  creators: { blocks: [...GLOBAL, 'page_creators'], collections: { creators: ['image'] } },
   // The article list shows cards only; the full text is fetched on the article's own page.
   blog: { blocks: [...GLOBAL, 'page_blog'], collections: { blog: ['title', 'tag', 'date', 'readTime', 'image', 'style'] } },
   blogPost: { blocks: [...GLOBAL, 'page_blog'], collections: { blog: null } },

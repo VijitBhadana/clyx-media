@@ -48,7 +48,8 @@ export default function CourseDetailsDialog({ open, onOpenChange, course, onBuy,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto rounded-2xl border-clyx-yellow/25 [scrollbar-color:var(--color-clyx-yellow)_transparent] [scrollbar-width:thin] bg-clyx-dark p-0 text-white shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)] sm:max-w-2xl">
+      {/* Re-points the brand colour tokens so the popup matches the Courses page's navy + lime look. */}
+      <DialogContent showCloseButton={false} style={{ '--color-clyx-yellow': '#B6EE3C', '--color-clyx-dark': '#071A29', fontFamily: "'Space Grotesk', sans-serif" } as React.CSSProperties} className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto rounded-2xl border-clyx-yellow/25 [scrollbar-color:var(--color-clyx-yellow)_transparent] [scrollbar-width:thin] bg-clyx-dark p-0 text-white shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)] sm:max-w-2xl">
         <div className="relative h-44 overflow-hidden sm:h-56">
           {course.image && <img {...responsiveImage(course.image, '(min-width: 640px) 672px, 100vw')} alt="" className="h-full w-full object-cover" />}
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-clyx-dark via-clyx-dark/40 to-transparent" />

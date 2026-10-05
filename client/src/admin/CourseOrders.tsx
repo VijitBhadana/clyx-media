@@ -150,7 +150,7 @@ export default function CourseOrders() {
         <div className="adm-orders">
           {orders.map((order) => {
             const wa = `https://wa.me/${waNumber(order.phone)}?text=${encodeURIComponent(
-              `Hi ${order.name}! Thanks for joining ${order.courseTitle} (order ${order.ref}). Your payment is confirmed ✅\n\nHere is your class link: `,
+              `Hi ${order.name}! Thanks for joining ${order.courseTitle}. Your payment is confirmed ✅\n\nHere is your class link: `,
             )}`;
             return (
               <article key={order.id} className={`adm-order is-${order.status}`}>

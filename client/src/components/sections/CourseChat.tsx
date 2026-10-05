@@ -12,21 +12,20 @@ type Step = 'name' | 'course' | 'utr' | 'phone' | 'saving' | 'done' | 'failed' |
 type Picked = { id: string; title: string; price: number };
 type Msg =
   | { id: number; from: 'bot' | 'user'; type: 'text'; text: string }
-  | { id: number; from: 'bot'; type: 'qr'; ref: string; amount: number; course: string }
+  | { id: number; from: 'bot'; type: 'qr'; amount: number; course: string }
   | { id: number; from: 'bot'; type: 'whatsapp'; href: string };
 type WithoutId<T> = T extends unknown ? Omit<T, 'id'> : never;
 type NewMsg = WithoutId<Msg>;
-type Saved = { v: 1; at: number; step: Step; msgs: Msg[]; name: string; course: Picked | null; ref: string; utr: string; phone: string };
+type Saved = { v: 2; at: number; step: Step; msgs: Msg[]; name: string; course: Picked | null; utr: string; phone: string };
 
 // The chat survives a reload or the phone switching to the UPI app and back (mobile browsers often reload the tab).
-const STORE_KEY = 'clyx_course_chat_v1';
+const STORE_KEY = 'clyx_course_chat_v2';
 const STORE_TTL_MS = 12 * 60 * 60 * 1000;
-const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function loadSaved(): Saved | null {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null') as Saved | null;
-    return saved?.v === 1 && Date.now() - saved.at < STORE_TTL_MS && Array.isArray(saved.msgs) ? saved : null;
+    return saved?.v === 2 && Date.now() - saved.at < STORE_TTL_MS && Array.isArray(saved.msgs) ? saved : null;
   } catch {
     return null;
   }
@@ -34,17 +33,27 @@ function loadSaved(): Saved | null {
 
 function store(saved: Omit<Saved, 'v' | 'at'>) {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 1, at: Date.now(), ...saved }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 2, at: Date.now(), ...saved }));
   } catch {
     // storage unavailable: the chat just starts over after a reload
   }
 }
 
-/** Order ID made before payment so it can ride along in the UPI note; the backend keeps it unless it is taken. */
-function newRef() {
-  const bytes = new Uint8Array(6);
-  crypto.getRandomValues(bytes);
-  return `CLX-${Array.from(bytes, (b) => REF_ALPHABET[b % REF_ALPHABET.length]).join('')}`;
+/**
+ * The order ID lives only in the database and the admin panel. Older saved copy still mentions it ("Order ID: {ref}"),
+ * so that part, and any other line with {ref}, is taken out before a message is shown or sent to WhatsApp.
+ */
+function withoutOrderId(template: string) {
+  return template
+    .split('\n')
+    .flatMap((line) => {
+      if (!line.includes('{ref}')) return [line];
+      const rest = line.replace(/[ \t]*order\s*id\s*:?\s*\{ref\}\.?/gi, '');
+      // A line that held only the order ID goes away entirely, so no blank line is left behind.
+      return rest.trim() && !rest.includes('{ref}') ? [rest.trimEnd()] : [];
+    })
+    .join('\n')
+    .trim();
 }
 
 /** Fills {name}, {course}… in a message. Lines whose placeholder has no value are dropped (e.g. no UTR yet). */
@@ -56,14 +65,14 @@ function fill(template: string, values: Record<string, string>) {
     .join('\n');
 }
 
-function upiLink(upiId: string, payee: string, amount: number, ref: string) {
+function upiLink(upiId: string, payee: string, amount: number) {
   const q = (v: string) => encodeURIComponent(v).replace(/%40/g, '@');
-  return `upi://pay?pa=${q(upiId)}&pn=${q(payee || 'CLYX Media')}&am=${amount.toFixed(2)}&cu=INR&tn=${q(`CLYX ${ref}`)}`;
+  return `upi://pay?pa=${q(upiId)}&pn=${q(payee || 'CLYX Media')}&am=${amount.toFixed(2)}&cu=INR&tn=${q('CLYX Course')}`;
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-type SaveResult = { ok: true; ref: string } | { ok: false; status: number; error?: string };
+type SaveResult = { ok: true } | { ok: false; status: number; error?: string };
 
 /** Saves the order, retrying network failures and server errors (a sleeping free backend can take ~50s to wake). */
 async function postOrder(body: Record<string, unknown>): Promise<SaveResult> {
@@ -77,7 +86,7 @@ async function postOrder(body: Record<string, unknown>): Promise<SaveResult> {
         signal: timeout,
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok) return { ok: true, ref: typeof data.ref === 'string' ? data.ref : String(body.ref) };
+      if (res.ok) return { ok: true };
       if (res.status >= 400 && res.status < 500 && res.status !== 429) return { ok: false, status: res.status, error: data.error };
     } catch {
       // network error or timeout: retry
@@ -116,10 +125,10 @@ function CopyChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** The payment card: QR with the exact amount (or the uploaded QR image), order ID, and a pay button on phones. */
+/** The payment card: QR with the exact amount (or the uploaded QR image), the UPI ID, and a pay button on phones. */
 function QrCard({ msg, c }: { msg: Extract<Msg, { type: 'qr' }>; c: Copy }) {
   const upiId = (c.upiId || '').trim();
-  const link = upiId ? upiLink(upiId, c.upiName, msg.amount, msg.ref) : '';
+  const link = upiId ? upiLink(upiId, c.upiName, msg.amount) : '';
   const qr = useMemo(() => (link ? qrSvgPath(link, 3) : null), [link]);
   return (
     <div className="cc-qr">
@@ -137,7 +146,6 @@ function QrCard({ msg, c }: { msg: Extract<Msg, { type: 'qr' }>; c: Copy }) {
       <p className="cc-qr-course">{msg.course}</p>
       <div className="cc-qr-rows">
         {upiId && <CopyChip label="UPI ID" value={upiId} />}
-        <CopyChip label="Order ID" value={msg.ref} />
       </div>
       {link && (
         <a href={link} className="cc-qr-pay">
@@ -163,7 +171,6 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const [step, setStep] = useState<Step>(saved?.step ?? 'name');
   const [name, setName] = useState(saved?.name ?? '');
   const [course, setCourse] = useState<Picked | null>(saved?.course ?? null);
-  const [ref, setRef] = useState(saved?.ref ?? '');
   const [utr, setUtr] = useState(saved?.utr ?? '');
   const [phone, setPhone] = useState(saved?.phone ?? '');
   const [typing, setTyping] = useState(false);
@@ -178,7 +185,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const whatsappNumber = (c.whatsappNumber || '').replace(/\D/g, '');
   const hasPayment = !!((c.upiId || '').trim() || c.qrImage);
 
-  useEffect(() => store({ step: step === 'saving' ? 'phone' : step, msgs, name, course, ref, utr, phone }), [step, msgs, name, course, ref, utr, phone]);
+  useEffect(() => store({ step: step === 'saving' ? 'phone' : step, msgs, name, course, utr, phone }), [step, msgs, name, course, utr, phone]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const add = useCallback((msg: NewMsg) => setMsgs((list) => [...list, { ...msg, id: nextId.current++ } as Msg]), []);
@@ -208,14 +215,13 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const whatsapp = (values: Record<string, string>): NewMsg => ({
     from: 'bot',
     type: 'whatsapp',
-    href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fill(c.chatWhatsappMessage, values))}`,
+    href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(fill(withoutOrderId(c.chatWhatsappMessage), values))}`,
   });
 
   const begin = useCallback(
     (knownName: string) => {
       setMsgs([]);
       setCourse(null);
-      setRef('');
       setUtr('');
       setPhone('');
       if (knownName) say([text(fill(c.chatWelcomeBack, { name: knownName })), text(c.chatAskCourse)], 'course');
@@ -265,11 +271,10 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const amountText = course ? formatRupees(course.price) : '';
 
   const submit = useCallback(
-    async (order: { name: string; course: Picked; ref: string; utr: string; phone: string }) => {
+    async (order: { name: string; course: Picked; utr: string; phone: string }) => {
       setStep('saving');
       setTyping(true);
       const result = await postOrder({
-        ref: order.ref,
         name: order.name,
         phone: order.phone,
         courseId: order.course.id,
@@ -280,14 +285,13 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
       setTyping(false);
       const values = { name: order.name, course: order.course.title, amount: formatRupees(order.course.price), utr: order.utr };
       if (result.ok) {
-        setRef(result.ref);
-        say([text(fill(c.chatSaved, { ...values, ref: result.ref })), text(c.chatDone), whatsapp({ ...values, ref: result.ref })], 'done');
+        say([text(fill(withoutOrderId(c.chatSaved), values)), text(c.chatDone), whatsapp(values)], 'done');
       } else if (result.status === 409) {
         say([text(c.chatDuplicate)], 'utr');
       } else if (result.status === 400) {
-        say([text(result.error || c.chatBadUtr), text(c.chatAskUtr)], 'utr');
+        say([text(result.error || c.chatBadUtrLength), text(c.chatAskUtr)], 'utr');
       } else {
-        say([text(c.chatSaveError), whatsapp({ ...values, ref: order.ref })], 'failed');
+        say([text(c.chatSaveError), whatsapp(values)], 'failed');
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -299,15 +303,13 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     const picked = { id: item.id, title: item.title, price: coursePrice(item) };
     add({ from: 'user', type: 'text', text: `${item.title} · ${formatRupees(picked.price)}` });
     setCourse(picked);
-    const orderRef = newRef();
-    setRef(orderRef);
     if (!hasPayment) {
-      say([text(c.chatNoPayment), whatsapp({ name, course: picked.title, amount: formatRupees(picked.price), ref: '', utr: '' })], 'nopay');
+      say([text(c.chatNoPayment), whatsapp({ name, course: picked.title, amount: formatRupees(picked.price), utr: '' })], 'nopay');
       return;
     }
     say(
       [
-        { from: 'bot', type: 'qr', ref: orderRef, amount: picked.price, course: picked.title },
+        { from: 'bot', type: 'qr', amount: picked.price, course: picked.title },
         text(fill(c.chatPay, { amount: formatRupees(picked.price), course: picked.title })),
         text(c.chatAskUtr),
       ],
@@ -328,15 +330,16 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
       setName(clean);
       say([text(fill(c.chatWelcome, { name: clean })), text(c.chatAskCourse)], 'course');
     } else if (step === 'utr') {
-      const id = value.replace(/\s+/g, '').toUpperCase();
-      if (!/^[A-Z0-9]{6,40}$/.test(id)) return say([text(c.chatBadUtr)], 'utr');
+      // The UTR / UPI Ref No is always 12 digits; spaces and dashes copied along with it are fine.
+      const id = value.replace(/[\s-]+/g, '');
+      if (!/^\d{12}$/.test(id)) return say([text(c.chatBadUtrLength)], 'utr');
       setUtr(id);
       say([text(c.chatAskPhone)], 'phone');
     } else if (step === 'phone') {
       const number = value.replace(/[\s()-]/g, '');
       if (!/^\+?\d{10,15}$/.test(number)) return say([text(c.chatBadPhone)], 'phone');
       setPhone(number);
-      if (course) void submit({ name, course, ref, utr, phone: number });
+      if (course) void submit({ name, course, utr, phone: number });
     }
   };
 
@@ -346,7 +349,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     if (!open || resumed.current) return;
     resumed.current = true;
     if (saved?.step === 'phone' && saved.phone && saved.course && saved.utr) {
-      void submit({ name: saved.name, course: saved.course, ref: saved.ref, utr: saved.utr, phone: saved.phone });
+      void submit({ name: saved.name, course: saved.course, utr: saved.utr, phone: saved.phone });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -361,7 +364,7 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
   const placeholder = step === 'name' ? c.chatNamePlaceholder : step === 'utr' ? c.chatUtrPlaceholder : step === 'phone' ? c.chatPhonePlaceholder : step === 'course' ? c.chatPickHint : '';
   const chips: { label: string; icon: typeof RotateCcw; run: () => void }[] = [];
   if (!typing && (step === 'utr' || step === 'phone') && course) chips.push({ label: c.chatChange, icon: ArrowLeftRight, run: () => say([text(c.chatAskCourse)], 'course') });
-  if (!typing && step === 'failed' && course) chips.push({ label: c.chatRetry, icon: RotateCcw, run: () => void submit({ name, course, ref, utr, phone }) });
+  if (!typing && step === 'failed' && course) chips.push({ label: c.chatRetry, icon: RotateCcw, run: () => void submit({ name, course, utr, phone }) });
   if (!typing && (step === 'done' || step === 'failed' || step === 'nopay')) chips.push({ label: c.chatRestart, icon: RotateCcw, run: () => begin(name) });
 
   const bubble = reduce ? {} : { initial: { opacity: 0, y: 10, scale: 0.97 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } };
@@ -456,9 +459,9 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
                   placeholder={placeholder || (step === 'saving' ? c.chatSaving : '')}
                   disabled={!needsInput || typing}
                   maxLength={60}
-                  inputMode={step === 'phone' ? 'tel' : 'text'}
+                  inputMode={step === 'phone' ? 'tel' : step === 'utr' ? 'numeric' : 'text'}
                   autoComplete={step === 'name' ? 'name' : step === 'phone' ? 'tel' : 'off'}
-                  autoCapitalize={step === 'utr' ? 'characters' : step === 'name' ? 'words' : 'off'}
+                  autoCapitalize={step === 'name' ? 'words' : 'off'}
                   aria-label={placeholder || 'Message'}
                 />
                 <button type="submit" className="cc-send" disabled={!needsInput || typing || !draft.trim()} aria-label="Send">

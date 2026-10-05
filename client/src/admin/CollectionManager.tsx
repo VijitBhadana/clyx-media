@@ -28,6 +28,8 @@ export default function CollectionManager({
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<{ id: string | null; draft: Draft } | null>(null);
   const [deleting, setDeleting] = useState<ListItem | null>(null);
+  const titleOf = (item: ListItem) =>
+    String((def.titleKey && item[def.titleKey]) || (def.fallbackTitle ? `${def.fallbackTitle} ${items.indexOf(item) + 1}` : `Untitled ${def.singular}`));
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -120,7 +122,7 @@ export default function CollectionManager({
                     {badge ? <span className="adm-tag">{badge}</span> : <span />}
                     {!def.imageKey && item.hidden && <span className="adm-card-flag is-inline">Hidden</span>}
                   </div>
-                  <h4 onClick={() => openEdit(item)}>{String(item[def.titleKey] || `Untitled ${def.singular}`)}</h4>
+                  <h4 onClick={() => openEdit(item)}>{titleOf(item)}</h4>
                   {subtitle && <p>{subtitle}</p>}
                 </div>
                 <div className="adm-card-actions">
@@ -201,7 +203,7 @@ export default function CollectionManager({
       <Confirm
         open={!!deleting}
         title={`Delete this ${def.singular}?`}
-        message={`“${String(deleting?.[def.titleKey] ?? '')}” will be removed from the website. This cannot be undone — use Hide if you only want to take it down for now.`}
+        message={`“${deleting ? titleOf(deleting) : ''}” will be removed from the website. This cannot be undone — use Hide if you only want to take it down for now.`}
         onCancel={() => setDeleting(null)}
         onConfirm={() => {
           const id = deleting?.id;
