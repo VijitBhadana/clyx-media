@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { ImagePlus, IndentDecrease, IndentIncrease, Link2, List, ListOrdered, Loader2, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
+import { ArrowDown, ArrowUp, Film, ImagePlus, IndentDecrease, IndentIncrease, Link2, List, ListOrdered, Loader2, Plus, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadImage } from './uploadImage';
+import type { RowColumn } from '@/lib/pageContent';
+import { MAX_VIDEO_MB, uploadImage, uploadVideo, VIDEO_ACCEPT } from './uploadImage';
 
 /** 'textarea' is plain multi-line text (lists the site splits per line); 'richtext' adds the bullet toolbar and shows on the site as typed. */
-export type ControlType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color';
+export type ControlType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color' | 'rows';
 
 /** Label row + control + hint, shared by every form in the admin. */
 export function Field({
@@ -282,20 +283,185 @@ export function ImageInput({ value, onChange }: { value: string; onChange: (v: s
   );
 }
 
+const YOUTUBE_ID = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/;
+
+/** Video picker: upload a file (sent straight to storage, with progress) or paste a YouTube / video link. */
+export function VideoInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const youtube = YOUTUBE_ID.exec(value)?.[1];
+
+  const handleFile = async (file?: File) => {
+    if (!file) return;
+    if (!VIDEO_ACCEPT.split(',').includes(file.type)) {
+      toast.error('Please choose an MP4, WebM or MOV video.');
+      return;
+    }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      toast.error(`The video is larger than ${MAX_VIDEO_MB} MB. Compress it, or upload it to YouTube and paste the link.`);
+      return;
+    }
+    setProgress(0);
+    try {
+      onChange(await uploadVideo(file, setProgress));
+      toast.success('Video uploaded');
+    } catch (err) {
+      toast.error(`Video upload failed: ${err instanceof Error ? err.message : 'unknown error'}`);
+    } finally {
+      setProgress(null);
+      if (input.current) input.current.value = '';
+    }
+  };
+
+  const busy = progress !== null;
+  return (
+    <div className="adm-image">
+      <input ref={input} type="file" accept={VIDEO_ACCEPT} hidden onChange={(e) => handleFile(e.target.files?.[0])} />
+      <button
+        type="button"
+        className={`adm-image-drop adm-video-drop${dragging ? ' is-drag' : ''}${value && !busy ? ' has-image' : ''}`}
+        onClick={() => input.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          handleFile(e.dataTransfer.files?.[0]);
+        }}
+        disabled={busy}
+      >
+        {value && !busy ? (
+          <>
+            {youtube ? <img src={`https://i.ytimg.com/vi/${youtube}/hqdefault.jpg`} alt="" /> : <video src={`${value}#t=0.5`} muted playsInline preload="metadata" />}
+            <span className="adm-image-overlay">
+              <Film size={18} /> Replace video
+            </span>
+          </>
+        ) : (
+          <span className="adm-image-empty">
+            {busy ? <Loader2 size={22} className="adm-spin" /> : <UploadCloud size={22} />}
+            <strong>{busy ? `Uploading… ${Math.round((progress ?? 0) * 100)}%` : 'Drop a video or click to upload'}</strong>
+            <small>{`MP4, WebM or MOV · up to ${MAX_VIDEO_MB} MB`}</small>
+          </span>
+        )}
+        {busy && <span className="adm-video-bar" style={{ transform: `scaleX(${progress ?? 0})` }} />}
+      </button>
+      <div className="adm-image-url">
+        <Link2 size={14} />
+        <input className="adm-input-bare" value={value} placeholder="…or paste a YouTube / Shorts / video link" onChange={(e) => onChange(e.target.value)} />
+        {value && (
+          <button type="button" className="adm-icon-btn is-danger" title="Remove video" onClick={() => onChange('')}>
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const cleanCell = (v: string) => v.replace(/\|/g, '/').replace(/\s*\n\s*/g, ' ').trim();
+const parseRows = (text: string, size: number) =>
+  text
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line) => {
+      const cells = line.split('|').map((c) => c.trim());
+      return Array.from({ length: size }, (_, i) => cells[i] ?? '');
+    });
+const serializeRows = (rows: string[][]) =>
+  rows
+    .map((row) => {
+      const cells = row.map(cleanCell);
+      while (cells.length && !cells[cells.length - 1]) cells.pop();
+      return cells.join(' | ');
+    })
+    .filter(Boolean)
+    .join('\n');
+
+/** A list edited one card per row, with image / video uploads per column. Saved as "a | b | c" lines. */
+export function RowsInput({ value, onChange, columns, item = 'Item' }: { value: string; onChange: (v: string) => void; columns: RowColumn[]; item?: string }) {
+  const [rows, setRows] = useState(() => parseRows(value, columns.length));
+  // Follow outside changes (reset, reload) but keep a freshly added empty row while it is being filled in.
+  useEffect(() => {
+    if (serializeRows(rows) !== value) setRows(parseRows(value, columns.length));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, columns.length]);
+  const commit = (next: string[][]) => {
+    setRows(next);
+    onChange(serializeRows(next));
+  };
+  const setCell = (r: number, c: number, v: string) => commit(rows.map((row, i) => (i === r ? row.map((old, j) => (j === c ? v : old)) : row)));
+  const move = (r: number, dir: number) => {
+    const next = [...rows];
+    [next[r], next[r + dir]] = [next[r + dir], next[r]];
+    commit(next);
+  };
+
+  return (
+    <div className="adm-rows">
+      {rows.map((row, r) => (
+        <div key={r} className="adm-row">
+          <div className="adm-row-head">
+            <strong>{`${item} ${r + 1}${row[0] ? ` · ${row[0]}` : ''}`}</strong>
+            <div className="adm-row-tools">
+              <button type="button" className="adm-icon-btn" title="Move up" disabled={r === 0} onClick={() => move(r, -1)}>
+                <ArrowUp size={14} />
+              </button>
+              <button type="button" className="adm-icon-btn" title="Move down" disabled={r === rows.length - 1} onClick={() => move(r, 1)}>
+                <ArrowDown size={14} />
+              </button>
+              <button type="button" className="adm-icon-btn is-danger" title={`Remove ${item.toLowerCase()}`} onClick={() => commit(rows.filter((_, i) => i !== r))}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="adm-row-grid">
+            {columns.map((col, c) => (
+              <div key={c} className={`adm-row-cell${col.kind === 'text' ? ' is-text' : ''}`}>
+                <span className="adm-row-label">{col.label}</span>
+                {col.kind === 'image' ? (
+                  <ImageInput value={row[c]} onChange={(v) => setCell(r, c, v)} />
+                ) : col.kind === 'video' ? (
+                  <VideoInput value={row[c]} onChange={(v) => setCell(r, c, v)} />
+                ) : (
+                  <input className="adm-input" value={row[c]} placeholder={col.placeholder} onChange={(e) => setCell(r, c, e.target.value)} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button type="button" className="adm-btn is-outline adm-rows-add" onClick={() => setRows([...rows, columns.map(() => '')])}>
+        <Plus size={15} /> {`Add ${item.toLowerCase()}`}
+      </button>
+    </div>
+  );
+}
+
 export function Control({
   type = 'text',
   value,
   onChange,
   placeholder,
   options,
+  columns,
+  item,
 }: {
   type?: ControlType;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   options?: string[];
+  columns?: RowColumn[];
+  item?: string;
 }) {
   switch (type) {
+    case 'rows':
+      return <RowsInput value={value} onChange={onChange} columns={columns ?? []} item={item} />;
     case 'textarea':
       return <AutoTextarea value={value} onChange={onChange} placeholder={placeholder} />;
     case 'richtext':

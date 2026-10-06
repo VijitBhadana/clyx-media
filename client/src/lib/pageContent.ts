@@ -9,8 +9,10 @@ import { services } from '@/data/home';
  * Field keys ending in "Image" hold image URLs, keys ending in "Url" hold links and keys ending in "Links" hold
  * one "Label | link" per line (the backend checks all three).
  */
-export type FieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select';
-export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[] };
+export type FieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'rows';
+/** One column of a 'rows' field; the rows are still saved as "a | b | c" lines, so the site reads them the same way. */
+export type RowColumn = { label: string; kind: 'text' | 'image' | 'video'; placeholder?: string };
+export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[]; columns?: RowColumn[]; item?: string };
 export type SectionDef = { id: string; title: string; description?: string; block?: string; fields: FieldDef[] };
 export type CollectionName =
   | 'campaigns'
@@ -38,6 +40,8 @@ const t = (key: string, label: string, value: string, hint?: string): FieldDef =
 const long = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'richtext', default: value, hint });
 /** Plain multi-line text the site splits up itself (one item per line, "Label | link", heading lines...). */
 const list = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'textarea', default: value, hint });
+/** A list edited row by row in the admin (with image / video uploads), stored as "a | b | c" lines. */
+const rows = (key: string, label: string, item: string, columns: RowColumn[], hint?: string): FieldDef => ({ key, label, type: 'rows', default: '', item, columns, hint });
 const img = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'image', default: value, hint });
 const link = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'url', default: value, hint });
 const pick = (key: string, label: string, value: string, options: string[], hint?: string): FieldDef => ({ key, label, type: 'select', default: value, options, hint });
@@ -126,6 +130,15 @@ export const PAGES: PageDef[] = [
     blurb: 'Navigation bar, footer, page-top buttons, WhatsApp bubble and cookie notice, shared by every page.',
     collections: [],
     sections: [
+      {
+        id: 'peek',
+        title: 'Peeking guide (every page)',
+        description: 'A cartoon guide peeks in from the left a few seconds after a page opens and asks a question. On the Courses page clicking it opens the purchase chat; on other pages it takes the visitor to Courses and opens the chat there. Once closed he stays away for that visit. Leave the message empty to turn him off.',
+        fields: [
+          t('peekText', 'Message in the cloud', 'Kya aapne abhi tak course purchase kiya?'),
+          t('peekButton', 'Button under the message', 'Enroll Now', 'Leave empty to hide the button.'),
+        ],
+      },
       {
         id: 'header',
         title: 'Navigation bar',
@@ -1071,13 +1084,18 @@ export const PAGES: PageDef[] = [
       {
         id: 'testimonials',
         title: 'Student videos',
-        description: 'Vertical video cards with a play button. Hidden until you add at least one video.',
+        description: 'Vertical video cards with a play button, right after the certificate. Until you add a video it shows "coming soon" cards. Clear the heading to hide the section.',
         fields: [
           t('testLabel', 'Label', 'Students'),
           t('testTitle', 'Heading', 'Testimonials'),
           t('testPrev', 'Previous arrow (screen readers)', 'Previous'),
           t('testNext', 'Next arrow (screen readers)', 'Next'),
-          list('testimonials', 'Videos', '', 'One per line, written as: Name | video link | cover image link. YouTube / Shorts links and .mp4 files play on the page; a YouTube video gets its cover automatically.'),
+          t('testSoon', 'Placeholder card text', 'Student story coming soon', 'Shown on the cards while no video is added yet.'),
+          rows('testimonials', 'Videos', 'Video', [
+            { label: 'Student name', kind: 'text', placeholder: 'e.g. Rahul' },
+            { label: 'Video', kind: 'video' },
+            { label: 'Cover image (optional)', kind: 'image' },
+          ], 'Upload a video (MP4, WebM or MOV, up to 50 MB) or paste a YouTube / Shorts link. A YouTube video gets its cover automatically.'),
         ],
       },
       {
@@ -1086,7 +1104,10 @@ export const PAGES: PageDef[] = [
         description: 'Scrolling row of white logo tiles above the mentor. Hidden until you add a brand.',
         fields: [
           t('brandsLabel', 'Label', 'Brands we have worked with'),
-          list('brands', 'Brands', '', 'One per line, written as: Brand name | logo image link. Without a logo the name is shown.'),
+          rows('brands', 'Brands', 'Brand', [
+            { label: 'Brand name', kind: 'text', placeholder: 'e.g. Boat' },
+            { label: 'Logo', kind: 'image' },
+          ], 'Without a logo the brand name is shown on the tile.'),
         ],
       },
       {
@@ -1132,7 +1153,7 @@ export const PAGES: PageDef[] = [
       {
         id: 'bar',
         title: 'Enroll bar (pinned to the bottom)',
-        description: 'Slides up once the visitor scrolls past the hero. Leave the button empty to turn it off.',
+        description: 'Shown from the moment the page opens. Leave the button empty to turn it off.',
         fields: [
           t('barTitle', 'Title', '', 'Leave empty to use the first course’s title.'),
           t('barMeta', 'Small line', 'Live classes · Enroll now'),

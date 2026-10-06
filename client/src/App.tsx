@@ -42,6 +42,8 @@ const Careers = page(() => import('./pages/Careers'));
 const Courses = page(() => import('./pages/Courses'));
 const LegalPage = page(() => import('./pages/LegalPage'));
 const Admin = lazy(() => import('./admin/AdminApp'));
+// Courses mounts its own guide (it opens the chat in place); the admin has none.
+const SitePeek = lazy(() => import('./components/sections/SitePeek'));
 const NotFound = page(() => import('./pages/NotFound'));
 
 // The public pages are small; fetching them while the browser is idle makes every menu click instant.
@@ -88,8 +90,10 @@ export default function App() {
   useCanonicalUrl(location);
   usePreloadPages();
   usePauseOffscreenAnimations();
+  const showPeek = !location.startsWith('/admin') && location !== '/courses';
   return (
-    // Keyed by route so a page that crashed does not keep showing the error screen on the next page.
+    <>
+    {/* Keyed by route so a page that crashed does not keep showing the error screen on the next page. */}
     <ErrorBoundary key={location}>
       <Suspense fallback={<RouteFallback />}>
         <Switch>
@@ -115,5 +119,11 @@ export default function App() {
         </Switch>
       </Suspense>
     </ErrorBoundary>
+    {showPeek && (
+      <Suspense fallback={null}>
+        <SitePeek />
+      </Suspense>
+    )}
+    </>
   );
 }

@@ -148,11 +148,11 @@ export default function Header() {
           <a
             href={ctaHref}
             {...linkTarget(ctaHref)}
-            className="clyx-nav-round group hidden items-center gap-2 bg-[#FFDE59] py-1.5 pl-5 pr-1.5 text-[11px] font-bold uppercase tracking-[.1em] text-[#050505] shadow-[0_6px_20px_-6px_rgba(255,222,89,0.8)] hover:shadow-[0_8px_28px_-6px_rgba(255,222,89,1)] md:inline-flex lg:pl-1.5 xl:pl-5"
+            className="clyx-nav-round clyx-header-cta group hidden items-center gap-2 bg-[#FFDE59] py-1.5 pl-5 pr-1.5 text-[11px] font-bold uppercase tracking-[.1em] text-[#050505] shadow-[0_6px_20px_-6px_rgba(255,222,89,0.8)] hover:shadow-[0_8px_28px_-6px_rgba(255,222,89,1)] md:inline-flex lg:pl-1.5 xl:pl-5"
             aria-label={c.headerCtaText}
           >
             <span className="lg:hidden xl:inline">{c.headerCtaText}</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#050505] text-[#FFDE59] transition-transform duration-300 group-hover:rotate-45">
+            <span className="clyx-header-cta-icon flex h-7 w-7 items-center justify-center rounded-full bg-[#050505] text-[#FFDE59] transition-transform duration-300 group-hover:rotate-45">
               <ArrowUpRight size={14} strokeWidth={2.5} />
             </span>
           </a>
@@ -229,7 +229,7 @@ export default function Header() {
             href={ctaHref}
             {...linkTarget(ctaHref)}
             onClick={() => setOpen(false)}
-            className="clyx-nav-round flex h-12 flex-1 items-center justify-center gap-2 bg-[#FFDE59] text-xs font-bold uppercase tracking-[.1em] text-[#050505]"
+            className="clyx-nav-round clyx-header-cta flex h-12 flex-1 items-center justify-center gap-2 bg-[#FFDE59] text-xs font-bold uppercase tracking-[.1em] text-[#050505]"
           >
             {c.headerCtaText} <ArrowUpRight size={16} />
           </a>

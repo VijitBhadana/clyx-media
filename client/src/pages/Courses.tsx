@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { CookieBar, WhatsAppButton } from '@/components/layout/Footer';
+import CoursePeek from '@/components/sections/CoursePeek';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { FormattedText } from '@/components/ui/FormattedText';
 import { usePageTitle } from '@/hooks/usePageMeta';
@@ -55,7 +56,12 @@ export default function Courses() {
   }, []);
   const enroll = useCallback(() => buy(courses.length === 1 ? courses[0] : undefined), [buy, courses]);
   const closeChat = useCallback(() => setChatOpen(false), []);
-  const heroRef = useRef<HTMLElement>(null);
+  // Arriving from the peeking guide on another page (/courses?enroll=1): open the purchase chat straight away.
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('enroll')) return;
+    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
+    buy();
+  }, [buy]);
 
   // Numbered sections ("01 — The problem"); a section the admin left empty drops out and the rest renumber.
   const numbered: [string, (n: number) => ReactNode][] = [];
@@ -63,7 +69,7 @@ export default function Courses() {
   numbered.push(['courses', (n) => <CourseList key="courses" n={n} c={c} courses={courses} onDetails={setDetails} onBuy={buy} onEnroll={enroll} />]);
   if (parsePairs(c.currModules).length) numbered.push(['curriculum', (n) => <Curriculum key="curriculum" n={n} c={c} />]);
   if (c.certTitle) numbered.push(['certificate', (n) => <Certificate key="certificate" n={n} c={c} logo={g.logoImage} onEnroll={enroll} />]);
-  if (parts(c.testimonials).length) numbered.push(['testimonials', (n) => <Testimonials key="testimonials" n={n} c={c} />]);
+  if (c.testTitle || parts(c.testimonials).length) numbered.push(['testimonials', (n) => <Testimonials key="testimonials" n={n} c={c} />]);
   if (c.mentorTitle) numbered.push(['mentor', (n) => <Mentor key="mentor" n={n} c={c} />]);
   if (parsePairs(c.faqs).length) numbered.push(['faq', (n) => <Faq key="faq" n={n} c={c} />]);
 
@@ -71,7 +77,7 @@ export default function Courses() {
     <div className="cr-page">
       <Header />
       <main>
-        <Hero c={c} heroRef={heroRef} onEnroll={enroll} />
+        <Hero c={c} onEnroll={enroll} />
         {numbered.map(([id, render], i) => {
           // The brands strip sits between the student videos and the mentor, outside the numbering.
           const node = render(i + 1);
@@ -81,7 +87,8 @@ export default function Courses() {
         <CtaBand c={c} onEnroll={enroll} />
       </main>
       <CourseFooter c={c} />
-      <EnrollBar c={c} course={courses[0]} heroRef={heroRef} onEnroll={enroll} hidden={chatOpen || details !== null} />
+      <EnrollBar c={c} course={courses[0]} onEnroll={enroll} hidden={chatOpen || details !== null} />
+      <CoursePeek text={g.peekText} button={g.peekButton} onEnroll={enroll} hidden={chatOpen || details !== null} />
       <WhatsAppButton />
       <CookieBar />
 
@@ -124,11 +131,11 @@ function EnrollButton({ label, onClick, className = '', icon }: { label: string;
 
 const HERO_ICONS: LucideIcon[] = [Compass, TrendingUp, Banknote];
 
-function Hero({ c, heroRef, onEnroll }: { c: Copy; heroRef: React.RefObject<HTMLElement | null>; onEnroll: () => void }) {
+function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
   const points = splitLines(c.heroPoints);
   const stats = parsePairs(c.heroStats);
   return (
-    <section ref={heroRef} className="cr-hero">
+    <section className="cr-hero">
       <div className="cr-wrap cr-hero-grid">
         <div className="cr-hero-copy">
           <h1 className="cr-hero-title">
@@ -311,6 +318,7 @@ function Curriculum({ n, c }: { n: number; c: Copy }) {
 
 function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: string; onEnroll: () => void }) {
   const points = splitLines(c.certPoints);
+  const tilt = useTilt();
   return (
     <section className="cr-sec cr-navy cr-cert-sec">
       <Reveal className="cr-cert-grid">
@@ -324,12 +332,40 @@ function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: stri
           )}
           <EnrollButton label={c.certButton} onClick={onEnroll} className="cr-btn-lime cr-cert-btn" />
         </div>
-        <div className="cr-cert-wrap">
+        <div className="cr-cert-wrap" {...tilt}>
           {c.certImage ? <img className="cr-cert-img" src={c.certImage} alt="" loading="lazy" decoding="async" /> : <CertificateArt c={c} logo={logo} />}
         </div>
       </Reveal>
     </section>
   );
+}
+
+/** 3D tilt that follows the mouse: writes the angles and glare spot as CSS variables on the hovered element. */
+function useTilt() {
+  const frame = useRef(0);
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const el = e.currentTarget;
+    const { left, top, width, height } = el.getBoundingClientRect();
+    const x = (e.clientX - left) / width;
+    const y = (e.clientY - top) / height;
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => {
+      el.classList.add('is-tilting');
+      el.style.setProperty('--cr-ry', `${(x - 0.5) * 16}deg`);
+      el.style.setProperty('--cr-rx', `${(0.5 - y) * 12}deg`);
+      el.style.setProperty('--cr-mx', `${x * 100}%`);
+      el.style.setProperty('--cr-my', `${y * 100}%`);
+    });
+  }, []);
+  const onPointerLeave = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    cancelAnimationFrame(frame.current);
+    const el = e.currentTarget;
+    el.classList.remove('is-tilting');
+    ['--cr-rx', '--cr-ry', '--cr-mx', '--cr-my'].forEach((v) => el.style.removeProperty(v));
+  }, []);
+  return { onPointerMove, onPointerLeave };
 }
 
 /** A sample CLYX certificate drawn in HTML, shown unless an image is set in the admin. Sized in container units. */
@@ -372,27 +408,102 @@ type Video = { name: string; url: string; thumb: string; youtube: string; autoTh
 const youtubeId = (url: string) => /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/.exec(url)?.[1] ?? '';
 const isVideoFile = (url: string) => /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
 
+const REEL_SPEED = 28; // px per second
+const REEL_MIN_CARDS = 10; // one loop copy must be wider than the widest screen
+
 function Testimonials({ n, c }: { n: number; c: Copy }) {
   const videos: Video[] = parts(c.testimonials).map(([name = '', url = '', thumb = '']) => {
     const youtube = youtubeId(url);
     return { name, url, youtube, thumb: thumb || (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefault.jpg` : ''), autoThumb: !thumb && !!youtube };
   });
   const reel = useRef<HTMLDivElement>(null);
+  const [auto] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [edge, setEdge] = useState({ start: true, end: false });
   const [playing, setPlaying] = useState<Video | null>(null);
+  const hold = useRef({ hover: false, touch: false, modal: false, until: 0 });
+  hold.current.modal = !!playing;
+
+  // Auto-play loops the cards: enough copies to fill a wide screen, then that whole set twice so the wrap is seamless.
+  const count = videos.length || 5;
+  const perSet = auto ? Math.ceil(REEL_MIN_CARDS / count) * count : count;
+  const slots = Array.from({ length: auto ? perSet * 2 : count }, (_, i) => i);
+
   const update = useCallback(() => {
     const el = reel.current;
-    if (el) setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 });
-  }, []);
+    if (el && !auto) setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 });
+  }, [auto]);
   useEffect(update, [update, videos.length]);
+
+  // Distance after which the second copy lines up with the first.
+  const period = useCallback(() => {
+    const el = reel.current;
+    const first = el?.children[0] as HTMLElement | undefined;
+    const twin = el?.children[perSet] as HTMLElement | undefined;
+    return first && twin ? twin.offsetLeft - first.offsetLeft : 0;
+  }, [perSet]);
+
+  // Drifts left to right; pauses on hover, touch, after an arrow click, while a video plays and when off screen.
+  useEffect(() => {
+    const el = reel.current;
+    if (!auto || !el) return;
+    let pos = -1;
+    let last = 0;
+    let frame = 0;
+    let visible = false;
+    const tick = (now: number) => {
+      const loop = period();
+      const dt = last ? Math.min(now - last, 64) / 1000 : 0;
+      last = now;
+      if (loop > 0) {
+        if (pos < 0 || Math.abs(el.scrollLeft - pos) > 2) pos = el.scrollLeft; // the visitor scrolled it
+        const h = hold.current;
+        if (!h.hover && !h.touch && !h.modal && now > h.until) pos -= REEL_SPEED * dt;
+        if (pos <= 0) pos += loop;
+        else if (pos > loop * 1.5) pos -= loop;
+        if (Math.abs(el.scrollLeft - pos) >= 0.5) el.scrollLeft = pos;
+      }
+      frame = visible ? requestAnimationFrame(tick) : 0;
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !frame) {
+        last = 0;
+        frame = requestAnimationFrame(tick);
+      }
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [auto, period]);
+
   const step = (dir: number) => {
     const el = reel.current;
     const card = el?.firstElementChild as HTMLElement | null;
-    if (el && card) el.scrollBy({ left: dir * (card.offsetWidth + 20), behavior: 'smooth' });
+    if (!el || !card) return;
+    const by = card.offsetWidth + 20;
+    if (auto) {
+      // Jump to the same spot in the other copy first, so the loop never runs out.
+      const loop = period();
+      if (dir < 0 && el.scrollLeft < by) el.scrollLeft += loop;
+      if (dir > 0 && el.scrollLeft + by > loop * 1.5) el.scrollLeft -= loop;
+      hold.current.until = performance.now() + 1500;
+    }
+    el.scrollBy({ left: dir * by, behavior: 'smooth' });
   };
   const play = (video: Video) => {
     if (video.youtube || isVideoFile(video.url)) setPlaying(video);
     else if (video.url) window.open(video.url, '_blank', 'noopener');
+  };
+  const pause = {
+    onPointerEnter: (e: React.PointerEvent) => { if (e.pointerType === 'mouse') hold.current.hover = true; },
+    onPointerLeave: (e: React.PointerEvent) => { if (e.pointerType === 'mouse') hold.current.hover = false; },
+    onTouchStart: () => { hold.current.touch = true; },
+    onTouchEnd: () => {
+      hold.current.touch = false;
+      hold.current.until = performance.now() + 2000;
+    },
   };
   return (
     <section className="cr-sec cr-navy">
@@ -403,18 +514,36 @@ function Testimonials({ n, c }: { n: number; c: Copy }) {
             <h2 className="cr-h2">{c.testTitle}</h2>
           </div>
           <div className="cr-arrows">
-            <button type="button" onClick={() => step(-1)} disabled={edge.start} aria-label={c.testPrev || 'Previous'}><ChevronLeft size={20} /></button>
-            <button type="button" onClick={() => step(1)} disabled={edge.end} aria-label={c.testNext || 'Next'}><ChevronRight size={20} /></button>
+            <button type="button" onClick={() => step(-1)} disabled={!auto && edge.start} aria-label={c.testPrev || 'Previous'}><ChevronLeft size={20} /></button>
+            <button type="button" onClick={() => step(1)} disabled={!auto && edge.end} aria-label={c.testNext || 'Next'}><ChevronRight size={20} /></button>
           </div>
         </div>
-        <div ref={reel} className="cr-reel" onScroll={update}>
-          {videos.map((video, i) => (
-            <button key={i} type="button" className="cr-reel-card" onClick={() => play(video)} aria-label={video.name ? `Play ${video.name}'s video` : 'Play video'}>
-              {video.thumb && <img src={video.thumb} alt="" loading="lazy" decoding="async" className={video.autoThumb ? 'is-yt' : undefined} />}
-              <span className="cr-play"><Play size={22} fill="currentColor" aria-hidden="true" /></span>
-              {video.name && <span className="cr-reel-name">{video.name}</span>}
-            </button>
-          ))}
+        <div ref={reel} className={`cr-reel${auto ? ' is-auto' : ''}`} onScroll={update} {...pause}>
+          {slots.map((slot) => {
+            const copy = slot >= videos.length; // loop copies stay out of screen readers and the tab order
+            const video = videos[slot % count];
+            // No videos yet: placeholder cards keep the section's shape until the admin adds some.
+            if (!video) {
+              return (
+                <div key={slot} className="cr-reel-card is-soon" aria-hidden={slot > 0 || undefined}>
+                  <span className="cr-play"><Play size={22} fill="currentColor" aria-hidden="true" /></span>
+                  {c.testSoon && <span className="cr-reel-name">{c.testSoon}</span>}
+                </div>
+              );
+            }
+            return (
+              <button key={slot} type="button" className="cr-reel-card" onClick={() => play(video)} aria-hidden={copy || undefined} tabIndex={copy ? -1 : undefined} aria-label={video.name ? `Play ${video.name}'s video` : 'Play video'}>
+                {video.thumb ? (
+                  <img src={video.thumb} alt="" loading="lazy" decoding="async" className={video.autoThumb ? 'is-yt' : undefined} />
+                ) : isVideoFile(video.url) && (
+                  // An uploaded video without a cover shows its own first frame.
+                  <video src={`${video.url}#t=0.5`} muted playsInline preload="metadata" tabIndex={-1} />
+                )}
+                <span className="cr-play"><Play size={22} fill="currentColor" aria-hidden="true" /></span>
+                {video.name && <span className="cr-reel-name">{video.name}</span>}
+              </button>
+            );
+          })}
         </div>
       </Reveal>
       {playing && <VideoModal video={playing} onClose={() => setPlaying(null)} />}
@@ -462,8 +591,8 @@ function Brands({ c, after }: { c: Copy; after?: ReactNode }) {
           <div className="cr-marquee-track" style={{ '--cr-count': row.length } as React.CSSProperties}>
             {[0, 1].map((copy) =>
               row.map(([name, logo], i) => (
-                <span key={`${copy}-${i}`} className="cr-brand" aria-hidden={copy === 1 || undefined}>
-                  {logo ? <img src={logo} alt={name} loading="lazy" decoding="async" /> : <strong>{name}</strong>}
+                <span key={`${copy}-${i}`} className="cr-brand" aria-hidden={copy === 1 || i >= brands.length || undefined}>
+                  {/^(https?:|\/|data:image\/)/.test(logo) ? <img src={logo} alt={name} loading="lazy" decoding="async" /> : <strong>{name}</strong>}
                 </span>
               )),
             )}
@@ -584,19 +713,11 @@ function CourseFooter({ c }: { c: Copy }) {
   );
 }
 
-/** Pinned to the bottom of the screen once the hero has scrolled away. */
-function EnrollBar({ c, course, heroRef, onEnroll, hidden }: { c: Copy; course?: Course; heroRef: React.RefObject<HTMLElement | null>; onEnroll: () => void; hidden: boolean }) {
-  const [past, setPast] = useState(false);
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([entry]) => setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0));
-    io.observe(hero);
-    return () => io.disconnect();
-  }, [heroRef]);
+/** Pinned to the bottom of the screen from the moment the page loads. */
+function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; onEnroll: () => void; hidden: boolean }) {
   const title = c.barTitle || course?.title || '';
   const image = c.barImage || course?.image || '';
-  const show = past && !hidden && !!title && !!c.barButton;
+  const show = !hidden && !!title && !!c.barButton;
   // Lift the WhatsApp button above the bar on phones while it is showing.
   useEffect(() => {
     document.body.classList.toggle('cr-bar-on', show);
@@ -604,7 +725,7 @@ function EnrollBar({ c, course, heroRef, onEnroll, hidden }: { c: Copy; course?:
   }, [show]);
   return (
     <div className={`cr-bar${show ? ' is-on' : ''}`}>
-      {image && <img className="cr-bar-img" src={image} alt="" loading="lazy" decoding="async" />}
+      {image && <img className="cr-bar-img" src={image} alt="" decoding="async" />}
       <div className="cr-bar-text">
         <strong>{title}</strong>
         {c.barMeta && <span>{c.barMeta}</span>}

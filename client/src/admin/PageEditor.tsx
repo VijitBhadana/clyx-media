@@ -174,7 +174,7 @@ export default function PageEditor({
                   <div className="adm-form-grid">
                     {section.fields.map((f) => {
                       const value = valueOf(block, f.key);
-                      const wide = f.type === 'textarea' || f.type === 'richtext' || f.type === 'image' || f.default.length > 48;
+                      const wide = f.type === 'textarea' || f.type === 'richtext' || f.type === 'image' || f.type === 'rows' || f.default.length > 48;
                       return (
                         <Field
                           key={f.key}
@@ -183,7 +183,7 @@ export default function PageEditor({
                           wide={wide}
                           onReset={value !== f.default ? () => setValue(block, f.key, f.default) : undefined}
                         >
-                          <Control type={f.type} options={f.options} value={value} onChange={(v) => setValue(block, f.key, v)} />
+                          <Control type={f.type} options={f.options} columns={f.columns} item={f.item} value={value} onChange={(v) => setValue(block, f.key, v)} />
                         </Field>
                       );
                     })}
