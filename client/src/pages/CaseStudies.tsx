@@ -2,6 +2,7 @@ import { usePageTitle } from '@/hooks/usePageMeta';
 import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
+import CaseStoryline from '@/components/sections/CaseStoryline';
 import CaseHeroArt from '@/components/sections/CaseHeroArt';
 import { RevealWords } from '@/components/ui/ScrollMotion';
 import { HaloReel, type HaloReelItem } from '@/components/ui/halo-reel';
@@ -165,6 +166,8 @@ export default function CaseStudies() {
       <CaseGrid items={caseStudies} c={c} />
 
       <CasePattern content={c} />
+
+      <CaseStoryline content={c} />
     </PageShell>
   );
 }

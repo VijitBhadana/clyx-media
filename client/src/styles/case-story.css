@@ -1,0 +1,367 @@
+/* Case Studies "product storyline": a dark panel with a glass-block card and the heading on the left, then a
+   line running right with one brand per stem, stems alternating up and down. Looks the same in light and dark
+   mode. `bg-blue` only opts the section out of the dark-mode frosted-section style. */
+.ps-section.bg-blue {
+  background: transparent;
+}
+.ps-section {
+  --ps-blue: #013AA3;
+  --ps-yellow: #FFDE59;
+  --ps-ink: #06080F;
+  --ps-ease: cubic-bezier(.23, 1, .32, 1);
+
+  padding-block: 8px 56px;
+}
+
+.ps-panel {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+  border-radius: 28px;
+  color: #FFFFFF;
+  background:
+    radial-gradient(40% 70% at 18% 50%, rgba(1, 58, 163, 0.38), transparent 70%),
+    var(--ps-ink);
+  /* The edge keeps the panel apart from the dark-mode page, which is nearly the same colour. */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 30px 60px -34px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Left card: glass blocks (or an image from the admin) ---------- */
+.ps-visual {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 50% at 50% 30%, rgba(120, 160, 255, 0.35), transparent 70%),
+    linear-gradient(160deg, #0247C4 0%, var(--ps-blue) 45%, #001A4D 100%);
+}
+.ps-visual > svg,
+.ps-visual > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ps-cube polygon {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.ps-cube-top { fill: url(#ps-top); }
+.ps-cube-left { fill: url(#ps-left); }
+.ps-cube-right { fill: url(#ps-right); }
+.ps-cube.is-signal .ps-cube-top { fill: #FFE98A; }
+.ps-cube.is-signal .ps-cube-left { fill: var(--ps-yellow); }
+.ps-cube.is-signal .ps-cube-right { fill: #D9B52C; }
+.ps-cube.is-signal polygon { stroke: rgba(255, 255, 255, 0.8); }
+.ps-float {
+  animation: ps-float 6s ease-in-out var(--d, 0s) infinite;
+}
+@keyframes ps-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ---------- Intro ---------- */
+.ps-intro { padding: 30px 22px 8px; }
+.ps-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ps-yellow);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.ps-label > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ps-yellow);
+  box-shadow: 0 0 10px rgba(255, 222, 89, 0.8);
+}
+.ps-title {
+  margin-top: 16px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: clamp(2.2rem, 3.6vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -.03em;
+}
+.ps-title > span { display: block; }
+.ps-title > .is-hl { color: var(--ps-yellow); }
+.ps-text {
+  max-width: 24rem;
+  margin-top: 16px;
+  font-size: .95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.66);
+}
+/* Short line with a dot at each end, under the heading. */
+.ps-range {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 260px;
+  margin-top: 30px;
+}
+.ps-range::before {
+  content: '';
+  position: absolute;
+  inset-inline: 4px;
+  top: 50%;
+  height: 1.5px;
+  background: var(--ps-yellow);
+}
+.ps-range > i {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ps-yellow);
+}
+.ps-meta {
+  margin-top: 14px;
+  font-size: .9rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- The line and its brands ---------- */
+/* Phones: a vertical line down the left with the chapters stacked beside it. */
+.ps-line {
+  position: relative;
+  padding: 28px 22px 36px;
+}
+.ps-axis {
+  position: absolute;
+  left: 30px;
+  top: 28px;
+  bottom: 36px;
+  width: 1.5px;
+  background: rgba(255, 222, 89, 0.35);
+}
+.ps-axis-fill { display: none; }
+.ps-marks { display: grid; gap: 30px; }
+.ps-mark {
+  position: relative;
+  padding-left: 30px;
+}
+/* Node on the line beside each brand. */
+.ps-mark::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--ps-yellow);
+  background: var(--ps-ink);
+  transform: scale(.4);
+  transition: transform .5s var(--ps-ease), background .5s var(--ps-ease);
+}
+.ps-mark.is-on::before { transform: none; background: var(--ps-yellow); }
+.ps-stem { display: none; }
+.ps-card {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .6s var(--ps-ease) .1s, transform .6s var(--ps-ease) .1s;
+}
+.ps-mark.is-on .ps-card { opacity: 1; transform: none; }
+
+.ps-tag {
+  color: var(--ps-yellow);
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.ps-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+.ps-logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  /* 3:1, the shape the logo files are saved at, so the whole logo shows. */
+  width: 84px;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #FFFFFF;
+}
+.ps-logo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ps-points {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ps-points > li {
+  position: relative;
+  padding-left: 16px;
+  font-size: .88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.64);
+}
+.ps-points > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .72em;
+  width: 8px;
+  height: 1.5px;
+  background: var(--ps-yellow);
+}
+
+/* ---------- Tablet and up: pinned, sideways storyline ---------- */
+/* CaseStoryline.tsx sets the track's height, slides .ps-strip left with the scroll, scales the yellow fill
+   along the line and adds .is-on to each brand once the fill reaches it. */
+@media (min-width: 768px) {
+  .ps-section { padding-block: 8px 72px; }
+  .ps-panel {
+    position: sticky;
+    top: 88px;
+    height: min(620px, calc(100vh - 112px));
+  }
+  .ps-strip {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    will-change: transform;
+  }
+  .ps-visual {
+    flex: none;
+    width: clamp(220px, 24vw, 320px);
+    height: 100%;
+  }
+  .ps-intro {
+    flex: none;
+    align-self: center;
+    width: clamp(320px, 36vw, 480px);
+    padding: 0 40px 0 48px;
+  }
+
+  .ps-line {
+    /* Space between brands, how long each stem is, and how wide the copy at its end can be. */
+    --gap: 250px;
+    --stem: calc(50% - 52px);
+    --card: 270px;
+
+    flex: none;
+    width: calc(var(--n) * var(--gap) + var(--card) - var(--gap) / 2 + 64px);
+    height: 100%;
+    padding: 0;
+  }
+  .ps-axis {
+    left: 0;
+    right: 40px;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 1.5px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+  /* The yellow part of the line, drawn ahead of the scroll. */
+  .ps-axis-fill {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: var(--ps-yellow);
+    box-shadow: 0 0 12px rgba(255, 222, 89, 0.6);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  /* End dot. */
+  .ps-axis::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: var(--ps-yellow);
+  }
+
+  .ps-marks { display: block; position: absolute; inset: 0; }
+  .ps-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--i) * var(--gap) + var(--gap) / 2);
+    width: 0;
+    padding: 0;
+  }
+  /* Node where the stem leaves the line. */
+  .ps-mark::before {
+    left: -5px;
+    top: calc(50% - 5px);
+    width: 10px;
+    height: 10px;
+    border-width: 1.5px;
+  }
+  .ps-stem {
+    display: block;
+    position: absolute;
+    left: -.75px;
+    width: 1.5px;
+    height: var(--stem);
+    background: var(--ps-yellow);
+    transform: scaleY(0);
+    transition: transform .7s var(--ps-ease) .1s;
+  }
+  .is-up .ps-stem { bottom: 50%; transform-origin: bottom; }
+  .is-down .ps-stem { top: 50%; transform-origin: top; }
+  /* Dot at the far end of the stem. */
+  .ps-stem::after {
+    content: '';
+    position: absolute;
+    left: -4.25px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ps-yellow);
+    box-shadow: 0 0 10px rgba(255, 222, 89, 0.7);
+  }
+  .is-up .ps-stem::after { top: -5px; }
+  .is-down .ps-stem::after { bottom: -5px; }
+  .ps-mark.is-on .ps-stem { transform: none; }
+
+  .ps-card {
+    position: absolute;
+    left: 24px;
+    width: var(--card);
+    transition-delay: .55s;
+  }
+  .is-up .ps-card { top: calc(50% - var(--stem) - 8px); }
+  .is-down .ps-card { bottom: calc(50% - var(--stem) - 8px); }
+  .ps-brand { font-size: 1.6rem; }
+}
+
+@media (min-width: 1024px) {
+  .ps-line { --gap: 280px; --card: 290px; }
+  .ps-intro { padding: 0 48px 0 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-section *, .ps-section *::before, .ps-section *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

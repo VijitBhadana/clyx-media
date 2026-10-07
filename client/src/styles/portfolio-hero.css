@@ -312,3 +312,34 @@
   .pf-card { transition: none; }
   .pf-ticker-track { animation: none; }
 }
+
+/* Brand discs (after the case-studies CTA): DiscCascadeCarousel in the site's type and colours. */
+.pf-discs { --dcc-accent: var(--clyx-blue); }
+.dark .pf-discs { --dcc-accent: var(--clyx-yellow); }
+.pf-discs .pf-discs-stage { border-radius: 24px; border: 1px solid var(--border-subtle); }
+.pf-discs .dcc-title { font-weight: 700; letter-spacing: -.035em; text-transform: none; line-height: 1; }
+.pf-discs .dcc-point span { color: var(--text-secondary); }
+.dark .pf-discs .dcc-point span { color: rgba(255, 255, 255, .78); }
+.pf-discs .dcc-frame { display: none; }
+@container (max-width: 720px) {
+  .pf-discs .dcc-nav { display: none; }
+}
+
+/* Scroll-pinned discs: the track is as tall as the scroll it takes to pass every disc; the pin sticks
+   below the floating header for that whole distance. */
+.pf-discs-track { position: relative; }
+.pf-discs-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding-top: 92px;
+  padding-bottom: 16px;
+}
+@media (min-width: 768px) { .pf-discs-pin { padding-top: 104px; padding-bottom: 24px; } }
+/* The dark-mode card style clips sections with overflow:hidden, which would stop the pin from sticking. */
+/* Its backdrop blur is dropped too: over a section several screens tall it re-blurred behind every moving disc each frame. */
+.dark .inner-page-shell .page-content-reveal > section.pf-discs:not(.bg-blue):not(.bg-yellow) {
+  overflow: clip;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

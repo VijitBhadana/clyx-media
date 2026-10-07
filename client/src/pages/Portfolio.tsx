@@ -1,5 +1,5 @@
 import { usePageTitle } from '@/hooks/usePageMeta';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import {
   ArrowUpRight,
@@ -21,6 +21,8 @@ import { usePortfolio, type PortfolioItem } from '@/lib/portfolio';
 import '@/styles/portfolio-hero.css';
 import { responsiveImage } from '@/lib/images';
 import { FormattedText } from '@/components/ui/FormattedText';
+import DiscCascadeCarousel, { type DiscCascadeController, type DiscCascadeItem } from '@/components/ui/disc-cascade-carousel';
+import { slugify } from '@/data/caseStudies';
 
 type PortfolioImage = PortfolioItem;
 
@@ -834,6 +836,193 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
   );
 }
 
+// Disc art for the built-in brands, in their own colours; brands added in the admin get the carousel's default palettes.
+const DISC_STYLES: Record<string, Pick<DiscCascadeItem, 'pattern' | 'palette'>> = {
+  okhai: { pattern: 'sunburst', palette: ['#f6efe4', '#f19a2b', '#8a8a8a'] },
+  'studio-rigu': { pattern: 'eclipse', palette: ['#111111', '#f4f1ea', '#c8a24a'] },
+  'the-souled-store': { pattern: 'stripes', palette: ['#f4f3ef', '#c62a2f', '#1d1d1d'] },
+  'mutha-beauty': { pattern: 'halftone', palette: ['#f7efec', '#9c6a52', '#d9b8a6'] },
+  snob: { pattern: 'rings', palette: ['#f49ac1', '#f2ec6d', '#ef7d3c'] },
+  savana: { pattern: 'sunburst', palette: ['#ecad32', '#2b2b2b', '#f6e3b4'] },
+  'google-gemini': { pattern: 'eclipse', palette: ['#0b1020', '#4f8cff', '#f2c94c'] },
+  superyou: { pattern: 'stripes', palette: ['#1f5fae', '#e0353b', '#f4f4f4'] },
+  'flipkart-glam-up': { pattern: 'sunburst', palette: ['#fde3ea', '#f7c626', '#8a1c4a'] },
+  kratos: { pattern: 'rings', palette: ['#141414', '#2e2e2e', '#d9d9d9'] },
+  'live-wab': { pattern: 'mosaic', palette: ['#2b0a5e', '#e3127b', '#7b2ff7'] },
+};
+
+// Page scroll, in viewport heights, that moves the carousel on by one disc: half a screen for a short list,
+// shrinking for a long one so the whole run stays around six screens (never under a fifth of a screen per disc).
+const discScrollSvh = (count: number) => Math.min(50, Math.max(20, 600 / Math.max(count - 1, 1)));
+
+// A portfolio project as a disc: its photo is the print, its result / category / story opening are the points.
+function projectDisc(item: PortfolioItem): DiscCascadeItem {
+  const story = item.detail.replace(/\s+/g, ' ').trim();
+  // First sentence (no lookbehind: older Safari can't parse it).
+  const opening = story.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? story;
+  return {
+    title: item.title,
+    // The disc is at most 400px across, so a phone-sized photo is plenty.
+    src: /^https:\/\/images\.unsplash\.com\//.test(item.src) ? item.src.replace(/([?&])w=\d+/, '$1w=600') : item.src,
+    alt: item.alt,
+    points: [
+      item.result,
+      item.category && `${item.category} campaign`,
+      opening && (opening.length > 90 ? opening.slice(0, 88).trimEnd() + '…' : opening),
+    ].filter(Boolean) as string[],
+  };
+}
+
+/**
+ * Scroll-driven discs: the carousel is pinned inside `trackRef` while the page scrolls past it, and the
+ * line follows the scroll continuously (straight to the carousel, no React render per frame), settling on
+ * the nearest disc once scrolling stops. Arrows / drag call `goTo`, which scrolls the page to that disc's
+ * spot, so the scroll position and the discs never disagree.
+ */
+function useScrollDiscs(trackRef: RefObject<HTMLDivElement | null>, count: number) {
+  const controller = useRef<DiscCascadeController>(null);
+  // Where the track starts and how far it scrolls, measured on resize rather than read back every frame.
+  const cached = useRef<{ top: number; total: number } | null>(null);
+  const measure = () => {
+    const el = trackRef.current;
+    if (!el) return (cached.current = null);
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    return (cached.current = { top, total: Math.max(el.offsetHeight - window.innerHeight, 1) });
+  };
+  const metrics = () => cached.current ?? measure();
+
+  useEffect(() => {
+    if (count < 2) return;
+    let raf = 0;
+    let settle = 0;
+    const update = () => {
+      raf = 0;
+      const m = metrics();
+      if (!m) return;
+      const position = Math.min(Math.max((window.scrollY - m.top) / m.total, 0), 1) * (count - 1);
+      controller.current?.setPosition(position);
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => controller.current?.setPosition(Math.round(position)), 160);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
+    measure();
+    update();
+    // Content above (images, the CMS answering) can push the track down, so re-measure when the page grows.
+    const observer = new ResizeObserver(onResize);
+    observer.observe(document.body);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(settle);
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count]);
+
+  const goTo = (i: number) => {
+    const m = metrics();
+    if (!m || count < 2) return;
+    window.scrollTo({ top: m.top + (i / (count - 1)) * m.total, behavior: 'smooth' });
+  };
+
+  return [controller, goTo] as const;
+}
+
+// Brand discs: one "name | logo | point | point | point" row per brand from the admin.
+function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: PortfolioItem[] }) {
+  const reduceMotion = useReducedMotion();
+  const trackRef = useRef<HTMLDivElement>(null);
+  // Memoised so each disc keeps the same item object across scroll re-renders and its art isn't rebuilt.
+  const brands = useMemo<DiscCascadeItem[]>(
+    () =>
+      splitLines(c.brandDiscs)
+        .map(line => line.split('|').map(cell => cell.trim()))
+        .filter(([name]) => name)
+        .map(([name, logo, ...points]) => ({
+          title: name,
+          logo: logo || undefined,
+          points: points.filter(Boolean),
+          ...DISC_STYLES[slugify(name)],
+        })),
+    [c.brandDiscs]
+  );
+  // Portfolio projects not already listed as a brand above follow them, in portfolio order.
+  const withProjects = c.brandsWithProjects !== 'No';
+  const projectDiscs = useMemo(() => {
+    if (!withProjects) return [];
+    const listed = new Set(brands.map(b => slugify(b.title)));
+    return projects.filter(p => p.title && !listed.has(slugify(p.title)));
+  }, [withProjects, brands, projects]);
+  const items = useMemo(() => [...brands, ...projectDiscs.map(projectDisc)], [brands, projectDiscs]);
+  const [controller, goTo] = useScrollDiscs(trackRef, items.length);
+  if (!items.length) return null;
+
+  return (
+    <section id="brands" className="pf-discs pb-16 md:pb-24">
+      <div className="container">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+          className="mb-8 md:mb-10"
+        >
+          {c.brandsLabel && <Label className="!mb-4">{c.brandsLabel}</Label>}
+          <h2 className="display text-4xl font-bold md:text-6xl">
+            {c.brandsTitle} <span className="text-blue dark:text-yellow">{c.brandsHighlight}</span>
+          </h2>
+        </motion.div>
+      </div>
+
+      {/* Tall track: the carousel stays pinned while the page scrolls one disc per discScrollSvh(),
+          then the track ends and the page carries on to the footer. */}
+      <div
+        ref={trackRef}
+        className="pf-discs-track"
+        style={{ height: `calc(100svh + ${(items.length - 1) * discScrollSvh(items.length)}svh)` }}
+      >
+        <div className="pf-discs-pin container">
+          <DiscCascadeCarousel
+            items={items}
+            className="pf-discs-stage"
+            height="100%"
+            discSize="clamp(200px, min(46vmin, 34vw), 400px)"
+            controllerRef={controller}
+            defaultIndex={0}
+            onIndexChange={goTo}
+            // Clicking the chosen project disc opens that project, as its card does.
+            onSelect={(_, i) => {
+              const project = projectDiscs[i - brands.length];
+              if (project) window.location.href = `/portfolio/${project.slug}`;
+            }}
+            duration={0.55}
+            bounce={0.12}
+            spin={0}
+            reviews={false}
+            indexLabel={c.brandsIndexLabel}
+            hint={c.brandsHint}
+            background="var(--bg-secondary)"
+            color="var(--foreground)"
+            serif="var(--font-display)"
+            sans="var(--font-body)"
+            display="var(--font-display)"
+            ariaLabel={c.brandsLabel || 'Brands'}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Portfolio() {
   usePageTitle('Portfolio | CLYX Media');
   const c = usePageContent('portfolio');
@@ -896,6 +1085,8 @@ export default function Portfolio() {
       </Section>
 
       <CaseStudiesCta content={c} />
+
+      <BrandDiscs c={c} projects={portfolioImages} />
     </PageShell>
   );
 }
