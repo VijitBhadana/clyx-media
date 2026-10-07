@@ -752,8 +752,8 @@ button:active,a:active{transform:scale(.97)}
 /* Dark mode turns inner-page sections into frosted dark panels; keep this one baby blue with its dot grid (it keeps the panel's rounded inset shape). */
 .dark .inner-page-shell .page-content-reveal > section.roles-band:not(.bg-blue):not(.bg-yellow) { background: #BDE0FE !important; border-color: rgba(3,26,82,0.15); }
 .dark .inner-page-shell .page-content-reveal > section.roles-band:not(.bg-blue):not(.bg-yellow)::before { background: radial-gradient(rgba(3,26,82,0.2) 1px, transparent 1px) 0 0 / 26px 26px; }
-/* Role cards on the band: dark navy gradient with a soft blue light in the top corner. */
-.role-card-dark { background: radial-gradient(120% 80% at 100% 0%, rgba(77,140,255,0.28), transparent 55%), linear-gradient(160deg, #0A2A75 0%, #031A52 55%, #00113A 100%); }
+/* Role cards on the band: light white-to-ice-blue gradient with a soft yellow glow in the top corner; navy ink. */
+.role-card-light { background: radial-gradient(120% 80% at 100% 0%, rgba(255,222,89,0.22), transparent 55%), linear-gradient(160deg, #FFFFFF 0%, #F4F9FF 55%, #E6F1FE 100%); }
 /* Careers open-roles heading highlight (see AnimatedHighlight in Careers.tsx). */
 .roles-highlight { position:relative; display:inline-block; }
 .rh-mask { display:inline-block; overflow:hidden; vertical-align:bottom; padding-bottom:.12em; margin-bottom:-.12em; }

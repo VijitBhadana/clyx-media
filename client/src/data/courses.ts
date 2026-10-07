@@ -46,7 +46,7 @@ export const defaultCourses: Course[] = [
     image: u('photo-1611926653458-09294b3142bf'),
     badge: 'Live batch',
     duration: '4 weeks',
-    format: 'Live classes on YouTube',
+    format: 'Live classes',
     level: 'Beginner to intermediate',
     schedule: 'Weekend live sessions, 7 PM IST',
     highlights: [
@@ -55,7 +55,7 @@ export const defaultCourses: Course[] = [
       'Edit for retention: pacing, captions and pattern breaks',
       'Whitelisting basics: run creator posts as paid ads',
     ].join('\n'),
-    includes: ['Private YouTube live classes', 'Class recordings to rewatch', 'Hook and script templates', 'WhatsApp support from the team'].join('\n'),
+    includes: ['Live classes', 'Class recordings to rewatch', 'Hook and script templates', 'WhatsApp support from the team'].join('\n'),
     description: '',
   },
   {
@@ -67,7 +67,7 @@ export const defaultCourses: Course[] = [
     image: u('photo-1551288049-bebda4e38f71'),
     badge: 'New',
     duration: '6 weeks',
-    format: 'Live classes on YouTube',
+    format: 'Live classes',
     level: 'Beginner',
     schedule: 'Weekday evening live sessions, 8 PM IST',
     highlights: [
@@ -76,7 +76,7 @@ export const defaultCourses: Course[] = [
       'Reading the numbers: CTR, CPA, ROAS and what to change',
       'Creative testing loops that keep winners coming',
     ].join('\n'),
-    includes: ['Private YouTube live classes', 'Class recordings to rewatch', 'Campaign planning sheet', 'WhatsApp support from the team'].join('\n'),
+    includes: ['Live classes', 'Class recordings to rewatch', 'Campaign planning sheet', 'WhatsApp support from the team'].join('\n'),
     description: '',
   },
 ];

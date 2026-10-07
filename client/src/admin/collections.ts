@@ -11,9 +11,9 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import type { CollectionName } from '@/lib/pageContent';
+import type { CollectionName, RowColumn } from '@/lib/pageContent';
 
-export type ItemFieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color';
+export type ItemFieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color' | 'rows';
 export type ItemField = {
   key: string;
   label: string;
@@ -27,6 +27,9 @@ export type ItemField = {
   hint?: string;
   /** Starts a new titled group in the edit panel (repeat-free: only set on the group's first field). */
   section?: string;
+  /** 'rows' only: the columns of each row (saved as "a | b | c" lines) and what one row is called. */
+  columns?: RowColumn[];
+  item?: string;
 };
 
 /** How each repeating list is edited in the admin. Field keys match the backend schema for that list. */
@@ -128,20 +131,131 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
     label: 'Case studies',
     singular: 'case study',
     icon: Film,
-    description: 'The expanding case-study panels on the Case Studies page.',
+    description:
+      'Cards on the Case Studies page. Each card opens its own page (/case-studies/<brand>) with the full story below. Empty fields hide their part of the page.',
     position: 'start',
     titleKey: 'brand',
     subtitleKey: 'headline',
     badgeKey: 'result',
     imageKey: 'image',
     fields: [
-      { key: 'brand', label: 'Brand', required: true },
-      { key: 'category', label: 'Category', placeholder: 'Beauty / Creator commerce' },
-      { key: 'headline', label: 'Headline', wide: true },
-      { key: 'result', label: 'Result', placeholder: '3.4x ROAS' },
+      { key: 'brand', label: 'Client / brand', required: true, section: 'Card', hint: 'Also sets the page address, e.g. "Urban Loom" → /case-studies/urban-loom.' },
+      { key: 'category', label: 'Category', placeholder: 'Skincare D2C / Meta Ads' },
+      { key: 'headline', label: 'Headline (on the card)', wide: true, placeholder: 'Scaled Meta spend 6x without breaking ROAS.' },
+      { key: 'result', label: 'Headline result', placeholder: '3.4x ROAS', hint: 'The yellow badge on the card.' },
       { key: 'accent', label: 'Accent colour', type: 'color', default: '#FFDE59' },
-      { key: 'detail', label: 'Story', type: 'richtext', wide: true },
-      { key: 'image', label: 'Image', type: 'image', wide: true },
+      { key: 'image', label: 'Cover image', type: 'image', wide: true },
+      {
+        key: 'detail',
+        label: 'Short summary',
+        type: 'richtext',
+        wide: true,
+        section: 'Case study page · overview',
+        placeholder: 'Two or three lines: where the client started, what we did, what changed.',
+      },
+      {
+        key: 'highlights',
+        label: 'Key points (one per line)',
+        type: 'textarea',
+        wide: true,
+        placeholder: 'Meta spend scaled from ₹3L to ₹18L a month\nBlended ROAS doubled from 1.6x to 3.4x',
+        hint: 'Shown beside the cover image, appearing one by one. Three to five short points work best.',
+      },
+      { key: 'industry', label: 'Industry', placeholder: 'D2C skincare' },
+      { key: 'market', label: 'Market', placeholder: 'India, metro-first' },
+      { key: 'duration', label: 'Engagement', placeholder: '6 months' },
+      { key: 'adSpend', label: 'Ad spend', placeholder: '₹3L → ₹18L / month' },
+      { key: 'channels', label: 'Channels', wide: true, placeholder: 'Meta Ads, Google Search, YouTube' },
+      { key: 'services', label: 'What we did (comma separated)', wide: true, placeholder: 'Meta Ads management, Creative strategy, Landing page CRO' },
+      {
+        key: 'requirement',
+        label: 'Client requirement / brief',
+        type: 'richtext',
+        wide: true,
+        section: 'The brief',
+        placeholder: 'What the client came to us with and what they asked for.',
+      },
+      { key: 'goals', label: 'Goals (one per line)', type: 'textarea', wide: true, placeholder: 'Scale Meta spend to ₹15L a month\nHold ROAS above 3x' },
+      {
+        key: 'challenges',
+        label: 'Issues we faced',
+        type: 'rows',
+        item: 'Issue',
+        columns: [
+          { label: 'Issue', kind: 'text', placeholder: 'Broken tracking' },
+          { label: 'What happened', kind: 'text', placeholder: 'Meta saw only 60% of real purchases.' },
+        ],
+        section: 'Issues & how we handled them',
+      },
+      {
+        key: 'approach',
+        label: 'How we handled it',
+        type: 'rows',
+        item: 'Step',
+        columns: [
+          { label: 'Step', kind: 'text', placeholder: 'Fix the data first' },
+          { label: 'What we did', kind: 'text', placeholder: 'Set up the Conversions API with server-side events.' },
+        ],
+      },
+      {
+        key: 'execution',
+        label: 'How the work ran',
+        type: 'richtext',
+        wide: true,
+        section: 'Our work',
+        placeholder: 'The weekly rhythm, the team, how decisions were made.',
+      },
+      { key: 'deliverables', label: 'Deliverables (one per line)', type: 'textarea', wide: true, placeholder: '180+ ad creatives\nConversions API setup' },
+      {
+        key: 'work',
+        label: 'Work photos',
+        type: 'rows',
+        item: 'Photo',
+        columns: [
+          { label: 'Photo', kind: 'image' },
+          { label: 'Caption', kind: 'text', placeholder: 'Creator shoot for the hook tests' },
+        ],
+        hint: 'Shoots, ads, dashboards, landing pages: anything that shows the work. Three or four look best.',
+      },
+      {
+        key: 'metrics',
+        label: 'Key numbers',
+        type: 'rows',
+        item: 'Number',
+        columns: [
+          { label: 'Value', kind: 'text', placeholder: '3.4x' },
+          { label: 'Label', kind: 'text', placeholder: 'Blended ROAS' },
+          { label: 'Note', kind: 'text', placeholder: 'up from 1.6x' },
+        ],
+        section: 'Results',
+        hint: 'The first four also show under the cover image.',
+      },
+      {
+        key: 'comparison',
+        label: 'Before vs after',
+        type: 'rows',
+        item: 'Row',
+        columns: [
+          { label: 'Metric', kind: 'text', placeholder: 'Blended ROAS' },
+          { label: 'Before', kind: 'text', placeholder: '1.6x' },
+          { label: 'After', kind: 'text', placeholder: '3.4x' },
+        ],
+      },
+      { key: 'resultsSummary', label: 'Results summary', type: 'richtext', wide: true },
+      { key: 'quote', label: 'Client response (quote)', type: 'richtext', wide: true, section: 'Client response', hint: 'Leave empty to hide the quote.' },
+      { key: 'quoteName', label: 'Quote by', placeholder: 'Co-founder' },
+      { key: 'quoteRole', label: 'Company / role', placeholder: 'Kulture Skin' },
+      {
+        key: 'learnings',
+        label: 'Key takeaways',
+        type: 'rows',
+        item: 'Takeaway',
+        columns: [
+          { label: 'Takeaway', kind: 'text', placeholder: 'Fix tracking before touching budget' },
+          { label: 'Why it mattered', kind: 'text', placeholder: 'Better signal improved CPA by 18%.' },
+        ],
+        section: 'Takeaways',
+      },
     ],
   },
   portfolio: {
@@ -294,12 +408,12 @@ export const COLLECTIONS: Record<CollectionName, CollectionDef> = {
       { key: 'originalPrice', label: 'Original price in ₹ (optional)', placeholder: '999', hint: 'Shown struck through next to the price.' },
       { key: 'image', label: 'Card image', type: 'image', wide: true },
       { key: 'badge', label: 'Badge (optional)', placeholder: 'Live batch' },
-      { key: 'format', label: 'Format', placeholder: 'Live classes on YouTube', hint: 'Shown in the details popup.' },
+      { key: 'format', label: 'Format', placeholder: 'Live classes', hint: 'Shown in the details popup.' },
       { key: 'duration', label: 'Duration', placeholder: '4 weeks', section: 'Course details' },
       { key: 'level', label: 'Level', placeholder: 'Beginner' },
       { key: 'schedule', label: 'Schedule', wide: true, placeholder: 'Weekend live sessions, 7 PM IST' },
       { key: 'highlights', label: 'What you will learn (one point per line)', type: 'textarea', wide: true, placeholder: 'Write hooks that stop the scroll\nScript and brief creators for ads' },
-      { key: 'includes', label: 'What you get (one point per line)', type: 'textarea', wide: true, placeholder: 'Private YouTube live classes\nClass recordings to rewatch' },
+      { key: 'includes', label: 'What you get (one point per line)', type: 'textarea', wide: true, placeholder: 'Live classes\nClass recordings to rewatch' },
       {
         key: 'description',
         label: 'About this course (optional)',

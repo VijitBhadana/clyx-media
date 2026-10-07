@@ -213,18 +213,19 @@ html:not(.dark) .sb-book {
   background: var(--accent-soft); color: var(--accent);
 }
 .sb-book .sb-detail h3 { font-size: clamp(1.2rem, calc(var(--page-h) * 0.046), 2.6rem); line-height: 1.1; color: var(--ink); }
-.sb-book .sb-detail-text { font-size: clamp(0.8rem, calc(var(--page-h) * 0.027), 1.25rem); line-height: 1.6; color: var(--ink-soft); }
+.sb-book .sb-detail-text { font-size: clamp(0.8rem, calc(var(--page-h) * 0.025), 1.2rem); line-height: 1.5; color: var(--ink-soft); }
 .sb-book .sb-label {
-  margin: clamp(12px, 2.4vh, 22px) 0 10px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+  margin: clamp(12px, 2.2vh, 20px) 0 10px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
 }
-.sb-points { list-style: none; display: flex; flex-direction: column; gap: clamp(6px, 1.5vh, 16px); }
+/* The list is the only part allowed to shrink, so long copy never pushes the footer (and its CTA) off the page. */
+.sb-points { list-style: none; display: flex; flex-direction: column; gap: clamp(6px, 1.2vh, 14px); min-height: 0; overflow: hidden; }
 .sb-book .sb-points li {
   display: flex; gap: 10px; align-items: flex-start;
-  font-size: clamp(0.78rem, calc(var(--page-h) * 0.025), 1.15rem); line-height: 1.45; color: var(--ink);
+  font-size: clamp(0.78rem, calc(var(--page-h) * 0.023), 1.1rem); line-height: 1.4; color: var(--ink);
 }
 .sb-points svg { flex: none; margin-top: 0.2em; color: var(--accent); }
 .sb-book .sb-detail-foot {
-  margin-top: auto; padding-top: 12px; border-top: 1px solid var(--rule);
+  flex: none; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--rule);
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
 }
 .sb-book .sb-next { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
@@ -272,12 +273,106 @@ html:not(.dark) .sb-dot.is-active::before { background: #013AA3; }
   }
 }
 
+/* ---------- Mobile carousel (ServiceCarousel) ----------
+   Replaces the book at phone width with standalone service cards (not book pages), sliding right to left on a loop.
+   Each card: a navy brand band with the icon badge and a big faded number, then title, summary, tags and a link. */
+.sbc {
+  --card-w: min(80vw, 300px);
+  --card-h: 440px;
+  --card-bg: #0F1530;
+  --ink: #F5F7FF;
+  --ink-soft: #A3AEC6;
+  --rule: rgba(255, 255, 255, 0.1);
+  --accent: #FFDE59;
+  --tag-bg: rgba(255, 255, 255, 0.06);
+  display: none;
+  overflow: hidden;
+  padding: 10px 0 30px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+html:not(.dark) .sbc {
+  --card-bg: #FFFFFF;
+  --ink: #0A1128;
+  --ink-soft: #4B5568;
+  --rule: rgba(1, 58, 163, 0.12);
+  --accent: #013AA3;
+  --tag-bg: rgba(1, 58, 163, 0.06);
+}
+.sbc-track { display: flex; width: max-content; animation: sbc-scroll var(--sbc-duration, 42s) linear infinite; }
+.sbc-track:hover, .sbc-track:active { animation-play-state: paused; }
+.sbc-set { display: flex; gap: 16px; padding-right: 16px; }
+@keyframes sbc-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+.sbc .sbc-card {
+  flex: none; width: var(--card-w); height: var(--card-h);
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 22px; border: 1px solid var(--rule);
+  background: var(--card-bg); color: var(--ink); text-decoration: none;
+  box-shadow: 0 22px 44px -26px rgba(1, 20, 70, 0.55);
+}
+
+.sbc .sbc-band {
+  position: relative; flex: none; height: 138px;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(255, 222, 89, 0.22), transparent 60%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.09) 1px, transparent 1.2px) 0 0 / 14px 14px,
+    linear-gradient(135deg, #013AA3 0%, #0A1F66 55%, #070C22 100%);
+}
+.sbc .sbc-band-num {
+  position: absolute; right: -4px; bottom: -26px;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 700;
+  font-size: 7.5rem; line-height: 1; letter-spacing: -0.06em; color: rgba(255, 255, 255, 0.1);
+}
+.sbc .sbc-index {
+  position: absolute; top: 16px; left: 18px; padding: 5px 10px; border-radius: 9999px;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.18);
+}
+/* Yellow badge straddling the band and the body. */
+.sbc .sbc-icon {
+  position: absolute; left: 18px; bottom: -28px; width: 58px; height: 58px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: #FFDE59; color: #013AA3; border: 4px solid var(--card-bg);
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.5);
+}
+.sbc .sb-icon-img { display: block; width: 28px; height: 28px; object-fit: contain; }
+
+.sbc .sbc-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 42px 20px 18px; }
+.sbc .sbc-body h3 { font-size: 1.3rem; line-height: 1.15; letter-spacing: -0.02em; color: var(--ink); }
+.sbc .sbc-text {
+  font-size: 0.86rem; line-height: 1.5; color: var(--ink-soft);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sbc .sbc-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; min-height: 0; overflow: hidden; }
+.sbc .sbc-tags li {
+  max-width: 100%; padding: 5px 11px; border-radius: 9999px;
+  font-size: 0.72rem; font-weight: 600; color: var(--ink); background: var(--tag-bg); border: 1px solid var(--rule);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sbc .sbc-more {
+  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .sb-track { display: none; }
+  /* Full bleed, cancelling the section's 24px padding, so cards slide in from the screen edge. */
+  .sbc { display: block; margin: 0 -24px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sb-book .sb-cover-clyx { animation: none; }
+  /* No auto-scroll: the strip becomes a swipeable row instead. */
+  .sbc { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: none; mask-image: none; }
+  .sbc-track { animation: none; padding-left: 24px; }
+  .sbc-set[aria-hidden="true"] { display: none; }
+  .sbc .sbc-card { scroll-snap-align: center; }
 }
 
 /* Short screens (small laptops, zoomed browsers): tighten spacing so the full page still fits. */
-@media (max-height: 700px) {
+@media (max-height: 800px) {
   .sb-book .sb-page { padding-top: 18px; padding-bottom: 18px; }
   .sb-book .sb-detail-head { margin: 12px 0 8px; }
   .sb-book .sb-label { margin: 10px 0 6px; }

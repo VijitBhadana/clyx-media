@@ -1,8 +1,124 @@
 /* A single case study's page (CaseStudyDetail.tsx). Builds on service-detail.css (back link, overview grid, steps,
    "included" card); everything here uses the site tokens so it follows light and dark mode. */
 
-/* Hero: the result tag stands out from the category tag, facts list inside the intro card. */
-.inner-hero .sd-hero-tags .csd-hero-result {
+/* Hero (PageShell heroClass="csd-hero"): light paper background with a faded mini-plus pattern, navy text, and the
+   facts list in a white card. Stays light in dark mode, like the Case Studies hero. */
+.inner-hero.csd-hero {
+  --csd-ink: #031A52;
+  --csd-accent: #013AA3;
+  --csd-muted: rgba(3, 26, 82, 0.68);
+  --csd-line: rgba(3, 26, 82, 0.1);
+  color: var(--csd-ink);
+  background:
+    radial-gradient(38% 55% at 88% 8%, rgba(255, 222, 89, 0.34), transparent 70%),
+    radial-gradient(45% 60% at 4% 100%, rgba(1, 58, 163, 0.1), transparent 70%),
+    linear-gradient(180deg, #FBFBF7 0%, #F1F4FB 100%);
+  border-bottom-color: var(--csd-line);
+}
+.inner-hero.csd-hero::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 10.5v7M10.5 14h7' stroke='%23031A52' stroke-opacity='.2' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 28px 28px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse 90% 95% at 50% 45%, #000 45%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 95% at 50% 45%, #000 45%, transparent 100%);
+}
+.inner-hero.csd-hero .ih-orb { background: radial-gradient(circle, rgba(59, 110, 255, 0.16), transparent 65%); }
+.inner-hero.csd-hero .ih-eyebrow {
+  color: var(--csd-accent);
+  border-color: rgba(1, 58, 163, 0.18);
+  background: #FFFFFF;
+  box-shadow: 0 6px 18px -10px rgba(3, 26, 82, 0.35);
+}
+.inner-hero.csd-hero .ih-dot { background: var(--csd-accent); animation: none; }
+.inner-hero.csd-hero .ih-title { color: var(--csd-ink); }
+.inner-hero.csd-hero .sd-hero-line { color: var(--csd-muted); }
+.inner-hero.csd-hero .sd-hero-tags li {
+  border-color: rgba(3, 26, 82, 0.16);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--csd-ink);
+}
+.inner-hero.csd-hero .ih-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(3, 26, 82, 0.1);
+  box-shadow: 0 24px 60px -30px rgba(3, 26, 82, 0.35);
+}
+.inner-hero.csd-hero .ih-actions { border-top-color: var(--csd-line); }
+.inner-hero.csd-hero .ih-btn-primary:hover { background: var(--csd-ink); border-color: var(--csd-ink); color: #FFFFFF; }
+.inner-hero.csd-hero a:focus-visible { outline-color: var(--csd-accent); }
+
+/* Compact hero: less space above and below, a smaller title and the facts in two columns. */
+.inner-hero.csd-hero { padding: 100px 0 36px; }
+.inner-hero.csd-hero .ih-inner { gap: 28px; align-items: center; }
+.inner-hero.csd-hero .ih-eyebrow { margin-bottom: 16px; }
+.inner-hero.csd-hero .ih-title { font-size: clamp(2.5rem, 4.6vw, 4.1rem); }
+.inner-hero.csd-hero .sd-hero-line { margin-top: 14px; font-size: 1.05rem; }
+.inner-hero.csd-hero .sd-hero-tags { margin-top: 16px; }
+.inner-hero.csd-hero .ih-card { padding: 22px 22px 20px; }
+.inner-hero.csd-hero .csd-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+.inner-hero.csd-hero .csd-facts > div { padding-bottom: 12px; }
+/* The last fact (channels) is the longest, so it takes the full width. */
+.inner-hero.csd-hero .csd-facts > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.inner-hero.csd-hero .csd-facts dd { font-size: 14.5px; }
+.inner-hero.csd-hero .ih-actions { margin-top: 16px; padding-top: 16px; }
+@media (min-width: 900px) {
+  .inner-hero.csd-hero { padding: 108px 0 40px; }
+  .inner-hero.csd-hero .ih-inner { grid-template-columns: 1.15fr .85fr; gap: 48px; }
+}
+
+/* Facts card: floats up into place, the facts rise in one by one, then the card keeps drifting gently. */
+.inner-hero.csd-hero .direction-reveal { opacity: 1; transform: none; transition: none; }
+/* Moved on its own GPU layer, and without the glass blur (redrawing a backdrop blur every frame makes it stutter). */
+.inner-hero.csd-hero .ih-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation:
+    csd-card-in 1.2s cubic-bezier(.16, 1, .3, 1) .3s both,
+    csd-card-float 7s cubic-bezier(.37, 0, .63, 1) 1.5s infinite;
+}
+.inner-hero.csd-hero .ih-card::before {
+  transform-origin: left center;
+  animation: csd-bar-in .7s cubic-bezier(.16, 1, .3, 1) 1s both;
+}
+.inner-hero.csd-hero .csd-facts > div,
+.inner-hero.csd-hero .ih-actions {
+  animation: csd-fact-in .7s cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(.6s + var(--i, 0) * .1s);
+}
+.inner-hero.csd-hero .csd-facts > div:nth-child(2) { --i: 1; }
+.inner-hero.csd-hero .csd-facts > div:nth-child(3) { --i: 2; }
+.inner-hero.csd-hero .csd-facts > div:nth-child(4) { --i: 3; }
+.inner-hero.csd-hero .csd-facts > div:nth-child(5) { --i: 4; }
+.inner-hero.csd-hero .ih-actions { --i: 5; }
+/* Both card keyframes end/start at the same translate3d(0, 0, 0), so the hand-over from entrance to float is seamless. */
+@keyframes csd-card-in {
+  from { opacity: 0; transform: translate3d(0, 40px, 0) scale(.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes csd-card-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -8px, 0) scale(1); }
+}
+@keyframes csd-bar-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes csd-fact-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inner-hero.csd-hero .ih-card,
+  .inner-hero.csd-hero .ih-card::before,
+  .inner-hero.csd-hero .csd-facts > div,
+  .inner-hero.csd-hero .ih-actions { animation: none; }
+}
+
+/* The result tag stands out from the category tag. */
+.inner-hero .sd-hero-tags .csd-hero-result,
+.inner-hero.csd-hero .sd-hero-tags .csd-hero-result {
   border-color: #FFDE59;
   background: #FFDE59;
   color: #050505;
@@ -12,7 +128,7 @@
   display: grid;
   gap: 2px;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid var(--csd-line, rgba(255, 255, 255, 0.14));
 }
 .inner-hero .csd-facts > div:last-child { border-bottom: 0; padding-bottom: 0; }
 .inner-hero .csd-facts dt {
@@ -20,9 +136,9 @@
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: #FFDE59;
+  color: var(--csd-accent, #FFDE59);
 }
-.inner-hero .csd-facts dd { font-size: 15.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.88); }
+.inner-hero .csd-facts dd { font-size: 15.5px; line-height: 1.45; color: var(--csd-ink, rgba(255, 255, 255, 0.88)); }
 
 /* Cover image with the headline result pinned to the corner. */
 .csd-cover {
@@ -68,6 +184,78 @@
   color: #FFFFFF;
 }
 
+/* Cover beside its key points: a smaller image on the left, the points on the right on wide screens. */
+.csd-cover-row { display: grid; gap: 18px; }
+.csd-cover-row > .scroll-reveal { min-width: 0; }
+.csd-cover-row.has-points .csd-cover { aspect-ratio: 4 / 3; }
+
+.csd-glance {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 26px;
+  border-radius: 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 30px 60px -40px rgba(15, 23, 42, 0.45);
+}
+.dark .csd-glance { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.12); box-shadow: none; }
+.csd-glance::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 26px;
+  width: 48px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: #FFDE59;
+}
+.csd-glance-label {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--clyx-blue);
+}
+.dark .csd-glance-label { color: var(--clyx-yellow); }
+.csd-glance li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 0;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--foreground);
+  /* Each point slides in from the right after the one before it. */
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity .5s var(--ease-out), transform .6s var(--ease-out);
+  transition-delay: calc(250ms + var(--i, 0) * 140ms);
+}
+.csd-glance li + li { border-top: 1px solid var(--border-subtle); }
+.dark .csd-glance li + li { border-top-color: rgba(255, 255, 255, 0.1); }
+.csd-glance-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #FFDE59;
+  color: #050505;
+  font-size: 12px;
+  font-weight: 800;
+  transform: scale(.4);
+  transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+  transition-delay: calc(330ms + var(--i, 0) * 140ms);
+}
+.csd-glance.is-visible li { opacity: 1; transform: none; }
+.csd-glance.is-visible .csd-glance-num { transform: none; }
+
 /* At-a-glance numbers under the cover. */
 .csd-metrics {
   display: grid;
@@ -109,26 +297,18 @@
   color: var(--foreground);
 }
 
-/* Challenge: story and pain points on the left, numbered goals card on the right. */
+/* Section headings (same scale as the service pages). */
+.csd-h2 {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -.03em;
+  color: var(--foreground);
+}
+.csd-split .csd-h2 { margin-bottom: 24px; }
+
+/* Brief: what the client asked for on the left, numbered goals card on the right. */
 .csd-split { display: grid; gap: 40px; }
-.csd-pains { display: grid; gap: 12px; margin-top: 28px; }
-.csd-pains li {
-  position: relative;
-  padding-left: 26px;
-  font-size: 15.5px;
-  line-height: 1.55;
-  color: var(--text-secondary);
-}
-.csd-pains li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: .55em;
-  width: 12px;
-  height: 2px;
-  border-radius: 2px;
-  background: #E5484D;
-}
 .csd-goals {
   padding: 28px;
   border-radius: 20px;
@@ -162,53 +342,66 @@
 }
 .dark .csd-goal-num { color: var(--clyx-yellow); }
 
-/* Results: a blue panel with the headline numbers, the same in light and dark mode. */
+/* Results: a compact light panel with the headline numbers in brand blue. */
 .csd-results-panel {
   position: relative;
   overflow: hidden;
-  padding: clamp(28px, 5vw, 64px);
+  padding: clamp(24px, 3.6vw, 44px);
   border-radius: 28px;
-  color: #FFFFFF;
+  color: var(--foreground);
   background:
-    radial-gradient(45% 70% at 80% 0%, rgba(255, 222, 89, 0.16), transparent 62%),
-    linear-gradient(150deg, #0247C4 0%, #013AA3 45%, #002366 100%);
-  box-shadow: 0 30px 60px -34px rgba(1, 35, 102, 0.7);
+    radial-gradient(40% 70% at 92% 0%, rgba(255, 222, 89, 0.3), transparent 65%),
+    linear-gradient(160deg, #EEF4FF 0%, #F8FAFF 60%, #FFFFFF 100%);
+  border: 1px solid rgba(1, 58, 163, 0.12);
+  box-shadow: 0 24px 50px -36px rgba(1, 35, 102, 0.45);
 }
-.csd-results-panel .csd-results-label { color: rgba(255, 255, 255, 0.7); }
+.dark .csd-results-panel {
+  background:
+    radial-gradient(40% 70% at 92% 0%, rgba(255, 222, 89, 0.08), transparent 65%),
+    rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+.csd-results-panel .sd-head { margin-bottom: 26px; }
+.csd-results-panel .csd-results-label { margin-bottom: 14px; }
+.csd-results-panel .csd-h2 { font-size: clamp(1.9rem, 3.6vw, 2.75rem); }
 .csd-results-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28px 20px;
+  gap: 20px 20px;
 }
-.csd-results-grid > li { padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.2); }
-.csd-results-grid .scroll-reveal { display: flex; flex-direction: column; gap: 6px; }
+.csd-results-grid > li { padding-top: 14px; border-top: 2px solid rgba(1, 58, 163, 0.14); }
+.dark .csd-results-grid > li { border-top-color: rgba(255, 255, 255, 0.14); }
+.csd-results-grid .scroll-reveal { display: flex; flex-direction: column; gap: 4px; }
 .csd-results-value {
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size: clamp(2rem, 3.6vw, 2.9rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -.03em;
-  color: #FFDE59;
+  color: var(--clyx-blue);
 }
-.csd-results-name { font-size: 15px; font-weight: 700; }
-.csd-results-note { font-size: 13.5px; line-height: 1.4; color: rgba(255, 255, 255, 0.68); }
+.dark .csd-results-value { color: var(--clyx-yellow); }
+.csd-results-name { font-size: 14.5px; font-weight: 700; color: var(--foreground); }
+.csd-results-note { font-size: 13px; line-height: 1.4; color: var(--muted); }
 .csd-results-summary {
   max-width: 52rem;
-  margin-top: 44px;
-  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  margin-top: 26px;
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
 }
 
-/* Client quote. */
+/* Client response. */
 .csd-quote {
   position: relative;
   max-width: 56rem;
   margin: 0 auto;
   text-align: center;
 }
+.csd-quote .csd-quote-label { margin-bottom: 18px; }
 .csd-quote-icon { margin: 0 auto 22px; color: var(--clyx-blue); }
 .dark .csd-quote-icon { color: var(--clyx-yellow); }
-.csd-quote p {
+.csd-quote blockquote p {
   font-family: 'Urbanist', sans-serif;
   font-size: clamp(1.45rem, 3vw, 2.3rem);
   font-weight: 600;
@@ -216,14 +409,145 @@
   letter-spacing: -.015em;
   color: var(--foreground);
 }
-.csd-quote footer {
-  margin-top: 24px;
+.csd-quote figcaption {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 28px;
   font-size: 13px;
-  font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--muted);
 }
+.csd-quote figcaption strong { font-weight: 800; color: var(--foreground); }
+.csd-quote figcaption strong + span::before { content: '·'; margin-right: 10px; }
+
+/* Issues we faced: numbered cards with a warning marker. */
+.csd-issue-grid { display: grid; gap: 16px; }
+.csd-issue-grid > li { display: grid; }
+.csd-issue {
+  height: 100%;
+  padding: 26px 24px 28px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid #E5484D;
+}
+.dark .csd-issue { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.12); border-top-color: #F2555A; }
+.csd-issue-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.csd-issue-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(229, 72, 77, 0.1);
+  color: #D13438;
+}
+.dark .csd-issue-icon { background: rgba(242, 85, 90, 0.14); color: #FF8589; }
+.csd-issue-num {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+.csd-issue h3 {
+  margin-bottom: 10px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--foreground);
+}
+.csd-issue p { font-size: 15px; line-height: 1.6; color: var(--text-secondary); }
+
+/* Work photos: one large photo and the rest beside it on wide screens. */
+.csd-gallery { display: grid; gap: 16px; margin-top: 56px; }
+.csd-shot figure {
+  position: relative;
+  height: 100%;
+  min-height: 240px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--bg-card);
+}
+.csd-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s var(--ease-out);
+}
+.csd-shot figure:hover img { transform: scale(1.04); }
+.csd-shot figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 55%);
+  pointer-events: none;
+}
+.csd-shot figcaption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #FFFFFF;
+}
+
+/* Before vs after table inside the results panel. */
+.csd-compare { margin-top: 30px; }
+.csd-compare-title {
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--clyx-blue);
+}
+.dark .csd-compare-title { color: var(--clyx-yellow); }
+.csd-compare table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(1, 58, 163, 0.1);
+  font-size: 14.5px;
+}
+.dark .csd-compare table { background: rgba(255, 255, 255, 0.04); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.csd-compare th,
+.csd-compare td { padding: 11px 18px; text-align: left; vertical-align: top; }
+.csd-compare thead th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(1, 58, 163, 0.05);
+}
+.dark .csd-compare thead th { background: rgba(255, 255, 255, 0.05); }
+.csd-compare thead th.is-after { color: var(--clyx-blue); }
+.dark .csd-compare thead th.is-after { color: var(--clyx-yellow); }
+.csd-compare tbody tr + tr { border-top: 1px solid rgba(1, 58, 163, 0.08); }
+.dark .csd-compare tbody tr + tr { border-top-color: rgba(255, 255, 255, 0.1); }
+.csd-compare tbody th { font-weight: 600; color: var(--foreground); }
+.csd-compare tbody td { color: var(--muted); white-space: nowrap; }
+.csd-compare tbody td.is-after {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--clyx-blue);
+}
+.dark .csd-compare tbody td.is-after { color: var(--clyx-yellow); }
 
 /* Learnings reuse the service step cards. */
 .csd-learning-grid { display: grid; gap: 16px; }
@@ -296,13 +620,28 @@
 .csd-more-card:hover .csd-more-arrow { transform: translate(3px, -3px); }
 
 @media (min-width: 640px) {
+  .csd-issue-grid { grid-template-columns: repeat(2, 1fr); }
+  .csd-gallery { grid-template-columns: repeat(2, 1fr); }
+  .csd-gallery[data-count='3'] .csd-shot:first-child { grid-column: 1 / -1; }
+  .csd-shot figure { min-height: 280px; }
   .csd-more-grid { grid-template-columns: repeat(2, 1fr); }
   .csd-learning-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 1024px) {
+  .csd-cover-row.has-points { grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: stretch; }
+  .csd-cover-row.has-points > .scroll-reveal:first-child { height: 100%; }
+  .csd-cover-row.has-points .csd-cover { aspect-ratio: auto; height: 100%; min-height: 380px; }
+  .csd-glance { padding: 30px 32px; }
   .csd-metrics { grid-template-columns: repeat(4, 1fr); }
   .csd-split { grid-template-columns: 1.25fr .9fr; gap: 64px; align-items: start; }
   .csd-results-grid { grid-template-columns: repeat(4, 1fr); }
+  .csd-gallery[data-count='3'] { grid-template-columns: 1.45fr 1fr; grid-template-rows: repeat(2, 260px); }
+  .csd-gallery[data-count='3'] .csd-shot:first-child { grid-column: auto; grid-row: span 2; }
+  .csd-gallery[data-count='3'] .csd-shot figure { min-height: 0; }
+  .csd-gallery[data-count='4'] { grid-auto-rows: 320px; }
+  .csd-gallery[data-count='1'] .csd-shot figure { min-height: 460px; }
+  .csd-gallery[data-count='1'] { grid-template-columns: 1fr; }
+  .csd-gallery[data-count='2'] { grid-auto-rows: 360px; }
   .csd-learning-grid { grid-template-columns: repeat(3, 1fr); }
   .csd-more-grid { grid-template-columns: repeat(3, 1fr); }
 }
@@ -310,9 +649,16 @@
   .csd-cover { aspect-ratio: 4 / 3; border-radius: 20px; }
   .csd-overview { margin-top: 48px; }
   .csd-goals { padding: 22px 20px; }
+  .csd-issue { padding: 22px 20px 24px; }
+  .csd-gallery { margin-top: 40px; }
+  .csd-compare th,
+  .csd-compare td { padding: 10px 12px; font-size: 13.5px; }
+  .csd-compare tbody td { white-space: normal; }
+  .csd-compare tbody td.is-after { font-size: 15px; }
   .csd-results-panel { border-radius: 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .csd-more-card, .csd-more-card:hover, .csd-more-media img, .csd-more-card:hover .csd-more-media img,
-  .csd-more-arrow, .csd-more-card:hover .csd-more-arrow { transition: none; transform: none; }
+  .csd-glance li, .csd-glance-num { opacity: 1; transform: none; transition: none; }
+  .csd-more-arrow, .csd-more-card:hover .csd-more-arrow, .csd-shot img, .csd-shot figure:hover img { transition: none; transform: none; }
 }

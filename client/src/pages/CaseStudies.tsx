@@ -1,6 +1,6 @@
 import { usePageTitle } from '@/hooks/usePageMeta';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
 import CaseHeroArt from '@/components/sections/CaseHeroArt';
@@ -8,129 +8,125 @@ import { RevealWords } from '@/components/ui/ScrollMotion';
 import { cn } from '@/lib/utils';
 import { useCaseStudies } from '@/lib/caseStudies';
 import type { CaseStudyItem } from '@/data/caseStudies';
-import { safeHref, usePageContent } from '@/lib/pageContent';
+import { usePageContent } from '@/lib/pageContent';
 import '@/styles/case-studies-hero.css';
 import { responsiveImage } from '@/lib/images';
 import { FormattedText } from '@/components/ui/FormattedText';
 
-interface CaseCardProps {
-  item: CaseStudyItem;
-  index: number;
-  requestHref: string;
-  requestText: string;
-  detailsText: string;
-  featured?: boolean;
-}
-
-function CaseCard({ item, index, requestHref, requestText, detailsText, featured = false }: CaseCardProps) {
+/** One case study as a photo card: just enough to pick a story, the whole card opens its page. */
+function CaseCard({ item, index, detailsText }: { item: CaseStudyItem; index: number; detailsText: string }) {
   return (
-    <motion.article
+    <motion.li
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5, delay: featured ? 0 : index * 0.08, ease: [0.25, 1, 0.5, 1] }}
-      className={cn(
-        'group relative flex overflow-hidden rounded-3xl border border-slate-200 bg-white backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.04]',
-        'shadow-[0_20px_50px_-30px_rgba(15,23,42,0.35)] transition-all duration-500 dark:shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]',
-        'hover:-translate-y-1.5 hover:border-yellow/60 hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)] dark:hover:shadow-[0_30px_80px_-30px_rgba(255,222,89,0.35)]',
-        'has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-yellow',
-        featured ? 'flex-col lg:flex-row' : 'flex-col'
-      )}
+      transition={{ duration: 0.55, delay: (index % 3) * 0.08, ease: [0.25, 1, 0.5, 1] }}
+      className="min-w-0"
     >
-      {/* Image */}
-      <div
+      <a
+        href={`/case-studies/${item.slug}`}
         className={cn(
-          'relative shrink-0 overflow-hidden',
-          featured ? 'aspect-[16/10] lg:aspect-auto lg:w-[58%]' : 'aspect-[16/11]'
+          'group relative isolate flex h-[340px] flex-col justify-between overflow-hidden rounded-[24px] bg-slate-900 p-5 md:h-[380px]',
+          'shadow-[0_24px_60px_-32px_rgba(15,23,42,0.55)] transition-[transform,box-shadow] duration-500 ease-out',
+          'hover:-translate-y-1.5 hover:shadow-[0_34px_80px_-34px_rgba(1,58,163,0.6)] dark:hover:shadow-[0_34px_80px_-34px_rgba(255,222,89,0.35)]',
+          'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow motion-reduce:transition-none motion-reduce:hover:translate-y-0'
         )}
       >
         <img
-          {...responsiveImage(item.src, featured ? '(max-width: 1023px) 92vw, 680px' : '(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 420px')}
+          {...responsiveImage(item.src, '(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 380px')}
           alt={item.alt}
-          loading="lazy"
+          loading={index < 3 ? 'eager' : 'lazy'}
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5" style={{ background: item.accent }} />
+        <span aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+        <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5" style={{ background: item.accent }} />
 
-        <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
-          <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
-            {item.category}
-          </span>
-          <span className="font-mono text-xs font-bold text-yellow drop-shadow">#{item.code}</span>
-        </div>
-
-        <div className="absolute bottom-4 left-4 rounded-2xl bg-yellow px-4 py-2 shadow-lg">
-          <span className="display block text-lg font-bold leading-none text-dark md:text-xl">{item.result}</span>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className={cn('flex flex-1 flex-col', featured ? 'p-6 md:p-8 lg:p-10' : 'p-6')}>
-        <h3 className="font-['Poppins',sans-serif] text-[26px] font-normal leading-tight tracking-normal text-slate-900 dark:text-white">
-          {item.brand}
-        </h3>
-        <h4 className="mt-3 font-['Poppins',sans-serif] text-lg font-medium leading-snug tracking-normal text-slate-800 dark:text-white/90">
-          {item.headline}
-        </h4>
-        <p className="mt-1.5 font-['Poppins',sans-serif] text-lg font-normal leading-[1.65] tracking-normal text-slate-600 dark:text-white/70">
-          <FormattedText text={item.detail} />
-        </p>
-
-        <div className={cn('flex flex-wrap items-center gap-3', featured ? 'mt-8' : 'mt-auto pt-6')}>
-          {/* The details link stretches over the whole card, so clicking anywhere opens the full case study. */}
-          <a
-            href={`/case-studies/${item.slug}`}
-            className="inline-flex w-fit items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-dark transition-colors after:absolute after:inset-0 after:content-[''] focus-visible:outline-none group-hover:bg-blue group-hover:text-white"
-            aria-label={`${detailsText}: ${item.brand}`}
-          >
-            {detailsText} <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-          </a>
-          {featured && requestText && (
-            <a
-              href={requestHref}
-              className="relative z-10 inline-flex w-fit items-center gap-2 rounded-full border border-slate-300 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-800 transition-colors hover:border-yellow hover:bg-yellow hover:text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow dark:border-white/25 dark:text-white"
-            >
-              {requestText} <ArrowUpRight size={15} />
-            </a>
+        <span className="flex items-start justify-between gap-3">
+          {item.category && (
+            <span className="max-w-[80%] rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md">
+              {item.category}
+            </span>
           )}
-        </div>
-      </div>
-    </motion.article>
+          <span className="ml-auto font-mono text-xs font-bold text-yellow drop-shadow">{item.code}</span>
+        </span>
+
+        <span className="block">
+          <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">{item.brand}</span>
+          <span className="display mt-2 block max-w-[20ch] text-[21px] font-bold leading-[1.12] tracking-[-0.02em] text-white md:text-[23px]">
+            {item.headline}
+          </span>
+          <span className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+            {item.result && (
+              <span className="display rounded-full bg-yellow px-3.5 py-1 text-sm font-bold leading-tight text-dark">{item.result}</span>
+            )}
+            <span className="ml-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+              {detailsText}
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-dark transition-colors duration-300 group-hover:bg-yellow">
+                <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </span>
+            </span>
+          </span>
+        </span>
+      </a>
+    </motion.li>
   );
 }
 
-function CaseCards({
-  items,
-  className,
-  requestText,
-  requestUrl,
-  detailsText,
-}: {
-  items: CaseStudyItem[];
-  className?: string;
-  requestText: string;
-  requestUrl: string;
-  detailsText: string;
-}) {
-  const requestHref = safeHref(requestUrl || '/contact');
-  const [featured, ...rest] = items;
-  if (!featured) return null;
-  const shared = { requestHref, requestText, detailsText: detailsText || 'More details' };
+/** "Number | label" lines from the admin as headline stats. */
+const statsOf = (text: string) =>
+  text
+    .split('\n')
+    .map((line) => line.split('|').map((part) => part.trim()))
+    .filter(([value]) => value)
+    .map(([value, label = '']) => ({ value, label }));
+
+function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, string> }) {
+  if (!items.length) return null;
+  const stats = statsOf(c.listStats || '');
 
   return (
-    <div className={cn('relative mx-auto w-full max-w-6xl px-4 py-8', className)}>
-      <CaseCard item={featured} index={0} {...shared} featured />
+    // Full-width section with the content centred inside, so dark mode's glass-card sections stay centred too.
+    <section className="relative pb-8 pt-12 md:pb-12 md:pt-16">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <header className="mb-10 grid gap-8 md:mb-14 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:gap-16">
+          <div>
+            {c.listLabel && (
+              <p className="mb-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-white/60">
+                <span aria-hidden="true" className="h-px w-8 bg-current" />
+                {c.listLabel}
+              </p>
+            )}
+            <h2 className="display text-4xl font-bold leading-[1.02] tracking-[-0.03em] text-slate-900 md:text-6xl dark:text-white">
+              <FormattedText text={c.listTitle} />
+            </h2>
+          </div>
+          <div>
+            {c.listText && (
+              <p className="text-base leading-relaxed text-slate-600 md:text-lg dark:text-white/70">
+                <FormattedText text={c.listText} />
+              </p>
+            )}
+            {stats.length > 0 && (
+              <dl className="mt-7 grid grid-cols-3 gap-4 border-t border-slate-200 pt-6 dark:border-white/10">
+                {stats.map((stat) => (
+                  <div key={stat.value + stat.label} className="min-w-0">
+                    <dt className="display text-2xl font-bold tracking-[-0.02em] text-blue md:text-3xl dark:text-yellow">{stat.value}</dt>
+                    <dd className="mt-1 text-xs leading-snug text-slate-500 md:text-[13px] dark:text-white/60">{stat.label}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+        </header>
 
-      {rest.length > 0 && (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {rest.map((item, i) => (
-            <CaseCard key={item.id} item={item} index={i} {...shared} />
+        <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {items.map((item, i) => (
+            <CaseCard key={item.id} item={item} index={i} detailsText={c.caseDetailsButton || 'View case study'} />
           ))}
-        </div>
-      )}
-    </div>
+        </ul>
+      </div>
+    </section>
   );
 }
 
@@ -171,12 +167,7 @@ export default function CaseStudies() {
       intro={c.heroIntro}
       aside={<CaseHeroArt />}
     >
-      <CaseCards
-        items={caseStudies}
-        requestText={c.caseButton}
-        requestUrl={c.caseButtonUrl}
-        detailsText={c.caseDetailsButton}
-      />
+      <CaseGrid items={caseStudies} c={c} />
 
       <CasePattern content={c} />
     </PageShell>

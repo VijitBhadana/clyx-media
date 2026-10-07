@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
@@ -115,9 +115,57 @@ function ServicePage({ service, chapter, c }: { service: Service; chapter: numbe
   );
 }
 
+// A point reads "Label - detail"; the card shows just the label as a tag.
+const pointLabel = (point: string) => point.split(/\s[-–—]\s/)[0];
+
+function CarouselCard({ service }: { service: Service }) {
+  return (
+    <a className="sbc-card" href={`/services/${service.slug}`}>
+      <div className="sbc-band">
+        <span className="sbc-band-num" aria-hidden="true">{service.number}</span>
+        <span className="sbc-icon"><ServiceIcon service={service} size={26} /></span>
+        <span className="sbc-index">{service.number} / {pad(services.length)}</span>
+      </div>
+      <div className="sbc-body">
+        <h3>{service.title}</h3>
+        <p className="sbc-text"><FormattedText text={service.text} /></p>
+        {service.points.length > 0 && (
+          <ul className="sbc-tags">
+            {service.points.slice(0, 3).map((point, i) => <li key={i}>{pointLabel(point)}</li>)}
+          </ul>
+        )}
+        <span className="sbc-more">Explore service <ArrowUpRight size={15} aria-hidden="true" /></span>
+      </div>
+    </a>
+  );
+}
+
+// Mobile replaces the flip book with an endless right-to-left strip of service cards.
+// The set is rendered twice and the track slides by half its width, so the loop is seamless (like TeamMarquee).
+function ServiceCarousel({ items }: { items: Service[] }) {
+  const cards = items.map((service, i) => <CarouselCard key={i} service={service} />);
+  return (
+    <div className="sbc" role="region" aria-label="Services">
+      <div className="sbc-track" style={{ '--sbc-duration': `${items.length * 7}s` } as CSSProperties}>
+        <div className="sbc-set">{cards}</div>
+        <div className="sbc-set" aria-hidden="true" inert>{cards}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function ServiceBook({ content: c = pageDefaults('home') }: { content?: Copy }) {
   const items = useServiceBook(c.bookNextText);
   const logoSrc = usePageContent('global').logoImage;
+  return (
+    <>
+      <FlipBook c={c} items={items} logoSrc={logoSrc} />
+      <ServiceCarousel items={items} />
+    </>
+  );
+}
+
+function FlipBook({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: string }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<HTMLDivElement>(null);

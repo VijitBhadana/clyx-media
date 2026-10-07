@@ -185,12 +185,14 @@ export default function CollectionManager({
             {def.fields.map((f) => (
               <Fragment key={f.key}>
                 {f.section && <h4 className="adm-form-section">{f.section}</h4>}
-                <Field label={f.label} hint={f.hint} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea' || f.type === 'richtext'}>
+                <Field label={f.label} hint={f.hint} required={f.required} wide={f.wide || f.type === 'image' || f.type === 'textarea' || f.type === 'richtext' || f.type === 'rows'}>
                   <Control
                     type={f.type}
                     value={editing.draft[f.key] ?? ''}
                     options={f.options}
                     placeholder={f.placeholder}
+                    columns={f.columns}
+                    item={f.item}
                     onChange={(v) => setEditing((e) => (e ? { ...e, draft: { ...e.draft, [f.key]: v } } : e))}
                   />
                 </Field>

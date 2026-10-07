@@ -317,6 +317,35 @@ html:not(.dark) .v1-landing-wrapper .macbook-base { background: #CBD5E1; }
   border-color: var(--clyx-blue);
 }
 
+/* Mobile stand-in for the laptop (shown only at <=768px, see the mobile block below): a ring of the week's revenue
+   by day. Always dark, like the laptop screen it replaces. */
+.engine-ring { display: none; width: 100%; max-width: 440px; margin: 0 auto; padding: 18px 16px 16px; background: #060913; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(1, 58, 163, 0.25); color: #94A3B8; }
+.engine-ring-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.engine-ring-head .dash-nav-brand { font-size: 0.76rem; min-width: 0; }
+.engine-ring-title { margin-top: 10px; font-size: 0.78rem; font-weight: 600; color: #FFFFFF; text-align: center; }
+.engine-ring-chart { position: relative; width: min(240px, 72vw); aspect-ratio: 1; margin: 12px auto 6px; }
+.engine-ring-chart svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.engine-ring-track { fill: none; stroke: rgba(255, 255, 255, 0.06); stroke-width: 22; }
+.engine-ring-seg { fill: none; stroke-width: 22; transition: stroke-dasharray 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.engine-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.engine-ring-center .lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; color: #64748B; }
+.engine-ring-center .val { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; color: #FFFFFF; line-height: 1.15; }
+.engine-ring-center .change { font-size: 0.7rem; font-weight: 600; color: #22c55e; }
+.engine-ring-legend { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; padding: 10px 4px 14px; }
+.engine-ring-legend li { display: flex; align-items: center; gap: 7px; font-size: 0.74rem; }
+.engine-ring-legend .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; }
+.engine-ring-legend .day { color: #94A3B8; }
+.engine-ring-legend .amt { margin-left: auto; color: #FFFFFF; font-weight: 700; font-variant-numeric: tabular-nums; }
+.engine-ring-legend .tag { font-size: 0.6rem; font-weight: 800; color: #FFFFFF; padding: 1px 5px; border-radius: 4px; }
+.engine-ring-legend .tag-hi { background: #16a34a; }
+.engine-ring-legend .tag-lo { background: #dc2626; }
+.engine-ring-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.engine-ring-stats .dash-stat-box { padding: 9px 8px; min-width: 0; }
+.engine-ring-stats .dash-stat-box .lbl { font-size: 0.56rem; line-height: 1.25; min-height: 2.5em; }
+.engine-ring-stats .dash-stat-box .val { font-size: 1.05rem; }
+.engine-ring-stats .dash-stat-box .change { font-size: 0.58rem; white-space: normal; line-height: 1.3; }
+@media (prefers-reduced-motion: reduce) { .engine-ring-seg { transition: none; } }
+
 /* Channels Strip: intro copy on the left, a 3x2 grid of channel tiles on the right. */
 .channel-strip { padding: 32px 48px; max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 48px; align-items: center; }
 .channel-intro { --font-display: 'Urbanist', sans-serif; --font-body: 'Urbanist', sans-serif; font-family: var(--font-body); }
@@ -1073,6 +1102,11 @@ html:not(.dark) .v1-landing-wrapper .site-footer a[href*="wa.me"] { color: var(-
   .channel-tile { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; }
   .clip-stack { width: 320px; height: 380px; }
   .clip-card { width: 150px; height: 210px; }
+  /* Engine section: the laptop gives way to the ring card, and nothing is pinned, so the section is only as tall as its content. */
+  .kinetic-section { min-height: 0; padding-bottom: 48px; }
+  .kinetic-sticky-wrap { position: static; height: auto; overflow: visible; perspective: none; padding: 8px 16px 0; }
+  .macbook-container { display: none; }
+  .engine-ring { display: block; }
   .footer-grid { grid-template-columns: 1fr; }
   .newsletter-form { flex-direction: column; }
   .cookie-popup, .cookie-bar { left: 16px !important; right: 16px !important; bottom: 84px !important; width: auto !important; max-width: none !important; }

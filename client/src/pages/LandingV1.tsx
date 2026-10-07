@@ -14,6 +14,7 @@ import { safeHref, sectionDefaults, splitLines, usePageContent } from '@/lib/pag
 import { Lines } from '@/components/ui/Lines';
 import { markIntroLoaderPlayed, shouldPlayIntroLoader } from '@/lib/introLoader';
 import { useLandingMotion } from '@/hooks/useLandingMotion';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { API_URL } from '@/lib/api';
 import '../styles/landing-v1.css';
 import { FormattedText } from '@/components/ui/FormattedText';
@@ -62,6 +63,98 @@ function Counter({ value, className, style }: { value: string; className?: strin
     <span key={value} ref={ref} className={className ? `${className} counter` : 'counter'} style={style}>
       {value}
     </span>
+  );
+}
+
+// Starting height (%) of each day's bar in the laptop chart; the mobile ring uses the same values.
+const CHART_HEIGHTS = [42, 58, 72, 66, 86, 96, 90];
+// Same scale as the chart's H / L price tags: a 100% bar is ₹1.5L.
+const dayRevenue = (pct: number) => `₹${((pct * 1.5) / 100).toFixed(2)}L`;
+const RING_R = 78;
+const RING_C = 2 * Math.PI * RING_R;
+const RING_GAP = 4;
+// Low days lean blue, high days lean yellow, like the bars' blue-to-yellow gradient.
+const RING_LOW = [37, 99, 235];
+const RING_HIGH = [255, 222, 89];
+const ringColor = (t: number) => `rgb(${RING_LOW.map((lo, i) => Math.round(lo + (RING_HIGH[i] - lo) * t)).join(',')})`;
+
+type DashStat = { label: string; value: string; note: string };
+
+// Mobile stand-in for the laptop dashboard: a ring of the week's revenue by day, 30-day revenue in the middle
+// and the other stats below. Segments sweep in the first time the card scrolls into view.
+function EngineRing({ c, days, stats }: { c: Record<string, string>; days: string[]; stats: DashStat[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useScrollReveal(ref);
+  const total = CHART_HEIGHTS.reduce((sum, h) => sum + h, 0);
+  const min = Math.min(...CHART_HEIGHTS);
+  const max = Math.max(...CHART_HEIGHTS);
+  const hi = CHART_HEIGHTS.indexOf(max);
+  const lo = CHART_HEIGHTS.indexOf(min);
+  let start = 0;
+  const segments = CHART_HEIGHTS.map((h, i) => {
+    const length = (h / total) * RING_C;
+    const segment = { i, offset: -start, length: Math.max(0, length - RING_GAP), color: ringColor((h - min) / (max - min || 1)) };
+    start += length;
+    return segment;
+  });
+  const [center, ...rest] = [stats[1], stats[0], stats[2], stats[3]];
+
+  return (
+    <div ref={ref} className={`engine-ring${visible ? ' is-visible' : ''}`}>
+      <div className="engine-ring-head">
+        <div className="dash-nav-brand">
+          <span style={{ color: "var(--clyx-yellow)" }}>CLYX</span> {c.dashTitle}
+        </div>
+        {c.dashLive && <span className="dash-nav-pill">● {c.dashLive}</span>}
+      </div>
+      <p className="engine-ring-title">{c.dashChartTitle}</p>
+
+      <div className="engine-ring-chart">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle className="engine-ring-track" cx="100" cy="100" r={RING_R} />
+          {segments.map((s) => (
+            <circle
+              key={s.i}
+              className="engine-ring-seg"
+              cx="100"
+              cy="100"
+              r={RING_R}
+              stroke={s.color}
+              strokeDasharray={`${visible ? s.length : 0} ${RING_C}`}
+              strokeDashoffset={s.offset}
+              style={{ transitionDelay: `${s.i * 90}ms` }}
+            />
+          ))}
+        </svg>
+        <div className="engine-ring-center">
+          <span className="lbl">{center?.label}</span>
+          <Counter value={center?.value ?? ''} className="val" />
+          <span className="change">{center?.note}</span>
+        </div>
+      </div>
+
+      <ul className="engine-ring-legend">
+        {segments.map((s) => (
+          <li key={s.i}>
+            <span className="dot" style={{ background: s.color }} />
+            <span className="day">{days[s.i] ?? ''}</span>
+            <span className="amt">{dayRevenue(CHART_HEIGHTS[s.i])}</span>
+            {s.i === hi && <span className="tag tag-hi">H</span>}
+            {s.i === lo && <span className="tag tag-lo">L</span>}
+          </li>
+        ))}
+      </ul>
+
+      <div className="engine-ring-stats">
+        {rest.filter(Boolean).map((stat, i) => (
+          <div key={i} className="dash-stat-box">
+            <div className="lbl">{stat.label}</div>
+            <Counter value={stat.value} className="val" style={i === 0 ? { color: "var(--clyx-yellow)" } : undefined} />
+            <div className="change">{stat.note}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -255,7 +348,7 @@ export default function LandingV1() {
                     <span style={{ fontSize: "0.75rem", color: "var(--clyx-yellow)" }}>{c.dashChartNote}</span>
                   </div>
                   <div className="chart-bars-wrap">
-                    {[42, 58, 72, 66, 86, 96, 90].map((h, i) => (
+                    {CHART_HEIGHTS.map((h, i) => (
                       <div key={i} className="chart-bar-group"><div className="chart-bar" style={{ height: `${h}%` }}></div><span className="chart-label">{chartDays[i] ?? ''}</span></div>
                     ))}
                     {/* Trading-style trace over the bar tops, drawn by useLandingMotion. */}
@@ -280,6 +373,9 @@ export default function LandingV1() {
           </div>
 
         </div>
+
+        {/* Mobile only (CSS): the laptop is hidden and this ring takes its place. */}
+        <EngineRing c={c} days={chartDays} stats={dashStats} />
 
       </div>
     </section>
