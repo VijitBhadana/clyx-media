@@ -1,77 +1,16 @@
 import { usePageTitle } from '@/hooks/usePageMeta';
-import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
 import CaseHeroArt from '@/components/sections/CaseHeroArt';
 import { RevealWords } from '@/components/ui/ScrollMotion';
-import { cn } from '@/lib/utils';
+import { HaloReel, type HaloReelItem } from '@/components/ui/halo-reel';
 import { useCaseStudies } from '@/lib/caseStudies';
 import type { CaseStudyItem } from '@/data/caseStudies';
 import { usePageContent } from '@/lib/pageContent';
 import '@/styles/case-studies-hero.css';
 import { responsiveImage } from '@/lib/images';
 import { FormattedText } from '@/components/ui/FormattedText';
-
-/** One case study as a photo card: just enough to pick a story, the whole card opens its page. */
-function CaseCard({ item, index, detailsText }: { item: CaseStudyItem; index: number; detailsText: string }) {
-  return (
-    <motion.li
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, delay: (index % 3) * 0.08, ease: [0.25, 1, 0.5, 1] }}
-      className="min-w-0"
-    >
-      <a
-        href={`/case-studies/${item.slug}`}
-        className={cn(
-          'group relative isolate flex h-[340px] flex-col justify-between overflow-hidden rounded-[24px] bg-slate-900 p-5 md:h-[380px]',
-          'shadow-[0_24px_60px_-32px_rgba(15,23,42,0.55)] transition-[transform,box-shadow] duration-500 ease-out',
-          'hover:-translate-y-1.5 hover:shadow-[0_34px_80px_-34px_rgba(1,58,163,0.6)] dark:hover:shadow-[0_34px_80px_-34px_rgba(255,222,89,0.35)]',
-          'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow motion-reduce:transition-none motion-reduce:hover:translate-y-0'
-        )}
-      >
-        <img
-          {...responsiveImage(item.src, '(max-width: 767px) 92vw, (max-width: 1023px) 46vw, 380px')}
-          alt={item.alt}
-          loading={index < 3 ? 'eager' : 'lazy'}
-          decoding="async"
-          className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-        />
-        <span aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-        <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5" style={{ background: item.accent }} />
-
-        <span className="flex items-start justify-between gap-3">
-          {item.category && (
-            <span className="max-w-[80%] rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md">
-              {item.category}
-            </span>
-          )}
-          <span className="ml-auto font-mono text-xs font-bold text-yellow drop-shadow">{item.code}</span>
-        </span>
-
-        <span className="block">
-          <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">{item.brand}</span>
-          <span className="display mt-2 block max-w-[20ch] text-[21px] font-bold leading-[1.12] tracking-[-0.02em] text-white md:text-[23px]">
-            {item.headline}
-          </span>
-          <span className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
-            {item.result && (
-              <span className="display rounded-full bg-yellow px-3.5 py-1 text-sm font-bold leading-tight text-dark">{item.result}</span>
-            )}
-            <span className="ml-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-              {detailsText}
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-dark transition-colors duration-300 group-hover:bg-yellow">
-                <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </span>
-            </span>
-          </span>
-        </span>
-      </a>
-    </motion.li>
-  );
-}
 
 /** "Number | label" lines from the admin as headline stats. */
 const statsOf = (text: string) =>
@@ -81,9 +20,46 @@ const statsOf = (text: string) =>
     .filter(([value]) => value)
     .map(([value, label = '']) => ({ value, label }));
 
+/** "Our work" copy beside the reel (inside it on wide screens, above it on phones). */
+function ReelLabel({ title, text, hint }: { title: string; text: string; hint: string }) {
+  return (
+    <>
+      {title && (
+        <p className="display text-5xl font-bold leading-none tracking-[-0.04em] text-slate-900 md:text-7xl dark:text-white">
+          {title}
+          <span className="text-yellow">.</span>
+        </p>
+      )}
+      {text && (
+        <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg dark:text-white/70">
+          <FormattedText text={text} />
+        </p>
+      )}
+      {hint && (
+        <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:border-white/15 dark:bg-white/5 dark:text-white/60">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-yellow" />
+          {hint}
+        </p>
+      )}
+    </>
+  );
+}
+
 function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, string> }) {
   if (!items.length) return null;
   const stats = statsOf(c.listStats || '');
+  const detailsText = c.caseDetailsButton || 'View case study';
+  const reelItems: HaloReelItem[] = items.map((item) => ({
+    ...responsiveImage(item.src, '240px'),
+    alt: item.alt,
+    href: `/case-studies/${item.slug}`,
+    linkLabel: `${detailsText}: ${item.brand}`,
+    eyebrow: item.category,
+    title: item.brand,
+    badge: item.result,
+    cta: <>{detailsText} <ArrowUpRight size={11} aria-hidden="true" /></>,
+    accent: item.accent,
+  }));
 
   return (
     // Full-width section with the content centred inside, so dark mode's glass-card sections stay centred too.
@@ -120,11 +96,30 @@ function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, stri
           </div>
         </header>
 
-        <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {items.map((item, i) => (
-            <CaseCard key={item.id} item={item} index={i} detailsText={c.caseDetailsButton || 'View case study'} />
-          ))}
-        </ul>
+        {/* Our work: the case studies ride a turning ring; drag to spin, click a card to open it. */}
+        <div className="mx-auto mb-4 max-w-md text-center md:hidden">
+          <ReelLabel title={c.reelTitle} text={c.reelText} hint={c.reelHint} />
+        </div>
+        <HaloReel
+          items={reelItems}
+          aria-label={c.reelTitle || 'Our work'}
+          centerLabel={
+            <div className="hidden max-w-sm md:block">
+              <ReelLabel title={c.reelTitle} text={c.reelText} hint={c.reelHint} />
+            </div>
+          }
+          cardWidth={210}
+          cardHeight={280}
+          cardClassName="rounded-[20px] ring-1 ring-black/5 dark:ring-white/10"
+          minScale={0.42}
+          radiusXRatio={0.45}
+          radiusYRatio={0.36}
+          spread={1.5}
+          scrollToSpin
+          holdDuration={1800}
+          stepDuration={800}
+          className="h-[500px] rounded-[28px] md:h-[600px]"
+        />
       </div>
     </section>
   );

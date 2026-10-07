@@ -712,6 +712,9 @@ export const PAGES: PageDef[] = [
             PAIRS('Number | label'),
           ),
           t('caseDetailsButton', 'Button text on each card', 'View case study', 'Clicking anywhere on a card opens that case study’s page.'),
+          t('reelTitle', 'Card ring · title', 'Our work'),
+          long('reelText', 'Card ring · text', 'Six brands, real budgets and the numbers that moved. Every card is a growth story you can open and read in full.'),
+          t('reelHint', 'Card ring · hint', 'Scroll or drag to explore · Click to read'),
         ],
       },
       {
