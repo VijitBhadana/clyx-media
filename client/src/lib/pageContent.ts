@@ -1255,7 +1255,7 @@ export const PAGES: PageDef[] = [
         fields: [
           t('barTitle', 'Title', '', 'Leave empty to use the first course’s title.'),
           t('barMeta', 'Small line', 'Live classes · Enroll now'),
-          img('barImage', 'Image', '', 'Leave empty to use the first course’s image.'),
+          img('barImage', 'Image (cut-out person)', '/courses/bar-person.webp', 'A transparent PNG/WebP of a person. It stands up out of the top of the bar.'),
           t('barButton', 'Button', 'Enroll Now'),
         ],
       },

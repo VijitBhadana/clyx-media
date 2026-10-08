@@ -853,6 +853,9 @@ const DISC_STYLES: Record<string, Pick<DiscCascadeItem, 'pattern' | 'palette'>> 
 
 // Page scroll, in viewport heights, that moves the carousel on by one disc: half a screen for a short list,
 // shrinking for a long one so the whole run stays around six screens (never under a fifth of a screen per disc).
+// The section shows at most this many discs: the brand rows first, then portfolio projects fill the rest.
+const MAX_DISCS = 15;
+
 const discScrollSvh = (count: number) => Math.min(50, Math.max(20, 600 / Math.max(count - 1, 1)));
 
 // A portfolio project as a disc: its photo is the print, its result / category / story opening are the points.
@@ -952,15 +955,16 @@ function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: Port
           logo: logo || undefined,
           points: points.filter(Boolean),
           ...DISC_STYLES[slugify(name)],
-        })),
+        }))
+        .slice(0, MAX_DISCS),
     [c.brandDiscs]
   );
-  // Portfolio projects not already listed as a brand above follow them, in portfolio order.
+  // Portfolio projects not already listed as a brand above follow them, in portfolio order, up to MAX_DISCS in all.
   const withProjects = c.brandsWithProjects !== 'No';
   const projectDiscs = useMemo(() => {
     if (!withProjects) return [];
     const listed = new Set(brands.map(b => slugify(b.title)));
-    return projects.filter(p => p.title && !listed.has(slugify(p.title)));
+    return projects.filter(p => p.title && !listed.has(slugify(p.title))).slice(0, Math.max(0, MAX_DISCS - brands.length));
   }, [withProjects, brands, projects]);
   const items = useMemo(() => [...brands, ...projectDiscs.map(projectDisc)], [brands, projectDiscs]);
   const [controller, goTo] = useScrollDiscs(trackRef, items.length);

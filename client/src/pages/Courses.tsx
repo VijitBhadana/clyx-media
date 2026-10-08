@@ -716,7 +716,8 @@ function CourseFooter({ c }: { c: Copy }) {
 /** Pinned to the bottom of the screen from the moment the page loads. */
 function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; onEnroll: () => void; hidden: boolean }) {
   const title = c.barTitle || course?.title || '';
-  const image = c.barImage || course?.image || '';
+  // A cut-out person (transparent background) that stands up out of the bar.
+  const image = c.barImage || '/courses/bar-person.webp';
   const show = !hidden && !!title && !!c.barButton;
   // Lift the WhatsApp button above the bar on phones while it is showing.
   useEffect(() => {
@@ -725,7 +726,9 @@ function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; 
   }, [show]);
   return (
     <div className={`cr-bar${show ? ' is-on' : ''}`}>
-      {image && <img className="cr-bar-img" src={image} alt="" decoding="async" />}
+      <div className="cr-bar-figure" aria-hidden="true">
+        <img className="cr-bar-img" src={image} alt="" decoding="async" />
+      </div>
       <div className="cr-bar-text">
         <strong>{title}</strong>
         {c.barMeta && <span>{c.barMeta}</span>}

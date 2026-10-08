@@ -465,14 +465,34 @@
   transition: opacity .35s var(--cr-ease), transform .45s var(--cr-ease), visibility 0s linear .45s;
 }
 .cr-bar.is-on { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
-.cr-bar-img { flex-shrink: 0; width: 64px; height: 52px; border-radius: 10px; object-fit: cover; }
+/* Slot keeps the text in place; the cut-out sits on the bar's floor and rises above its top edge. */
+.cr-bar-figure { position: relative; flex-shrink: 0; align-self: stretch; width: 72px; margin: -10px 0 -10px 6px; }
+.cr-bar-img {
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  width: 72px;
+  height: 90px;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .45));
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: cr-bar-pulse 2.4s ease-in-out infinite;
+}
+/* Gently grows from its feet and settles back, on loop. */
+@keyframes cr-bar-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
 .cr-bar-text { flex: 1; min-width: 0; }
 .cr-bar-text strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .cr-bar-text span { display: block; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--cr-mono); font-size: 10.5px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--cr-body); }
 .cr-bar-btn { flex-shrink: 0; height: 44px; padding: 0 26px; font-size: 15px; }
 @media (max-width: 639px) {
   .cr-bar { gap: 10px; padding: 8px 8px 8px 10px; }
-  .cr-bar-img { display: none; }
+  .cr-bar-figure { width: 52px; margin: -8px 0 -8px 0; }
+  .cr-bar-img { width: 52px; height: 65px; }
   .cr-bar-text strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 15px; line-height: 1.2; white-space: normal; }
   .cr-bar-text span { font-size: 9px; letter-spacing: .16em; }
   .cr-bar-btn { height: 40px; padding: 0 18px; font-size: 14px; }
@@ -482,6 +502,7 @@ body .whatsapp-widget { transition: bottom .35s cubic-bezier(.23, 1, .32, 1); }
 
 @media (prefers-reduced-motion: reduce) {
   .cr-reveal { opacity: 1; transform: none; transition: none; }
+  .cr-bar-img { animation: none; }
   .cr-marquee-track { animation: none; flex-wrap: wrap; justify-content: center; width: auto; }
   .cr-marquee { -webkit-mask-image: none; mask-image: none; }
   .cr-brand[aria-hidden] { display: none; }
