@@ -670,6 +670,9 @@ select.adm-input { appearance: auto; }
 .adm-row-cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .adm-row-cell.is-text { grid-column: 1 / -1; }
 .adm-row-label { font-size: 11.5px; font-weight: 600; color: var(--a-text-2); }
+.adm-range { display: flex; align-items: center; gap: 10px; min-height: 42px; }
+.adm-range input[type='range'] { flex: 1; min-width: 0; accent-color: var(--a-brand); cursor: pointer; }
+.adm-range-value { min-width: 46px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; color: var(--a-text); }
 .adm-row .adm-image-drop { height: 140px; }
 .adm-rows-add { align-self: flex-start; }
 

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { ArrowDown, ArrowUp, Film, ImagePlus, IndentDecrease, IndentIncrease, Link2, List, ListOrdered, Loader2, Plus, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
-import type { RowColumn } from '@/lib/pageContent';
+import type { RangeSpec, RowColumn } from '@/lib/pageContent';
 import { MAX_VIDEO_MB, uploadImage, uploadVideo, VIDEO_ACCEPT } from './uploadImage';
 
 /** 'textarea' is plain multi-line text (lists the site splits per line); 'richtext' adds the bullet toolbar and shows on the site as typed. */
-export type ControlType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color' | 'rows';
+export type ControlType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'color' | 'rows' | 'range';
 
 /** Label row + control + hint, shared by every form in the admin. */
 export function Field({
@@ -382,6 +382,21 @@ const serializeRows = (rows: string[][]) =>
     .filter(Boolean)
     .join('\n');
 
+/** Slider for a number field or column; clearing it goes back to the default. */
+function RangeInput({ spec, label, value, onChange }: { spec: RangeSpec; label?: string; value: string; onChange: (v: string) => void }) {
+  const { min = 0, max = 100, step = 1, value: fallback = min, unit = '' } = spec;
+  const current = Number.isFinite(Number.parseFloat(value)) ? Number.parseFloat(value) : fallback;
+  return (
+    <div className="adm-range">
+      <input type="range" min={min} max={max} step={step} value={current} onChange={(e) => onChange(e.target.value)} aria-label={label} />
+      <span className="adm-range-value">{`${current}${unit}`}</span>
+      <button type="button" className="adm-icon-btn" title="Reset" disabled={current === fallback} onClick={() => onChange('')}>
+        <RotateCcw size={13} />
+      </button>
+    </div>
+  );
+}
+
 /** A list edited one card per row, with image / video uploads per column. Saved as "a | b | c" lines. */
 export function RowsInput({ value, onChange, columns, item = 'Item' }: { value: string; onChange: (v: string) => void; columns: RowColumn[]; item?: string }) {
   const [rows, setRows] = useState(() => parseRows(value, columns.length));
@@ -427,6 +442,8 @@ export function RowsInput({ value, onChange, columns, item = 'Item' }: { value: 
                   <ImageInput value={row[c]} onChange={(v) => setCell(r, c, v)} />
                 ) : col.kind === 'video' ? (
                   <VideoInput value={row[c]} onChange={(v) => setCell(r, c, v)} />
+                ) : col.kind === 'range' ? (
+                  <RangeInput spec={col} label={col.label} value={row[c]} onChange={(v) => setCell(r, c, v)} />
                 ) : (
                   <input className="adm-input" value={row[c]} placeholder={col.placeholder} onChange={(e) => setCell(r, c, e.target.value)} />
                 )}
@@ -450,6 +467,7 @@ export function Control({
   options,
   columns,
   item,
+  range,
 }: {
   type?: ControlType;
   value: string;
@@ -458,8 +476,11 @@ export function Control({
   options?: string[];
   columns?: RowColumn[];
   item?: string;
+  range?: RangeSpec;
 }) {
   switch (type) {
+    case 'range':
+      return <RangeInput spec={range ?? {}} value={value} onChange={onChange} />;
     case 'rows':
       return <RowsInput value={value} onChange={onChange} columns={columns ?? []} item={item} />;
     case 'textarea':

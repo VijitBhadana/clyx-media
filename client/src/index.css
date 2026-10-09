@@ -721,10 +721,10 @@ button:active,a:active{transform:scale(.97)}
 }
 /* Courses teaser heading: Urbanist bold instead of the display font. */
 .display.vf-heading { font-family: 'Urbanist', sans-serif; font-weight: 700; letter-spacing: -.03em; }
-/* Sand heading (DustHeading): the text goes transparent while its canvas copy plays. */
+/* Sand heading (DustHeading): each word goes transparent while its canvas copy plays. */
 .dust-heading { position: relative; }
 .dust-word { transition: opacity .12s linear; }
-.dust-heading.is-dust .dust-word { opacity: 0; transition: none; }
+.dust-word.is-dust { opacity: 0; transition: none; }
 .dust-canvas { position: absolute; z-index: 1; pointer-events: none; }
 .section-shell.values-section { padding-block: 3.5rem 4.5rem; }
 @media (min-width: 768px) { .section-shell.values-section { padding-block: 4rem 6rem; } }

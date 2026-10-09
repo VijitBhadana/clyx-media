@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
 import { pageDefaults, safeHref, useServiceBook, usePageContent, type BookChapter } from '@/lib/pageContent';
@@ -34,22 +34,53 @@ function ServiceIcon({ service, size }: { service: Service; size: number }) {
   return <icon.Icon size={size} strokeWidth={1.6} className={`sc-icon sc-icon--${icon.motion}`} aria-hidden="true" />;
 }
 
+// Six nodes on the middle orbit ring of the cover art, one per discipline.
+const ORBIT_NODES = [0, 60, 120, 180, 240, 300].map((deg) => [100 + 64 * Math.cos((deg * Math.PI) / 180), 100 + 64 * Math.sin((deg * Math.PI) / 180)]);
+
 function Cover({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: string }) {
   return (
     <div className="sb-cover">
+      <svg className="sb-cover-orbit" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="96" className="sb-orbit-dash" />
+        <circle cx="100" cy="100" r="40" />
+        <circle cx="100" cy="100" r="18" />
+        <g className="sb-orbit-ring">
+          <circle cx="100" cy="100" r="64" />
+          {ORBIT_NODES.map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={i === 5 ? 2.6 : 1.6} className={`sb-orbit-node${i === 5 ? ' sb-orbit-node--lit' : ''}`} />
+          ))}
+        </g>
+      </svg>
       <span className="sb-cover-frame" aria-hidden="true" />
       <span className="sb-cover-ribbon" aria-hidden="true" />
-      <header className="sb-cover-kicker"><BrandLogo size={48} src={logoSrc} className="sb-cover-logo" /><span>{c.bookKicker}</span><span>{c.bookVolume}</span></header>
+      <header className="sb-cover-top">
+        <BrandLogo size={48} src={logoSrc} className="sb-cover-logo" />
+        <span className="sb-cover-kicker">{c.bookKicker}</span>
+        {c.bookVolume && <span className="sb-cover-vol">{c.bookVolume}</span>}
+      </header>
       <div className="sb-cover-title">
         <span className="sb-cover-clyx">{(c.bookCoverBrand || 'CLYX').replace(/\.$/, '')}</span>
         <span className="sb-cover-media">{c.bookCoverBrandSuffix || 'Media'}</span>
         <p className="sb-cover-sub">{c.bookCoverText} <em>{c.bookCoverHighlight}</em></p>
       </div>
-      <ol className="sb-cover-index">
-        {items.map((service, i) => (
-          <li key={i}><span>{service.number}</span>{service.title}</li>
-        ))}
-      </ol>
+      {/* The chapters as a single-line ticker (fixed height, so it fits any page size); the copy is doubled for a seamless loop. */}
+      <div className="sb-cover-foot">
+        <div className="sb-ticker">
+          <div className="sb-ticker-track">
+            {[0, 1].map((copy) => (
+              <ul key={copy} className="sb-ticker-set" aria-hidden={copy === 1 || undefined}>
+                {items.map((service, i) => (
+                  <li key={i}><span>{service.number}</span>{service.title}</li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
+        <div className="sb-cover-meta">
+          <span><b>{pad(items.length)}</b> Disciplines</span>
+          <span>Scroll to open <ArrowDown size={13} strokeWidth={2.2} aria-hidden="true" /></span>
+        </div>
+      </div>
     </div>
   );
 }

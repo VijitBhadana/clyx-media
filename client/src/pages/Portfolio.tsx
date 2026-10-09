@@ -790,7 +790,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
           <p
             ref={noteRef}
             aria-hidden="true"
-            className="flex items-start gap-1 font-['Architects_Daughter',cursive] text-xl leading-none text-yellow -rotate-3 md:text-[1.38rem] lg:mr-10"
+            className="flex items-start gap-1 font-['Urbanist',sans-serif] font-bold text-xl leading-none text-yellow -rotate-3 md:text-[1.38rem] lg:mr-10"
           >
             <span className="whitespace-pre">
               {note.split('').map((ch, i) => (
@@ -854,7 +854,7 @@ const DISC_STYLES: Record<string, Pick<DiscCascadeItem, 'pattern' | 'palette'>> 
 // Page scroll, in viewport heights, that moves the carousel on by one disc: half a screen for a short list,
 // shrinking for a long one so the whole run stays around six screens (never under a fifth of a screen per disc).
 // The section shows at most this many discs: the brand rows first, then portfolio projects fill the rest.
-const MAX_DISCS = 15;
+const MAX_DISCS = 7;
 
 const discScrollSvh = (count: number) => Math.min(50, Math.max(20, 600 / Math.max(count - 1, 1)));
 

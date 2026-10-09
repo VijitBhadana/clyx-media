@@ -1,4 +1,4 @@
-/* Services page "operating principle" band: brand yellow with a small feedback-loop diagram. Same in light and dark mode. */
+/* Services page "operating principle" band: brand yellow with a small creative-scorecard card. Same in light and dark mode. */
 .op-principle.bg-yellow {
   --op-ink: #050505;
   --op-blue: #013AA3;
@@ -144,7 +144,8 @@
   display: flex;
   align-items: flex-start;
   gap: 2px;
-  font-family: 'Architects Daughter', cursive;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 700;
   font-size: 1.18rem;
   line-height: 1;
   color: var(--op-blue);
@@ -167,83 +168,133 @@
 .op-inner.is-visible .op-note path:last-child { animation: op-draw .25s ease-out calc(var(--n) * 65ms + 1.8s) forwards; }
 @keyframes op-draw { to { stroke-dashoffset: 0; } }
 
-.op-loop {
+/* Creative scorecard: an ink card that reads each stage like a funnel. */
+.op-board {
   position: relative;
-  width: min(270px, 100%);
-  aspect-ratio: 1;
+  width: min(372px, 100%);
+  padding-right: 40px;
 }
-.op-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
-.op-ring circle {
-  fill: none;
-  stroke: rgba(5, 5, 5, 0.35);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 7;
-  animation: op-flow 1.6s linear infinite;
+/* A second sheet peeking out behind the card. */
+.op-board-back {
+  position: absolute;
+  inset: 14px 52px -12px 10px;
+  border-radius: 22px;
+  background: #FFF6CF;
+  border: 1px solid rgba(5, 5, 5, 0.1);
+  transform: rotate(-4deg);
+  box-shadow: 0 14px 30px -20px rgba(0, 0, 0, 0.45);
 }
-@keyframes op-flow { to { stroke-dashoffset: -11; } }
+.op-board-card {
+  position: relative;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--op-ink);
+  color: #FFFFFF;
+  box-shadow: 0 28px 50px -26px rgba(0, 0, 0, 0.7);
+  transform: rotate(1.5deg);
+  transition: transform .5s var(--op-ease);
+}
+.op-board:hover .op-board-card { transform: rotate(0deg) translateY(-4px); }
 
-/* A dot travelling clockwise around the ring (ring radius = 92/240 of the box). */
-.op-orbit {
-  position: absolute;
-  inset: 11.7%;
-  border-radius: 50%;
-  animation: op-spin 9s linear infinite;
+.op-board-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
 }
-.op-orbit i {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 12px;
-  height: 12px;
+.op-live { display: inline-flex; align-items: center; gap: 7px; color: #FFDE59; }
+.op-live i {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--op-blue);
-  box-shadow: 0 0 0 4px rgba(1, 58, 163, 0.18);
-  transform: translate(-50%, -50%);
+  background: #FFDE59;
+  box-shadow: 0 0 0 0 rgba(255, 222, 89, 0.6);
+  animation: op-pulse 1.8s ease-out infinite;
 }
-@keyframes op-spin { to { transform: rotate(360deg); } }
+@keyframes op-pulse { to { box-shadow: 0 0 0 7px rgba(255, 222, 89, 0); } }
+.op-board-tag { color: rgba(255, 255, 255, 0.45); }
 
-.op-core {
-  position: absolute;
-  inset: 31%;
+.op-stages { display: grid; gap: 4px; }
+.op-stages li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: auto 6px;
+  column-gap: 10px;
+  row-gap: 6px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  /* A highlight steps through the stages one after another, over and over. */
+  animation: op-active 6.4s ease-in-out calc(var(--i) * 1.6s + 1.6s) infinite;
+}
+@keyframes op-active {
+  0%, 30%, 100% { background: transparent; }
+  6%, 22% { background: rgba(255, 255, 255, 0.07); }
+}
+.op-stage-icon {
+  grid-row: 1 / 3;
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 4px;
-  border-radius: 50%;
-  background: var(--op-ink);
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: rgba(255, 222, 89, 0.14);
   color: #FFDE59;
-  text-align: center;
+}
+.op-stage-label {
   font-family: var(--font-display);
-  font-size: .78rem;
+  font-size: .85rem;
   font-weight: 600;
+  letter-spacing: -.01em;
   line-height: 1.1;
-  box-shadow: 0 18px 36px -18px rgba(0, 0, 0, 0.6);
 }
-.op-core svg { animation: op-spin 6s linear infinite; }
-
-.op-node {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
+.op-stage-bar {
+  height: 6px;
   border-radius: 999px;
-  background: #FFFFFF;
-  border: 1px solid rgba(5, 5, 5, 0.1);
-  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.35);
-  font-size: .72rem;
-  font-weight: 600;
-  white-space: nowrap;
-  transform: translate(-50%, -50%);
-  transition: transform .3s var(--op-ease), background .3s var(--op-ease), color .3s var(--op-ease);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
-.op-node svg { color: var(--op-blue); transition: color .3s var(--op-ease); }
-.op-node:hover { background: var(--op-ink); color: #FFDE59; transform: translate(-50%, -50%) scale(1.06); }
-.op-node:hover svg { color: #FFDE59; }
-.op-node.is-top { left: 50%; top: 11.7%; }
-.op-node.is-right { left: 88.3%; top: 50%; }
-.op-node.is-bottom { left: 50%; top: 88.3%; }
-.op-node.is-left { left: 11.7%; top: 50%; }
+.op-stage-bar i {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: #FFDE59;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 1s var(--op-ease) calc(var(--i) * 180ms + 700ms);
+}
+.op-inner.is-visible .op-stage-bar i { transform: none; }
+/* The last stage is the learning: striped and moving, since it feeds the next round. */
+.op-stages li.is-learn .op-stage-icon { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+.op-stages li.is-learn .op-stage-bar i {
+  background: repeating-linear-gradient(-45deg, #FFFFFF 0 6px, rgba(255, 255, 255, 0.45) 6px 12px);
+  background-size: 17px 100%;
+  animation: op-stripes 1.2s linear infinite;
+}
+@keyframes op-stripes { to { background-position: 17px 0; } }
+
+.op-board-foot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #FFDE59;
+  color: var(--op-ink);
+  font-family: var(--font-display);
+  font-size: .9rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+.op-board-foot > svg:first-child { animation: op-spin 6s linear infinite; }
 
 
 @media (min-width: 768px) {
@@ -253,7 +304,7 @@
 }
 @media (min-width: 1280px) {
   .op-inner { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, .95fr); gap: 64px; align-items: center; }
-  .op-loop-col { grid-column: auto; }
+  .op-loop-col { grid-column: auto; padding-inline: 0; }
   /* Heading and paragraph both start at the top of the row, level with the eyebrow pill. */
   .op-head, .op-body { align-self: start; }
   .op-note { top: -44px; left: -8px; }
@@ -269,4 +320,5 @@
   .op-note-text span { clip-path: none; }
   .op-steps li { transition: none; }
   .op-note path { stroke-dashoffset: 0; }
+  .op-stage-bar i { transition: none; }
 }

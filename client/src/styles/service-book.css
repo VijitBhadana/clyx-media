@@ -65,31 +65,34 @@ html:not(.dark) .sb-book {
 .sb-face--back::after { background: linear-gradient(to left, #000, rgba(0, 0, 0, 0.4)); opacity: var(--back-shade, 0); }
 
 /* ---------- Cover ----------
-   A navy cover in the site palette: blue glow, faint grid, gold-foil CLYX, gold inset frame and a yellow ribbon.
+   A navy hardcover in the site palette: blue glow, a pressed hinge groove near the spine, faint gold orbit rings
+   (one node per discipline) behind the type, gold-foil CLYX, a yellow ribbon and the six chapters as tiles.
    The spiral binding along its left edge is .sb-binding, below. */
 .sb-book .sb-cover {
   position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
-  padding: clamp(26px, 5vh, 48px) clamp(28px, 3.4vw, 48px) clamp(24px, 4.5vh, 42px) clamp(44px, 4.6vw, 64px);
-  color: #FFFFFF;
+  padding: clamp(24px, 4.6vh, 44px) clamp(26px, 3.2vw, 44px) clamp(22px, 4vh, 38px) clamp(52px, 5.2vw, 72px);
+  color: #FFFFFF; overflow: hidden;
   background:
-    radial-gradient(120% 70% at 0% 100%, rgba(1, 58, 163, 0.85), transparent 60%),
-    radial-gradient(60% 45% at 100% 0%, rgba(255, 222, 89, 0.16), transparent 70%),
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 100% 36px,
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 36px 100%,
+    linear-gradient(90deg, transparent 30px, rgba(0, 0, 0, 0.45) 31px, rgba(255, 255, 255, 0.07) 33px, transparent 37px),
+    radial-gradient(110% 65% at 0% 100%, rgba(1, 58, 163, 0.8), transparent 62%),
+    radial-gradient(55% 40% at 100% 0%, rgba(255, 222, 89, 0.14), transparent 70%),
     linear-gradient(160deg, #0B1433 0%, #070C22 55%, #050814 100%);
 }
+/* Hairline inset frame, starting right of the hinge groove. */
 .sb-cover-frame {
   position: absolute; pointer-events: none;
-  inset: clamp(12px, 2vh, 18px) clamp(12px, 1.4vw, 18px) clamp(12px, 2vh, 18px) 26px;
-  border: 1px solid rgba(255, 222, 89, 0.28); border-radius: 8px;
+  inset: clamp(12px, 2vh, 18px) clamp(12px, 1.4vw, 18px) clamp(12px, 2vh, 18px) 42px;
+  border: 1px solid rgba(255, 222, 89, 0.16); border-radius: 10px;
 }
-/* Corner ornaments on the frame. */
-.sb-cover-frame::before,
-.sb-cover-frame::after {
-  content: ''; position: absolute; width: 14px; height: 14px; border: 2px solid #FFDE59;
+.sb-cover-orbit {
+  position: absolute; pointer-events: none; top: -16%; right: -30%; width: 92%; height: auto; aspect-ratio: 1;
 }
-.sb-cover-frame::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
-.sb-cover-frame::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px; }
+.sb-cover-orbit circle { fill: none; stroke: rgba(255, 222, 89, 0.14); stroke-width: 0.5; }
+.sb-cover-orbit .sb-orbit-dash { stroke: rgba(255, 222, 89, 0.22); stroke-dasharray: 1 3; }
+.sb-cover-orbit .sb-orbit-ring { transform-box: view-box; transform-origin: 50% 50%; animation: sb-orbit 60s linear infinite; }
+.sb-cover-orbit .sb-orbit-node { fill: rgba(255, 222, 89, 0.5); stroke: none; }
+.sb-cover-orbit .sb-orbit-node--lit { fill: #FFDE59; filter: drop-shadow(0 0 3px rgba(255, 222, 89, 0.9)); }
+@keyframes sb-orbit { to { transform: rotate(360deg); } }
 .sb-cover-ribbon {
   position: absolute; top: 0; right: clamp(40px, 5vw, 64px); width: clamp(18px, 1.7vw, 24px); height: clamp(64px, 12vh, 104px);
   background: linear-gradient(to right, #E9C43A, #FFDE59 45%, #F2CF45);
@@ -97,50 +100,74 @@ html:not(.dark) .sb-book {
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
 }
 
-.sb-book .sb-cover-kicker {
-  position: relative; display: flex; gap: 14px; align-items: center; padding-right: clamp(40px, 5vw, 64px);
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6);
+.sb-book .sb-cover-top {
+  position: relative; display: flex; gap: 12px; align-items: center; padding-right: clamp(48px, 6vw, 76px);
 }
-.sb-book .sb-cover-kicker span:last-of-type { color: #FFDE59; }
-.sb-book .sb-cover-kicker span:first-of-type::after { content: ''; display: inline-block; width: 22px; height: 1px; margin-left: 14px; vertical-align: middle; background: rgba(255, 222, 89, 0.5); }
-/* Circular brand mark leading the kicker row, scaled with the page. */
-.sb-book .sb-cover-logo { width: clamp(30px, calc(var(--page-w) * 0.085), 52px); height: auto; aspect-ratio: 1; box-shadow: 0 0 0 1px rgba(255, 222, 89, 0.35), 0 8px 20px -8px rgba(0, 0, 0, 0.6); }
+/* Circular brand mark leading the top row, scaled with the page. */
+.sb-book .sb-cover-logo { flex: none; width: clamp(30px, calc(var(--page-w) * 0.08), 48px); height: auto; aspect-ratio: 1; box-shadow: 0 0 0 1px rgba(255, 222, 89, 0.35), 0 8px 20px -8px rgba(0, 0, 0, 0.6); }
+.sb-book .sb-cover-kicker {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255, 255, 255, 0.62);
+}
+.sb-book .sb-cover-vol {
+  margin-left: auto; flex: none; padding: 5px 11px; border-radius: 9999px;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #FFDE59; border: 1px solid rgba(255, 222, 89, 0.4); background: rgba(255, 222, 89, 0.06);
+}
 
 .sb-cover-title { position: relative; display: flex; flex-direction: column; }
 /* Gold foil with a slow sheen sweeping across. */
 .sb-book .sb-cover-clyx {
   font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 700;
-  font-size: calc(var(--page-w) * 0.3); line-height: 0.86; letter-spacing: -0.055em;
+  font-size: calc(var(--page-w) * 0.27); line-height: 0.84; letter-spacing: -0.06em; margin-left: -0.04em;
   background: linear-gradient(105deg, #E9BE2E 0%, #FFDE59 30%, #FFF4BF 45%, #FFDE59 60%, #E9BE2E 100%) 0 0 / 250% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 6px 18px rgba(255, 222, 89, 0.18));
   animation: sb-foil 6s ease-in-out infinite;
 }
 @keyframes sb-foil { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+/* "MEDIA" between two gold hairlines. */
 .sb-book .sb-cover-media {
-  display: flex; align-items: center; gap: 14px; margin-top: 12px;
+  display: flex; align-items: center; gap: 14px; margin-top: clamp(8px, 1.4vh, 14px);
   font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 500;
-  font-size: calc(var(--page-w) * 0.075); letter-spacing: 0.5em; text-transform: uppercase; color: #FFFFFF;
+  font-size: calc(var(--page-w) * 0.06); letter-spacing: 0.62em; text-transform: uppercase; color: #FFFFFF;
 }
+.sb-book .sb-cover-media::before { content: ''; flex: none; width: calc(var(--page-w) * 0.07); height: 1px; background: #FFDE59; }
 .sb-book .sb-cover-media::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(255, 222, 89, 0.6), transparent); }
 .sb-book .sb-cover-sub {
-  margin-top: clamp(10px, 2vh, 18px);
-  font-family: var(--font-display, 'Space Grotesk', sans-serif); font-size: clamp(0.95rem, calc(var(--page-h) * 0.03), 1.3rem);
-  line-height: 1.3; color: rgba(255, 255, 255, 0.82);
+  margin-top: clamp(10px, 2vh, 18px); padding-left: 14px; border-left: 2px solid #FFDE59; max-width: 30ch;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif); font-size: clamp(0.95rem, calc(var(--page-h) * 0.029), 1.25rem);
+  line-height: 1.3; color: rgba(255, 255, 255, 0.85);
 }
 .sb-book .sb-cover-sub em { font-style: normal; color: #FFDE59; }
 
-/* The six chapters, as a contents strip on the board. */
-.sb-book .sb-cover-index {
-  position: relative; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px;
-  padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.12);
+/* The six chapters as a gold-ruled ticker band, then a meta row. Fixed height, so it never overflows a short page. */
+.sb-book .sb-cover-foot { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.sb-book .sb-ticker {
+  overflow: hidden; padding: 10px 0;
+  border-block: 1px solid rgba(255, 222, 89, 0.3);
+  background: linear-gradient(90deg, rgba(255, 222, 89, 0.02), rgba(255, 222, 89, 0.07), rgba(255, 222, 89, 0.02));
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
 }
-.sb-book .sb-cover-index li {
-  display: flex; gap: 8px; align-items: baseline; min-width: 0;
-  font-size: clamp(0.68rem, calc(var(--page-h) * 0.02), 0.82rem); color: rgba(255, 255, 255, 0.72);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.sb-book .sb-ticker-track { display: flex; width: max-content; animation: sb-ticker 26s linear infinite; }
+.sb-book .sb-ticker-set { list-style: none; display: flex; flex: none; }
+.sb-book .sb-ticker-set li {
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif); font-size: clamp(0.78rem, calc(var(--page-h) * 0.021), 0.92rem);
+  font-weight: 500; color: rgba(255, 255, 255, 0.86);
 }
-.sb-book .sb-cover-index li span { font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 700; color: #FFDE59; }
+.sb-book .sb-ticker-set li span { font-size: 0.7em; font-weight: 700; letter-spacing: 0.1em; color: #FFDE59; }
+/* Gold star between chapters. */
+.sb-book .sb-ticker-set li::after { content: '\2726'; margin: 0 18px; font-size: 0.7em; color: rgba(255, 222, 89, 0.7); }
+@keyframes sb-ticker { to { transform: translateX(-50%); } }
+.sb-book .sb-cover-meta {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  font-size: 0.64rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5);
+}
+.sb-book .sb-cover-meta b { font-family: var(--font-display, 'Space Grotesk', sans-serif); font-weight: 700; color: #FFDE59; margin-right: 4px; }
+.sb-book .sb-cover-meta span:last-child { display: inline-flex; align-items: center; gap: 6px; }
+.sb-book .sb-cover-meta svg { color: #FFDE59; animation: sb-nudge 1.8s ease-in-out infinite; }
+@keyframes sb-nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
 /* ---------- Spiral binding ----------
    Sits on the spine above every leaf and never turns, so pages rotate around the wire like a spiral notebook.
@@ -263,7 +290,6 @@ html:not(.dark) .sb-dot.is-active::before { background: #013AA3; }
   .sb-coil-hole--left { display: none; }
   .sb-face--back { visibility: hidden; }
   .sb-caption { min-width: 0; text-align: center; width: 100%; }
-  .sb-book .sb-cover-index { grid-template-columns: 1fr; gap: 5px; }
 }
 /* Portrait tablets: a full-width single page is mostly empty paper, so cap it and use a squatter page. */
 @media (min-width: 600px) and (max-width: 768px) {
@@ -363,7 +389,7 @@ html:not(.dark) .sbc {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sb-book .sb-cover-clyx { animation: none; }
+  .sb-book .sb-cover-clyx, .sb-cover-orbit .sb-orbit-ring, .sb-book .sb-ticker-track, .sb-book .sb-cover-meta svg { animation: none; }
   /* No auto-scroll: the strip becomes a swipeable row instead. */
   .sbc { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: none; mask-image: none; }
   .sbc-track { animation: none; padding-left: 24px; }

@@ -9,10 +9,12 @@ import { services } from '@/data/home';
  * Field keys ending in "Image" hold image URLs, keys ending in "Url" hold links and keys ending in "Links" hold
  * one "Label | link" per line (the backend checks all three).
  */
-export type FieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'rows';
+export type FieldType = 'text' | 'textarea' | 'richtext' | 'image' | 'url' | 'select' | 'rows' | 'range';
 /** One column of a 'rows' field; the rows are still saved as "a | b | c" lines, so the site reads them the same way. */
-export type RowColumn = { label: string; kind: 'text' | 'image' | 'video'; placeholder?: string };
-export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[]; columns?: RowColumn[]; item?: string };
+/** Slider limits; the value is saved as a plain number and empty means `value` (the default). */
+export type RangeSpec = { min?: number; max?: number; step?: number; value?: number; unit?: string };
+export type RowColumn = { label: string; kind: 'text' | 'image' | 'video' | 'range'; placeholder?: string } & RangeSpec;
+export type FieldDef = { key: string; label: string; type?: FieldType; default: string; hint?: string; options?: string[]; columns?: RowColumn[]; item?: string; range?: RangeSpec };
 export type SectionDef = { id: string; title: string; description?: string; block?: string; fields: FieldDef[] };
 export type CollectionName =
   | 'campaigns'
@@ -45,6 +47,7 @@ const rows = (key: string, label: string, item: string, columns: RowColumn[], hi
 const img = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'image', default: value, hint });
 const link = (key: string, label: string, value: string, hint?: string): FieldDef => ({ key, label, type: 'url', default: value, hint });
 const pick = (key: string, label: string, value: string, options: string[], hint?: string): FieldDef => ({ key, label, type: 'select', default: value, options, hint });
+const slider = (key: string, label: string, value: number, range: Omit<RangeSpec, 'value'>, hint?: string): FieldDef => ({ key, label, type: 'range', default: String(value), range: { ...range, value }, hint });
 
 /** The hero at the top of every inner page (eyebrow, two-line title, intro card). */
 const pageHero = (eyebrow: string, title: string, highlight: string, intro: string | null): SectionDef => ({
@@ -568,11 +571,11 @@ export const PAGES: PageDef[] = [
           t('opStep3Title', 'Step 3 · title', 'Put budget behind proof.'),
           t('opStep3Text', 'Step 3 · text', 'Spend follows ROAS, not opinions.'),
           t('opNote', 'Handwritten note', 'the whole game, really'),
-          list('opCore', 'Loop centre text', 'Growth\ncompounds', LINES),
-          t('opLoop1', 'Loop · top', 'Stop the scroll'),
-          t('opLoop2', 'Loop · right', 'Click'),
-          t('opLoop3', 'Loop · bottom', 'Convert'),
-          t('opLoop4', 'Loop · left', 'Learn'),
+          list('opCore', 'Scorecard · footer text', 'Growth\ncompounds', LINES),
+          t('opLoop1', 'Scorecard · stage 1', 'Stop the scroll'),
+          t('opLoop2', 'Scorecard · stage 2', 'Click'),
+          t('opLoop3', 'Scorecard · stage 3', 'Convert'),
+          t('opLoop4', 'Scorecard · stage 4 (loops back)', 'Learn'),
         ],
       },
       {
@@ -1111,8 +1114,7 @@ export const PAGES: PageDef[] = [
           list('heroPoints', 'Points under the title', 'Hooks and scripts that stop the scroll\nRun ads the way real brands do\nTurn your skills into paid work', 'One per line. The icons (compass, growth arrow, money) follow the order.'),
           t('heroButton', 'Button', 'Enroll Now'),
           list('heroStats', 'Facts row', 'Classes | Live classes\nPay with | UPI in minutes\nWatch on | Any device', PAIRS('Small label | value')),
-          img('heroImage', 'Image in the arch', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=85'),
-          t('heroBadge', 'Lime tag under the image', 'Live classes | Recordings included', 'Leave empty to hide it.'),
+          img('heroBg', 'Faded background photo', '/courses/hero-team.webp', 'Sits faintly behind the hero on the right. A cut-out photo (transparent PNG/WebP) blends best. Leave empty to hide it.'),
         ],
       },
       {
@@ -1205,7 +1207,8 @@ export const PAGES: PageDef[] = [
           rows('brands', 'Brands', 'Brand', [
             { label: 'Brand name', kind: 'text', placeholder: 'e.g. Boat' },
             { label: 'Logo', kind: 'image' },
-          ], 'Without a logo the brand name is shown on the tile.'),
+            { label: 'Logo size', kind: 'range', min: 50, max: 250, step: 5, value: 100, unit: '%' },
+          ], 'Without a logo the brand name is shown on the tile. Logo size zooms the logo inside its tile; raise it for logos with a lot of empty space around them.'),
         ],
       },
       {
@@ -1216,11 +1219,14 @@ export const PAGES: PageDef[] = [
           t('mentorLabel', 'Label', 'Your mentor'),
           t('mentorTitle', 'Heading', 'Meet your Mentors'),
           img('mentorImage', 'Photo', 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=85'),
+          slider('mentorImageZoom', 'Photo · zoom', 100, { min: 100, max: 250, step: 5, unit: '%' }, '100% shows the photo filling the card; raise it to zoom in.'),
+          slider('mentorImageX', 'Photo · left / right', 50, { min: 0, max: 100, step: 1, unit: '%' }, 'Which part of the photo stays in view: 0% = left edge, 100% = right edge.'),
+          slider('mentorImageY', 'Photo · top / bottom', 50, { min: 0, max: 100, step: 1, unit: '%' }, '0% = top edge, 100% = bottom edge.'),
           t('mentorTag', 'Lime tag on the photo', 'The team behind the ads'),
           t('mentorName', 'Name on the photo', 'The CLYX Team'),
           t('mentorRole', 'Role on the photo', 'Course leads, CLYX Media'),
           long('mentorBio', 'Bio', 'The CLYX team runs **creator whitelisting and performance campaigns** for D2C brands every day: Meta and Google ads, content, and the systems that make growth repeatable.\n\nEvery class is taught by the people who **plan, shoot and scale** those campaigns, so you learn what is working right now, not what worked years ago.', 'Leave a blank line between paragraphs. Wrap words in **double asterisks** to make them bold.'),
-          list('mentorStats', 'Numbers row', '', 'One per line, written as: platform | number | label, e.g. instagram | 4.6M+ | Followers. Platforms with an icon: youtube, instagram, facebook, linkedin, x.'),
+          list('mentorStats', 'Numbers row', 'revenue | ₹45Cr+ | Revenue driven\nprojects | 30+ | Projects shipped\ncreators | 350+ | Creators managed\ngrowth | 4.4x | Peak ROAS', 'One per line, written as: icon | number | label, e.g. instagram | 4.6M+ | Followers. Icons: youtube, instagram, facebook, linkedin, x, revenue, projects, creators, growth. Leave empty for these default numbers; write none to hide the row.'),
         ],
       },
       {

@@ -54,7 +54,7 @@ export default function CourseDetailsDialog({ open, onOpenChange, course, onBuy,
           {course.image && <img {...responsiveImage(course.image, '(min-width: 640px) 672px, 100vw')} alt="" className="h-full w-full object-cover" />}
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-clyx-dark via-clyx-dark/40 to-transparent" />
           <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-clyx-yellow" />
-          <button type="button" onClick={() => onOpenChange(false)} className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur transition-colors hover:border-clyx-yellow hover:text-clyx-yellow" aria-label="Close"><X size={16} /></button>
+          <button type="button" onClick={() => onOpenChange(false)} className="cr-pill absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur transition-colors hover:border-clyx-yellow hover:text-clyx-yellow" aria-label="Close"><X size={16} /></button>
           {course.badge && <span className="absolute left-5 top-5 rounded-full bg-clyx-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-[.14em] text-clyx-dark">{course.badge}</span>}
         </div>
         <div className="-mt-10 relative px-6 pb-5">
@@ -97,7 +97,7 @@ export default function CourseDetailsDialog({ open, onOpenChange, course, onBuy,
               {original > price && <span className="text-sm text-white/45 line-through">{formatRupees(original)}</span>}
             </p>
           )}
-          <button type="button" onClick={onBuy} className="group inline-flex flex-1 items-center justify-center gap-3 rounded-full bg-clyx-yellow px-6 py-3.5 text-sm font-semibold uppercase tracking-[.1em] text-clyx-dark transition-colors hover:bg-white sm:flex-none">
+          <button type="button" onClick={onBuy} className="cr-pill group inline-flex flex-1 items-center justify-center gap-3 rounded-full bg-clyx-yellow px-6 py-3.5 text-sm font-semibold uppercase tracking-[.1em] text-clyx-dark transition-colors hover:bg-white sm:flex-none">
             {c.buyButton}<ArrowUpRight size={16} className="transition-transform group-hover:rotate-45" />
           </button>
         </div>

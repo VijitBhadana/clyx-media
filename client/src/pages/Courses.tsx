@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
-  ArrowUpRight, Banknote, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CirclePlay, Compass, Facebook, Instagram,
-  Linkedin, LockOpen, MonitorPlay, Play, Plus, ShoppingCart, Sparkles, TrendingUp, Twitter, X, Youtube, type LucideIcon,
+  ArrowUpRight, Banknote, BriefcaseBusiness, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Compass, Facebook, Instagram,
+  IndianRupee, Linkedin, LockOpen, MonitorPlay, Play, Plus, ShoppingCart, Sparkles, TrendingUp, Twitter, UsersRound, X, Youtube, type LucideIcon,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { CookieBar, WhatsAppButton } from '@/components/layout/Footer';
@@ -11,7 +11,7 @@ import { FormattedText } from '@/components/ui/FormattedText';
 import { usePageTitle } from '@/hooks/usePageMeta';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { responsiveImage } from '@/lib/images';
-import { parsePairs, splitLines, usePageContent } from '@/lib/pageContent';
+import { pageDefaults, parsePairs, splitLines, usePageContent } from '@/lib/pageContent';
 import { useCollection } from '@/lib/siteContent';
 import { coursePrice, defaultCourses, formatRupees, toCourse, type Course } from '@/data/courses';
 import '@/styles/courses.css';
@@ -136,6 +136,7 @@ function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
   const stats = parsePairs(c.heroStats);
   return (
     <section className="cr-hero">
+      {c.heroBg && <img className="cr-hero-bg" src={c.heroBg} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />}
       <div className="cr-wrap cr-hero-grid">
         <div className="cr-hero-copy">
           <h1 className="cr-hero-title">
@@ -161,13 +162,6 @@ function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
               ))}
             </dl>
           )}
-        </div>
-        <div className="cr-hero-art">
-          <div className="cr-arch">
-            <span className="cr-arch-ring" aria-hidden="true" />
-            {c.heroImage && <img {...responsiveImage(c.heroImage, '(min-width: 1024px) 430px, 80vw')} alt="" fetchPriority="high" decoding="async" />}
-          </div>
-          {c.heroBadge && <span className="cr-hero-pill"><CirclePlay size={18} aria-hidden="true" />{c.heroBadge}</span>}
         </div>
       </div>
     </section>
@@ -576,8 +570,14 @@ function VideoModal({ video, onClose }: { video: Video; onClose: () => void }) {
 
 /* ---------- Brands strip ---------- */
 
+/** The admin "Logo size" slider (percent, 100 = fit the tile) as a CSS scale. */
+const logoScale = (size: string | undefined) => {
+  const pct = Number.parseFloat(size ?? '');
+  return Number.isFinite(pct) ? Math.min(Math.max(pct, 50), 250) / 100 : 1;
+};
+
 function Brands({ c, after }: { c: Copy; after?: ReactNode }) {
-  const brands = parsePairs(c.brands);
+  const brands = parts(c.brands);
   if (!brands.length) return <>{after}</>;
   // Enough copies to fill a wide screen, then the whole row twice so the loop is seamless.
   const row = Array.from({ length: Math.max(1, Math.ceil(10 / brands.length)) }, () => brands).flat();
@@ -590,8 +590,13 @@ function Brands({ c, after }: { c: Copy; after?: ReactNode }) {
         <div className="cr-marquee">
           <div className="cr-marquee-track" style={{ '--cr-count': row.length } as React.CSSProperties}>
             {[0, 1].map((copy) =>
-              row.map(([name, logo], i) => (
-                <span key={`${copy}-${i}`} className="cr-brand" aria-hidden={copy === 1 || i >= brands.length || undefined}>
+              row.map(([name = '', logo = '', size], i) => (
+                <span
+                  key={`${copy}-${i}`}
+                  className="cr-brand"
+                  style={{ '--cr-logo-scale': logoScale(size) } as React.CSSProperties}
+                  aria-hidden={copy === 1 || i >= brands.length || undefined}
+                >
                   {/^(https?:|\/|data:image\/)/.test(logo) ? <img src={logo} alt={name} loading="lazy" decoding="async" /> : <strong>{name}</strong>}
                 </span>
               )),
@@ -613,6 +618,10 @@ const SOCIAL: Record<string, [LucideIcon, string]> = {
   linkedin: [Linkedin, 'is-in'],
   twitter: [Twitter, 'is-x'],
   x: [Twitter, 'is-x'],
+  revenue: [IndianRupee, 'is-other'],
+  projects: [BriefcaseBusiness, 'is-other'],
+  creators: [UsersRound, 'is-other'],
+  growth: [TrendingUp, 'is-other'],
 };
 
 /** Paragraphs from the admin text; **double asterisks** make a phrase bold. */
@@ -628,13 +637,25 @@ function RichParagraphs({ text }: { text: string }) {
   );
 }
 
+/** Admin zoom (%) and focus point (x / y %) for the mentor photo, clamped to the slider limits. */
+function photoFrame(c: Copy): React.CSSProperties {
+  const num = (v: string | undefined, fallback: number, min: number, max: number) => {
+    const n = Number.parseFloat(v ?? '');
+    return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback;
+  };
+  const focus = `${num(c.mentorImageX, 50, 0, 100)}% ${num(c.mentorImageY, 50, 0, 100)}%`;
+  return { objectPosition: focus, transformOrigin: focus, transform: `scale(${num(c.mentorImageZoom, 100, 100, 250) / 100})` };
+}
+
 function Mentor({ n, c }: { n: number; c: Copy }) {
-  const stats = parts(c.mentorStats);
+  // An empty saved field still shows the built-in numbers; writing "none" hides the row.
+  const raw = c.mentorStats?.trim() || pageDefaults('courses').mentorStats;
+  const stats = raw.toLowerCase() === 'none' ? [] : parts(raw);
   return (
     <section className="cr-sec cr-navy cr-mentor-sec">
       <Reveal className="cr-mentor-grid">
         <div className="cr-mentor-photo">
-          {c.mentorImage && <img {...responsiveImage(c.mentorImage, '(min-width: 1024px) 390px, 100vw')} alt="" loading="lazy" decoding="async" />}
+          {c.mentorImage && <img {...responsiveImage(c.mentorImage, '(min-width: 1024px) 390px, 100vw')} alt="" loading="lazy" decoding="async" style={photoFrame(c)} />}
           <div className="cr-mentor-cap">
             {c.mentorTag && <p className="cr-mentor-tag">{c.mentorTag}</p>}
             {c.mentorName && <p className="cr-mentor-name">{c.mentorName}</p>}

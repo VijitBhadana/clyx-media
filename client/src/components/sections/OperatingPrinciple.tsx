@@ -5,12 +5,13 @@ import { pageDefaults } from '@/lib/pageContent';
 import '@/styles/operating-principle.css';
 import { FormattedText } from '@/components/ui/FormattedText';
 
-// Four stops on the feedback loop, placed clockwise from the top. Labels come from opLoop1..4.
+// Four stages on the scorecard, in order. The bars narrow like a funnel and the last one feeds the next round.
+// Labels come from opLoop1..4.
 const LOOP = [
-  { Icon: Eye, pos: 'top' },
-  { Icon: MousePointerClick, pos: 'right' },
-  { Icon: ShoppingBag, pos: 'bottom' },
-  { Icon: BarChart3, pos: 'left' },
+  { Icon: Eye, width: '94%' },
+  { Icon: MousePointerClick, width: '66%' },
+  { Icon: ShoppingBag, width: '40%' },
+  { Icon: BarChart3, width: '100%' },
 ];
 
 export default function OperatingPrinciple({ content: c = pageDefaults('services') }: { content?: Record<string, string> }) {
@@ -48,18 +49,26 @@ export default function OperatingPrinciple({ content: c = pageDefaults('services
             </span>
             <svg viewBox="0 0 50 40" style={{ '--n': note.length } as React.CSSProperties}><path pathLength={1} d="M4 6 C 26 4, 42 14, 40 34" /><path pathLength={1} d="M32 28 L 40 36 L 47 27" /></svg>
           </p>}
-          <div className="op-loop" role="img" aria-label={`Feedback loop: ${loop.map((stop) => stop.label).join(', ')}, then repeat`}>
-            <svg className="op-ring" viewBox="0 0 240 240" aria-hidden="true">
-              <circle cx="120" cy="120" r="92" />
-            </svg>
-            <span className="op-orbit" aria-hidden="true"><i /></span>
-            <div className="op-core">
-              <RefreshCw size={18} strokeWidth={2.2} aria-hidden="true" />
-              <span><Lines text={c.opCore} /></span>
+          <div className="op-board" role="img" aria-label={`Feedback loop: ${loop.map((stop) => stop.label).join(', ')}, then repeat`}>
+            <span className="op-board-back" aria-hidden="true" />
+            <div className="op-board-card" aria-hidden="true">
+              <div className="op-board-top">
+                <span className="op-live"><i />Live test</span>
+                <span className="op-board-tag">Round {String(loop.length).padStart(2, '0')}</span>
+              </div>
+              <ol className="op-stages">
+                {loop.map(({ label, Icon, width }, i) => (
+                  <li key={i} className={i === loop.length - 1 ? 'is-learn' : undefined} style={{ '--i': i, '--w': width } as React.CSSProperties}>
+                    <span className="op-stage-icon"><Icon size={14} strokeWidth={2.2} /></span>
+                    <span className="op-stage-label">{label}</span>
+                    <span className="op-stage-bar"><i /></span>
+                  </li>
+                ))}
+              </ol>
+              <div className="op-board-foot">
+                <RefreshCw size={16} strokeWidth={2.2} />
+                <span><Lines text={c.opCore} /></span>              </div>
             </div>
-            {loop.map(({ label, Icon, pos }) => (
-              <span key={pos} className={`op-node is-${pos}`}><Icon size={14} strokeWidth={2.2} aria-hidden="true" />{label}</span>
-            ))}
           </div>
         </div>
       </Reveal>

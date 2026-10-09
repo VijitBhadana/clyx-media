@@ -165,9 +165,9 @@ export default function CaseStudies() {
     >
       <CaseGrid items={caseStudies} c={c} />
 
-      <CasePattern content={c} />
-
       <CaseStoryline content={c} />
+
+      <CasePattern content={c} />
     </PageShell>
   );
 }
