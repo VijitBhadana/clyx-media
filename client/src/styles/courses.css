@@ -397,16 +397,6 @@
 .cr-page .clyx-nav { --background: #050814; --foreground: #fff; --border: rgba(255, 255, 255, .09); --border-strong: rgba(255, 255, 255, .18); }
 .cr-page .clyx-nav-bar { background-color: rgba(5, 8, 20, .8); }
 .cr-page .clyx-nav-bar.is-floating { background-color: rgba(10, 16, 36, .7); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, .8); }
-/* Slimmer header on this page */
-.cr-page .clyx-nav-bar { height: 48px; }
-.cr-page .clyx-nav-bar.is-floating { height: 42px; margin-top: 8px; border-radius: 21px; }
-.cr-page .clyx-nav .clyx-logo { width: 32px; height: 32px; }
-.cr-page .clyx-nav-bar.is-floating .clyx-logo { width: 28px; height: 28px; }
-.cr-page .clyx-nav nav a { padding-block: 4px; }
-.cr-page .clyx-nav-round.h-10 { width: 30px; height: 30px; }
-.cr-page .clyx-header-cta { padding-block: 3px; }
-.cr-page .clyx-header-cta-icon { width: 22px; height: 22px; }
-.cr-page .clyx-nav .top-\[76px\], .cr-page .clyx-nav .top-\[78px\] { top: 56px; }
 
 /* ---------- Header CTA in the course colours (this page only) ---------- */
 .cr-page .clyx-header-cta { background: var(--cr-lime); color: var(--cr-ink); box-shadow: 0 6px 20px -6px rgba(182, 238, 60, .6); }
