@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { CookieBar, WhatsAppButton } from '@/components/layout/Footer';
-import CoursePeek from '@/components/sections/CoursePeek';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { FormattedText } from '@/components/ui/FormattedText';
 import { pageSeo, usePageTitle } from '@/hooks/usePageMeta';
@@ -88,7 +87,6 @@ export default function Courses() {
       </main>
       <CourseFooter c={c} />
       <EnrollBar c={c} course={courses[0]} onEnroll={enroll} hidden={chatOpen || details !== null} />
-      <CoursePeek text={g.peekText} button={g.peekButton} onEnroll={enroll} hidden={chatOpen || details !== null} />
       <WhatsAppButton />
       <CookieBar />
 
