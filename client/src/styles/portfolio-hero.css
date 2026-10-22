@@ -263,7 +263,7 @@
 .pf-ticker-track {
   display: flex;
   width: max-content;
-  animation: pf-marquee 60s linear infinite;
+  animation: pf-marquee 140s linear infinite;
 }
 .pf-ticker:hover .pf-ticker-track { animation-play-state: paused; }
 .pf-ticker-group { display: flex; }

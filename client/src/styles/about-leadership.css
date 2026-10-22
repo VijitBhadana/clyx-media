@@ -43,6 +43,25 @@
   color: var(--lead-accent);
 }
 .lead-accent-text { color: var(--lead-accent); }
+/* Section heading: Urbanist bold instead of the display font. */
+.display.lead-title { font-family: 'Urbanist', sans-serif; font-weight: 700; letter-spacing: -.03em; }
+
+/* Highlight typewriter (TypedLine in AboutLeadership.tsx): the hidden full line and the typed line share one grid
+   cell, so the box is final-size from the start. The caret shows while typing, blinks twice, then hides. */
+.lead-tw { display: inline-grid; }
+.lead-tw > .lead-tw-ghost, .lead-tw > .lead-tw-live { grid-area: 1 / 1; }
+.lead-tw-ghost { visibility: hidden; }
+.lead-tw-caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.85em;
+  margin-left: 0.06em;
+  vertical-align: -0.06em;
+  border-radius: 2px;
+  background: currentColor;
+}
+.lead-tw.is-done .lead-tw-caret { opacity: 0; animation: lead-caret-blink 0.9s step-end 2; }
+@keyframes lead-caret-blink { 0% { opacity: 1; } 50% { opacity: 0; } }
 
 /* Left column stretches to the card's height so the chat motif sits top, heading bottom. */
 .lead-head-main {

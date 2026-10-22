@@ -1,4 +1,4 @@
-import { memo, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults, safeHref } from '@/lib/pageContent';
@@ -9,6 +9,10 @@ export type TeamMember = { name: string; role: string; bio?: string; metric?: st
 
 // Avatars shown in the header stack before collapsing into a "+N" chip.
 const STACK_MAX = 6;
+
+// Heading highlight typewriter: delay after the heading scrolls into view, then time per letter.
+const TYPE_START_MS = 400;
+const TYPE_MS = 75;
 
 const isFounder = (m: TeamMember) => /founder|ceo/i.test(m.role || '');
 
@@ -22,6 +26,50 @@ function Portrait({ member, className }: { member: TeamMember; className: string
     return <div className={`${className} lead-monogram`} aria-hidden="true">{initialsOf(member.name)}</div>;
   }
   return <img src={member.img} alt={member.name} className={className} loading="lazy" onError={() => setFailed(true)} />;
+}
+
+// Types the line in once, letter by letter, when it scrolls into view. The invisible full line keeps the box at its
+// final size so the heading never reflows; screen readers get the static text.
+function TypedLine({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [animate] = useState(() => !(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false));
+  const [chars, setChars] = useState(0);
+
+  useEffect(() => {
+    setChars(0);
+    const el = ref.current;
+    if (!animate || !el) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setChars(text.length);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      let n = 0;
+      const tick = () => {
+        n++;
+        setChars(n);
+        if (n < text.length) timer = setTimeout(tick, TYPE_MS);
+      };
+      timer = setTimeout(tick, TYPE_START_MS);
+    }, { threshold: 0.6 });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
+  }, [animate, text]);
+
+  if (!animate) return <>{text}</>;
+  return (
+    <span ref={ref} className={`lead-tw${chars >= text.length ? ' is-done' : ''}`}>
+      <span className="sr-only">{text}</span>
+      <span className="lead-tw-ghost" aria-hidden="true">{text}</span>
+      <span className="lead-tw-live" aria-hidden="true">{text.slice(0, chars)}<span className="lead-tw-caret" /></span>
+    </span>
+  );
 }
 
 function AboutLeadership({
@@ -58,8 +106,8 @@ function AboutLeadership({
             </div>
             <div>
               <p className="lead-eyebrow">{c.leadEyebrow}</p>
-              <h2 className="display text-4xl font-bold md:text-6xl">
-                {c.leadTitle}<br /><span className="lead-accent-text">{c.leadHighlight}</span>
+              <h2 className="display lead-title text-4xl font-bold md:text-6xl">
+                {c.leadTitle}<br /><span className="lead-accent-text"><TypedLine text={c.leadHighlight} /></span>
               </h2>
             </div>
           </Reveal>
