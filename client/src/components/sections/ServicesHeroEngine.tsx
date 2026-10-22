@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { ICONS as SERVICE_ICONS } from '@/components/sections/ServiceGrid';
 import type { ServiceContent } from '@/lib/pageContent';
@@ -6,7 +6,7 @@ import '@/styles/services-hero-engine.css';
 import { FormattedText } from '@/components/ui/FormattedText';
 
 // Hero-sized summary of each service (short name, one-liner, tags), edited per service on the Services page.
-export default function ServicesHeroEngine({ items, note }: { items: ServiceContent[]; note: string }) {
+function ServicesHeroEngine({ items, note }: { items: ServiceContent[]; note: string }) {
   const [active, setActive] = useState(0);
   // Bumped on every change so the progress bar restarts, even when a tab is clicked twice.
   const [turn, setTurn] = useState(0);
@@ -74,3 +74,6 @@ export default function ServicesHeroEngine({ items, note }: { items: ServiceCont
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(ServicesHeroEngine);

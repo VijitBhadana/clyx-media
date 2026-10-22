@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { ArrowLeft, ArrowUpRight, Clock3 } from 'lucide-react';
+import { snippet, usePageTitle } from '@/hooks/usePageMeta';
 import { useParams } from 'wouter';
 import Header from '@/components/layout/Header';
 import { CookieBar, Footer, WhatsAppButton } from '@/components/layout/Footer';
@@ -71,12 +72,10 @@ export default function BlogPost() {
   const articleRef = useRef<HTMLElement>(null);
   useForceLightTheme();
 
-  useEffect(() => {
-    if (!post) return;
-    const previous = document.title;
-    document.title = `${post.title} | CLYX Journal`;
-    return () => { document.title = previous; };
-  }, [post?.title]);
+  const firstParagraph = blocks.find((b) => b.kind === 'p' && b.text.trim());
+  usePageTitle(post && `${post.title} | CLYX Journal`, {
+    description: post && snippet(post.excerpt || (firstParagraph?.kind === 'p' ? firstParagraph.text : post.title)),
+  });
 
   // A post added in the CMS is only known once the content has loaded; until then the page stays blank.
   if (!post) return data?.collections?.blog || !isFetching ? <NotFound /> : <div className="blog-article min-h-screen" />;

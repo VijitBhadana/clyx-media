@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { memo, useState, useEffect, useCallback, useRef } from "react";
 import { responsiveImage } from '@/lib/images';
 import { FormattedText } from '@/components/ui/FormattedText';
 
@@ -96,7 +96,7 @@ export interface CoverFlowCarouselProps {
   id?: string;
 }
 
-export default function CoverFlowCarousel({
+function CoverFlowCarousel({
   items = clyxCampaigns,
   sectionLabel = "FEATURED CAMPAIGNS",
   autoplay = true,
@@ -467,3 +467,6 @@ export default function CoverFlowCarousel({
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CoverFlowCarousel);

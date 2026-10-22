@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { memo, Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowUpRight, MessageCircle, RotateCcw } from 'lucide-react';
 import { leaders as defaultLeaders } from '@/data/home';
 import { useCollection } from '@/lib/siteContent';
@@ -12,7 +12,7 @@ const firstName = (name: string) => name.split(' ')[0];
 // Only the first three team members are shown, matching the three avatar tones.
 const MAX_PEOPLE = 3;
 
-export default function ServicesCTA({ content: c = pageDefaults('services') }: { content?: Record<string, string> }) {
+function ServicesCTA({ content: c = pageDefaults('services') }: { content?: Record<string, string> }) {
   const ref = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
@@ -128,3 +128,6 @@ export default function ServicesCTA({ content: c = pageDefaults('services') }: {
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(ServicesCTA);

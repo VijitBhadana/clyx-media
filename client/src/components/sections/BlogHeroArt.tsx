@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { Sparkles, TrendingUp, Users, Zap } from 'lucide-react';
 import '@/styles/blog-hero-art.css';
 
@@ -6,7 +6,7 @@ import '@/styles/blog-hero-art.css';
 const ICONS = [Users, Zap, TrendingUp];
 
 // Blog hero art: a small stack of floating note cards that tilt toward the pointer, replacing the old intro card.
-export default function BlogHeroArt({ content: c }: { content: Record<string, string> }) {
+function BlogHeroArt({ content: c }: { content: Record<string, string> }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cards = ICONS.map((Icon, i) => ({
@@ -62,3 +62,6 @@ export default function BlogHeroArt({ content: c }: { content: Record<string, st
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(BlogHeroArt);

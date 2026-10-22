@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { memo, Fragment } from 'react';
 import { HeartHandshake, Sparkles, Zap, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults } from '@/lib/pageContent';
@@ -9,7 +9,7 @@ import { FormattedText } from '@/components/ui/FormattedText';
 const ICONS: LucideIcon[] = [Zap, HeartHandshake, Sparkles];
 
 // The blue "creator types" band on the Creators page. It stays blue in both themes.
-export default function CreatorTypes({ content: c = pageDefaults('creators') }: { content?: Record<string, string> }) {
+function CreatorTypes({ content: c = pageDefaults('creators') }: { content?: Record<string, string> }) {
   const types = ICONS.map((Icon, i) => ({
     Icon,
     tag: c[`type${i + 1}Tag`],
@@ -62,3 +62,6 @@ export default function CreatorTypes({ content: c = pageDefaults('creators') }: 
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CreatorTypes);

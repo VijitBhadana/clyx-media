@@ -1,4 +1,5 @@
-import { usePageTitle } from '@/hooks/usePageMeta';
+import { usePageSeo } from '@/hooks/usePageMeta';
+import { memo } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import CasePattern from '@/components/sections/CasePattern';
@@ -46,7 +47,7 @@ function ReelLabel({ title, text, hint }: { title: string; text: string; hint: s
   );
 }
 
-function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, string> }) {
+const CaseGrid = memo(function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, string> }) {
   if (!items.length) return null;
   const stats = statsOf(c.listStats || '');
   const detailsText = c.caseDetailsButton || 'View case study';
@@ -124,10 +125,10 @@ function CaseGrid({ items, c }: { items: CaseStudyItem[]; c: Record<string, stri
       </div>
     </section>
   );
-}
+});
 
 export default function CaseStudies() {
-  usePageTitle('Case Studies | CLYX Media');
+  usePageSeo('/case-studies');
   const c = usePageContent('caseStudies');
   const caseStudies = useCaseStudies();
 

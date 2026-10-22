@@ -1,5 +1,6 @@
-import { usePageTitle } from '@/hooks/usePageMeta';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { usePageSeo } from '@/hooks/usePageMeta';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useLocation } from 'wouter';
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion';
 import {
   ArrowUpRight,
@@ -38,7 +39,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 type Filter = { label: string; icon: LucideIcon };
 
-function FilterPills({ filters, active, onChange }: { filters: Filter[]; active: string; onChange: (label: string) => void }) {
+const FilterPills = memo(function FilterPills({ filters, active, onChange }: { filters: Filter[]; active: string; onChange: (label: string) => void }) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -102,12 +103,12 @@ function FilterPills({ filters, active, onChange }: { filters: Filter[]; active:
       </motion.div>
     </div>
   );
-}
+});
 
 // Second title line: cycles through the admin's words.
 const WORD_MS = 2400;
 
-function HeroWords({ words }: { words: string[] }) {
+const HeroWords = memo(function HeroWords({ words }: { words: string[] }) {
   const reduceMotion = useReducedMotion();
   const [tick, setTick] = useState(0);
   const count = words.length;
@@ -134,10 +135,10 @@ function HeroWords({ words }: { words: string[] }) {
       </span>
     </span>
   );
-}
+});
 
 // Left column under the title: intro and stat row.
-function HeroLead({ c }: { c: Record<string, string> }) {
+const HeroLead = memo(function HeroLead({ c }: { c: Record<string, string> }) {
   const stats = [1, 2, 3].map(n => ({ value: c[`heroStat${n}Value`], label: c[`heroStat${n}Label`] })).filter(s => s.value);
 
   return (
@@ -155,12 +156,12 @@ function HeroLead({ c }: { c: Record<string, string> }) {
       )}
     </div>
   );
-}
+});
 
 // Right column: a fanned stack of project cards that deals the next one to the front every few seconds.
 const DEAL_MS = 3200;
 
-function HeroStack({ items, note, countLabel, total }: { items: PortfolioImage[]; note: string; countLabel: string; total: number }) {
+const HeroStack = memo(function HeroStack({ items, note, countLabel, total }: { items: PortfolioImage[]; note: string; countLabel: string; total: number }) {
   const reduceMotion = useReducedMotion();
   const [front, setFront] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -226,10 +227,10 @@ function HeroStack({ items, note, countLabel, total }: { items: PortfolioImage[]
       )}
     </div>
   );
-}
+});
 
 // Results strip running along the bottom edge of the hero.
-function HeroTicker({ items }: { items: PortfolioImage[] }) {
+const HeroTicker = memo(function HeroTicker({ items }: { items: PortfolioImage[] }) {
   if (!items.length) return null;
   return (
     <div className="pf-ticker" aria-hidden="true">
@@ -248,7 +249,7 @@ function HeroTicker({ items }: { items: PortfolioImage[] }) {
       </div>
     </div>
   );
-}
+});
 
 // Cards per hover-expand strip; longer lists (e.g. "All") stack into several strips.
 const ROW_SIZE = 6;
@@ -505,7 +506,7 @@ function buildJourney(aura: Box, kulture: Box, note: Box): Journey {
 }
 
 // Closing CTA: hand-drawn doodles (underline, loop arrow, note) draw themselves in once scrolled into view.
-function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: Record<string, string> }) {
+const CaseStudiesCta = memo(function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: Record<string, string> }) {
   const reduceMotion = useReducedMotion();
   const reveal = reduceMotion
     ? { initial: false as const, animate: 'show' }
@@ -834,7 +835,7 @@ function CaseStudiesCta({ content: c = pageDefaults('portfolio') }: { content?: 
       </div>
     </motion.section>
   );
-}
+});
 
 // Disc art for the built-in brands, in their own colours; brands added in the admin get the carousel's default palettes.
 const DISC_STYLES: Record<string, Pick<DiscCascadeItem, 'pattern' | 'palette'>> = {
@@ -941,8 +942,10 @@ function useScrollDiscs(trackRef: RefObject<HTMLDivElement | null>, count: numbe
 }
 
 // Brand discs: one "name | logo | point | point | point" row per brand from the admin.
-function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: PortfolioItem[] }) {
+// Memoized: changing the category filter above does not re-render the pinned disc carousel.
+const BrandDiscs = memo(function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: PortfolioItem[] }) {
   const reduceMotion = useReducedMotion();
+  const [, navigate] = useLocation();
   const trackRef = useRef<HTMLDivElement>(null);
   // Memoised so each disc keeps the same item object across scroll re-renders and its art isn't rebuilt.
   const brands = useMemo<DiscCascadeItem[]>(
@@ -1006,7 +1009,8 @@ function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: Port
             // Clicking the chosen project disc opens that project, as its card does.
             onSelect={(_, i) => {
               const project = projectDiscs[i - brands.length];
-              if (project) window.location.href = `/portfolio/${project.slug}`;
+              // In-app navigation, like a link click: no full reload, so the code and content are not downloaded again.
+              if (project) navigate(`/portfolio/${project.slug}`);
             }}
             duration={0.55}
             bounce={0.12}
@@ -1025,28 +1029,41 @@ function BrandDiscs({ c, projects }: { c: Record<string, string>; projects: Port
       </div>
     </section>
   );
-}
+});
 
 export default function Portfolio() {
-  usePageTitle('Portfolio | CLYX Media');
+  usePageSeo('/portfolio');
   const c = usePageContent('portfolio');
   const portfolioImages = usePortfolio();
+  const [, navigate] = useLocation();
   const allLabel = c.heroFilterAllLabel || 'All';
-  const filters: Filter[] = [allLabel, ...Array.from(new Set(portfolioImages.map(item => item.category).filter(Boolean)))].map(label => ({
-    label,
-    icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
-  }));
+  // Everything derived from the project list is memoized, so switching filters only rebuilds what depends on the
+  // filter, and the memoized hero pieces / disc carousel get unchanged props and skip re-rendering.
+  const filters = useMemo<Filter[]>(
+    () =>
+      [allLabel, ...Array.from(new Set(portfolioImages.map(item => item.category).filter(Boolean)))].map(label => ({
+        label,
+        icon: CATEGORY_ICONS[label.toLowerCase()] ?? TrendingUp,
+      })),
+    [allLabel, portfolioImages]
+  );
   const [filter, setFilter] = useState(allLabel);
   const [openSlug, setOpenSlug] = useState<string>();
-  const changeFilter = (label: string) => {
+  const changeFilter = useCallback((label: string) => {
     setOpenSlug(undefined);
     setFilter(label);
-  };
+  }, []);
   const isAll = filter === allLabel;
-  const filtered = isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter);
+  const filtered = useMemo(
+    () => (isAll ? portfolioImages.slice(0, ROW_SIZE) : portfolioImages.filter(item => item.category === filter)),
+    [isAll, filter, portfolioImages]
+  );
   // The hero stack deals the first project of up to four categories, so it shows some range.
-  const seen = new Set<string>();
-  const heroPicks = portfolioImages.filter(item => !seen.has(item.category) && Boolean(seen.add(item.category))).slice(0, 4);
+  const heroPicks = useMemo(() => {
+    const seen = new Set<string>();
+    return portfolioImages.filter(item => !seen.has(item.category) && Boolean(seen.add(item.category))).slice(0, 4);
+  }, [portfolioImages]);
+  const heroWords = useMemo(() => splitLines(c.heroWords), [c.heroWords]);
 
   return (
     <PageShell
@@ -1056,7 +1073,7 @@ export default function Portfolio() {
         <>
           {c.heroHeadline}
           <br />
-          <HeroWords words={splitLines(c.heroWords)} />
+          <HeroWords words={heroWords} />
         </>
       }
       intro=""
@@ -1079,7 +1096,7 @@ export default function Portfolio() {
             isAll
               ? item => {
                   // An uncategorised project has no tab to open, so go straight to its page.
-                  if (!item.category) return void (window.location.href = `/portfolio/${item.slug}`);
+                  if (!item.category) return navigate(`/portfolio/${item.slug}`);
                   setOpenSlug(item.slug);
                   setFilter(item.category);
                 }

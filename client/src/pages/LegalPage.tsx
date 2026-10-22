@@ -1,5 +1,6 @@
-import { Fragment, useEffect, type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { ArrowUpRight, Mail } from 'lucide-react';
+import { pageSeo, usePageTitle } from '@/hooks/usePageMeta';
 import { useLocation } from 'wouter';
 import Header from '@/components/layout/Header';
 import { CookieBar, Footer, WhatsAppButton } from '@/components/layout/Footer';
@@ -39,11 +40,7 @@ export default function LegalPage() {
   const [location] = useLocation();
   const doc = DOCS.find((d) => d.path === location) ?? privacy;
 
-  useEffect(() => {
-    const previous = document.title;
-    document.title = `${doc.title} | CLYX Media`;
-    return () => { document.title = previous; };
-  }, [doc.title]);
+  usePageTitle(`${doc.title} | CLYX Media`, { description: pageSeo(doc.path)?.description });
 
   return (
     <div className="legal-page min-h-screen">

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
+import { snippet, usePageTitle } from '@/hooks/usePageMeta';
 import { useParams } from 'wouter';
 import PageShell from '@/components/layout/PageShell';
 import { Label, Section } from '@/components/ui/primitives';
@@ -29,12 +29,9 @@ export default function PortfolioDetail() {
   const at = items.findIndex((item) => item.slug === slug);
   const item = items[at];
 
-  useEffect(() => {
-    if (!item) return;
-    const previous = document.title;
-    document.title = `${item.title} | Portfolio | CLYX Media`;
-    return () => { document.title = previous; };
-  }, [item?.title]);
+  usePageTitle(item && `${item.title} | Portfolio | CLYX Media`, {
+    description: item && snippet(item.detail || `${item.title}, a ${item.category} project by CLYX Media: ${item.result}.`),
+  });
 
   // A project added in the CMS is only known once the list has loaded; until then the page stays blank.
   if (!item) return data?.collections?.portfolio || !isFetching ? <NotFound /> : <div className="min-h-screen" />;

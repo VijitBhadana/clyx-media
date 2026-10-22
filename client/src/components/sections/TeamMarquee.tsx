@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { memo, useState, type CSSProperties } from 'react';
 import { useCollection } from '@/lib/siteContent';
 
 type Member = { name: string; role: string; img?: string };
@@ -38,7 +38,7 @@ function TeamCard({ member }: { member: Member }) {
 }
 
 /** The homepage team strip: an endless marquee of photo + name + role cards from the Team list. */
-export default function TeamMarquee() {
+function TeamMarquee() {
   const team = useCollection<Member>('team', defaultTeam, (m) => ({ name: String(m.name ?? ''), role: String(m.role ?? ''), img: photoFor(m.img) }));
   const cards = team.map((member, i) => <TeamCard key={`${member.name}-${i}`} member={member} />);
   return (
@@ -51,3 +51,6 @@ export default function TeamMarquee() {
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(TeamMarquee);

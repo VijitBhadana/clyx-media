@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { Infinity as MetaIcon, Instagram, Search, Youtube, ShoppingBag, MessageCircle, type LucideIcon } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { pageDefaults } from '@/lib/pageContent';
@@ -9,7 +9,7 @@ import { FormattedText } from '@/components/ui/FormattedText';
 const ICONS: LucideIcon[] = [MetaIcon, Instagram, Search, Youtube, ShoppingBag, MessageCircle];
 
 // Where CLYX runs campaigns: an intro on the left, one tile per channel on the right.
-export default function ChannelStrip({ content: c = pageDefaults('home') }: { content?: Record<string, string> }) {
+function ChannelStrip({ content: c = pageDefaults('home') }: { content?: Record<string, string> }) {
   const ref = useRef<HTMLElement>(null);
   const visible = useScrollReveal(ref);
   const channels = ICONS.map((icon, i) => ({ icon, name: c[`channel${i + 1}Name`], detail: c[`channel${i + 1}Detail`] })).filter(
@@ -41,3 +41,6 @@ export default function ChannelStrip({ content: c = pageDefaults('home') }: { co
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(ChannelStrip);

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { ArrowLeft, ArrowUpRight, Check, Plus } from 'lucide-react';
 import { useParams } from 'wouter';
 import PageShell, { HeroButtons } from '@/components/layout/PageShell';
@@ -6,6 +5,7 @@ import { Label, Section } from '@/components/ui/primitives';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { ICONS as SERVICE_ICONS } from '@/components/sections/ServiceGrid';
 import ServicesCTA from '@/components/sections/ServicesCTA';
+import { pageSeo, snippet, usePageTitle } from '@/hooks/usePageMeta';
 import { usePageContent, useServices } from '@/lib/pageContent';
 import NotFound from './NotFound';
 import '@/styles/service-detail.css';
@@ -21,12 +21,11 @@ export default function ServiceDetail() {
   const at = rows.findIndex((s) => s.slug === slug);
   const service = rows[at];
 
-  useEffect(() => {
-    if (!service) return;
-    const previous = document.title;
-    document.title = `${service.title} | CLYX Media`;
-    return () => { document.title = previous; };
-  }, [service?.title]);
+  // The six fixed services have their wording in data/seo.json; one added in the CMS falls back to its own text.
+  const seo = service && pageSeo(`/services/${service.slug}`);
+  usePageTitle(service && (seo?.title ?? `${service.title} | CLYX Media`), {
+    description: service && (seo?.description ?? snippet(service.text)),
+  });
 
   if (!service) return <NotFound />;
 

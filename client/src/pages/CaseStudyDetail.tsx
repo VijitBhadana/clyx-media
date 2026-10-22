@@ -1,5 +1,6 @@
-import { useEffect, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { ArrowLeft, ArrowUpRight, Check, Quote, TriangleAlert } from 'lucide-react';
+import { snippet, usePageTitle } from '@/hooks/usePageMeta';
 import { useParams } from 'wouter';
 import PageShell from '@/components/layout/PageShell';
 import { Label, Section } from '@/components/ui/primitives';
@@ -36,12 +37,7 @@ export default function CaseStudyDetail() {
   const at = items.findIndex((item) => item.slug === slug);
   const item = items[at];
 
-  useEffect(() => {
-    if (!item) return;
-    const previous = document.title;
-    document.title = `${item.brand} Case Study | CLYX Media`;
-    return () => { document.title = previous; };
-  }, [item?.brand]);
+  usePageTitle(item && `${item.brand} Case Study | CLYX Media`, { description: item && snippet(`${item.headline} ${item.detail}`) });
 
   // A case study added in the CMS is only known once the list has loaded; until then the page stays blank.
   if (!item) return data?.collections?.caseStudies || !isFetching ? <NotFound /> : <div className="min-h-screen" />;

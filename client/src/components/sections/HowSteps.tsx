@@ -1,9 +1,9 @@
-import { useRef, type CSSProperties } from 'react';
+import { memo, useRef, type CSSProperties } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { pageDefaults } from '@/lib/pageContent';
 import { FormattedText } from '@/components/ui/FormattedText';
 
-export default function HowSteps({ content: c = pageDefaults('home') }: { content?: Record<string, string> }) {
+function HowSteps({ content: c = pageDefaults('home') }: { content?: Record<string, string> }) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useScrollReveal(ref);
   const steps = [1, 2, 3].map((n) => ({ title: c[`step${n}Title`], text: c[`step${n}Text`] })).filter((s) => s.title || s.text);
@@ -22,3 +22,6 @@ export default function HowSteps({ content: c = pageDefaults('home') }: { conten
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(HowSteps);

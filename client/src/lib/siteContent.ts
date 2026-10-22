@@ -253,6 +253,8 @@ export function primeFirstPage(queryClient: QueryClient): Promise<void> {
 /** Resolves when the first page may render (see primeFirstPage); immediately for every later page. */
 export const firstPageReady = () => firstPage ?? Promise.resolve();
 
+// The query result is a tracked object: a component only re-renders for the fields it reads. Callers that need
+// just the content read `data` alone, so a background revalidation (isFetching on/off) does not re-render them.
 function useScopedContent() {
   const [location] = useLocation();
   const queryClient = useQueryClient();
@@ -268,7 +270,7 @@ function useScopedContent() {
     initialData: () => localContent(key, scope),
     initialDataUpdatedAt: 0,
   });
-  return { ...query, scope };
+  return { query, scope };
 }
 
 /** A section asked for content its page does not load: it would silently show built-in text. Dev-only check. */
@@ -280,14 +282,14 @@ function warnOutOfScope(scope: Scope, kind: 'block' | 'collection', name: string
 
 /** The current page's content (only the parts that page renders). */
 export function useSiteContent() {
-  return useScopedContent();
+  return useScopedContent().query;
 }
 
 /** One editable page block such as `page_home`; used by usePageContent. */
 export function useBlockData(name: string): Record<string, any> | undefined {
-  const { data, scope } = useScopedContent();
+  const { query, scope } = useScopedContent();
   warnOutOfScope(scope, 'block', name);
-  return data?.blocks?.[name];
+  return query.data?.blocks?.[name];
 }
 
 /**
@@ -300,9 +302,9 @@ export function useCollection<T>(
   fallback: T[],
   map: (item: Record<string, any>, index: number) => T,
 ): T[] {
-  const { data, scope } = useScopedContent();
+  const { query, scope } = useScopedContent();
   warnOutOfScope(scope, 'collection', name);
-  const raw = data?.collections?.[name];
+  const raw = query.data?.collections?.[name];
   // `map` is a plain converter that never changes meaning between renders, so only the data is tracked.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => (raw ? raw.map(map) : fallback), [raw]);

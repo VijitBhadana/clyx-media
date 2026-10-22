@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ArrowDown, ArrowUpRight, Asterisk, PenLine } from 'lucide-react';
 import { DirectionalReveal, Reveal } from '@/components/ui/ScrollMotion';
 import type { BlogPost } from '@/lib/blog';
@@ -6,7 +7,7 @@ import { FormattedText } from '@/components/ui/FormattedText';
 
 // Blog hero: a cream magazine masthead. Title and copy on the left, the latest three posts as an
 // "In this issue" index on the right, and a scrolling strip of topics along the bottom edge.
-export default function JournalHero({ c, posts }: { c: Record<string, string>; posts: BlogPost[] }) {
+function JournalHero({ c, posts }: { c: Record<string, string>; posts: BlogPost[] }) {
   const latest = posts.slice(0, 3);
   const topics = (c.journalTopics || '').split(',').map((x) => x.trim()).filter(Boolean);
   // The strip scrolls by half its width, so each half repeats the topics until it is wide enough to fill the screen.
@@ -65,3 +66,6 @@ export default function JournalHero({ c, posts }: { c: Record<string, string>; p
     </>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(JournalHero);

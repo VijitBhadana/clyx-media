@@ -36,9 +36,11 @@ export function useServerList<T extends { id: string; hidden: boolean }>(
   refetch: () => Promise<unknown>,
   position: 'start' | 'end' = 'end',
 ): [T[], (value: Updater<T>) => void] {
-  const createItem = trpc.admin.createItem.useMutation();
-  const updateItem = trpc.admin.updateItem.useMutation();
-  const deleteItem = trpc.admin.deleteItem.useMutation();
+  // Only the stable mutateAsync functions are kept: the mutation objects change on every status update, which used
+  // to recreate save/setItems (and re-render every list row) each time a save started or finished.
+  const { mutateAsync: createItem } = trpc.admin.createItem.useMutation();
+  const { mutateAsync: updateItem } = trpc.admin.updateItem.useMutation();
+  const { mutateAsync: deleteItem } = trpc.admin.deleteItem.useMutation();
 
   // Shown immediately while saving; cleared once the saved copy has been reloaded.
   const [optimistic, setOptimistic] = useState<ListItem[] | null>(null);
@@ -61,8 +63,8 @@ export function useServerList<T extends { id: string; hidden: boolean }>(
         const old = before.get(id) as ListItem | undefined;
         if (!old) {
           jobs.push(
-            createItem.mutateAsync({ collection, data, position }).then((row: { id: string }) =>
-              hidden ? updateItem.mutateAsync({ id: row.id, isHidden: true }) : undefined,
+            createItem({ collection, data, position }).then((row: { id: string }) =>
+              hidden ? updateItem({ id: row.id, isHidden: true }) : undefined,
             ),
           );
           continue;
@@ -72,7 +74,7 @@ export function useServerList<T extends { id: string; hidden: boolean }>(
         const changedFields = !sameFields(oldData, data);
         if (changedFields || hidden !== wasHidden) {
           jobs.push(
-            updateItem.mutateAsync({
+            updateItem({
               id,
               ...(changedFields ? { data } : {}),
               ...(hidden !== wasHidden ? { isHidden: hidden } : {}),
@@ -81,7 +83,7 @@ export function useServerList<T extends { id: string; hidden: boolean }>(
         }
       }
       for (const old of prev) {
-        if (!keptIds.has(old.id) && UUID.test(old.id)) jobs.push(deleteItem.mutateAsync({ id: old.id }));
+        if (!keptIds.has(old.id) && UUID.test(old.id)) jobs.push(deleteItem({ id: old.id }));
       }
 
       const results = await Promise.allSettled(jobs);
@@ -109,11 +111,11 @@ export function useServerList<T extends { id: string; hidden: boolean }>(
 
 /** Saves one singleton block (e.g. the homepage headline). */
 export function useSaveBlock(refetch: () => Promise<unknown>) {
-  const saveBlock = trpc.admin.saveBlock.useMutation();
+  const { mutateAsync: saveBlock } = trpc.admin.saveBlock.useMutation();
   return useCallback(
     async (key: string, value: Fields) => {
       try {
-        await saveBlock.mutateAsync({ key, value });
+        await saveBlock({ key, value });
         await refetch();
         return true;
       } catch (err) {
@@ -127,12 +129,12 @@ export function useSaveBlock(refetch: () => Promise<unknown>) {
 
 /** Moves one card up or down in its list, then reloads. */
 export function useMoveItem(refetch: () => Promise<unknown>) {
-  const moveItem = trpc.admin.moveItem.useMutation();
+  const { mutateAsync: moveItem } = trpc.admin.moveItem.useMutation();
   return useCallback(
     async (id: string, direction: 'up' | 'down') => {
       if (!UUID.test(id)) return;
       try {
-        await moveItem.mutateAsync({ id, direction });
+        await moveItem({ id, direction });
         await refetch();
       } catch (err) {
         toast.error(`Could not reorder: ${errorText(err)}`);

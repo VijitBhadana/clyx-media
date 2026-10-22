@@ -1,6 +1,6 @@
-import { usePageTitle } from '@/hooks/usePageMeta';
+import { usePageSeo } from '@/hooks/usePageMeta';
 import { motion, MotionValue, useInView, useMotionValue, useScroll, useTransform } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PageShell from '@/components/layout/PageShell';
 import CreatorTypes from '@/components/sections/CreatorTypes';
 import CreatorsHeroArt from '@/components/sections/CreatorsHeroArt';
@@ -276,8 +276,11 @@ function FeatureStage({ content: c }: { content: Record<string, string> }) {
 }
 
 export default function Creators() {
-  usePageTitle('Creators | CLYX Media');
+  usePageSeo('/creators');
   const c = usePageContent('creators');
+  // Same arrays until the copy changes, so the memoized hero art does not re-render with the page.
+  const cloudLeft = useMemo(() => splitLines(c.heroCloudLeft), [c.heroCloudLeft]);
+  const cloudRight = useMemo(() => splitLines(c.heroCloudRight), [c.heroCloudRight]);
   return (
     <PageShell
       heroClass="is-beige"
@@ -290,7 +293,7 @@ export default function Creators() {
         </>
       }
       intro=""
-      aside={<CreatorsHeroArt left={splitLines(c.heroCloudLeft)} right={splitLines(c.heroCloudRight)} />}
+      aside={<CreatorsHeroArt left={cloudLeft} right={cloudRight} />}
     >
       <FeatureStage content={c} />
 

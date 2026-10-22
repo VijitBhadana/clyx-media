@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { BarChart3, FlaskConical, RefreshCw, Rocket, Scissors, TrendingUp, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults } from '@/lib/pageContent';
@@ -29,7 +29,7 @@ const SCROLL_RATE = 1.3;
 // The "recurring pattern" block on the Case Studies page. On desktop the whole panel pins below the header at a
 // fixed height and page scroll moves the six steps up through the white half; after the last step it releases.
 // Below 1024px it is a normal stacked block.
-export default function CasePattern({ content: c = pageDefaults('caseStudies') }: { content?: Record<string, string> }) {
+function CasePattern({ content: c = pageDefaults('caseStudies') }: { content?: Record<string, string> }) {
   const lines = c.patternTitle.split('\n').filter(Boolean);
   const steps = ICONS.map((Icon, i) => ({
     Icon,
@@ -140,3 +140,6 @@ export default function CasePattern({ content: c = pageDefaults('caseStudies') }
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CasePattern);

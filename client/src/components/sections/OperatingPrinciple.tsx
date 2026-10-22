@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { BarChart3, Eye, MousePointerClick, RefreshCw, ShoppingBag } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { Lines } from '@/components/ui/Lines';
@@ -14,7 +15,7 @@ const LOOP = [
   { Icon: BarChart3, width: '100%' },
 ];
 
-export default function OperatingPrinciple({ content: c = pageDefaults('services') }: { content?: Record<string, string> }) {
+function OperatingPrinciple({ content: c = pageDefaults('services') }: { content?: Record<string, string> }) {
   // How the loop plays out, shown as a short numbered list under the intro.
   const steps = [1, 2, 3].map((n) => ({ title: c[`opStep${n}Title`], text: c[`opStep${n}Text`] })).filter((s) => s.title || s.text);
   const highlight = c.opHighlight;
@@ -75,3 +76,6 @@ export default function OperatingPrinciple({ content: c = pageDefaults('services
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(OperatingPrinciple);

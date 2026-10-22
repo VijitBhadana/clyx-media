@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { memo, useState, type CSSProperties } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { pageDefaults, safeHref } from '@/lib/pageContent';
@@ -24,7 +24,7 @@ function Portrait({ member, className }: { member: TeamMember; className: string
   return <img src={member.img} alt={member.name} className={className} loading="lazy" onError={() => setFailed(true)} />;
 }
 
-export default function AboutLeadership({
+function AboutLeadership({
   members,
   content: c = pageDefaults('about'),
 }: {
@@ -134,3 +134,6 @@ export default function AboutLeadership({
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(AboutLeadership);

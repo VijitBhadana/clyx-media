@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowDown, ArrowUpRight, Check } from 'lucide-react';
 import { services } from '../../data/home';
 import { ICONS } from './ServiceGrid';
@@ -185,7 +185,7 @@ function ServiceCarousel({ items }: { items: Service[] }) {
   );
 }
 
-export default function ServiceBook({ content: c = pageDefaults('home') }: { content?: Copy }) {
+function ServiceBook({ content: c = pageDefaults('home') }: { content?: Copy }) {
   const items = useServiceBook(c.bookNextText);
   const logoSrc = usePageContent('global').logoImage;
   return (
@@ -367,3 +367,6 @@ function FlipBook({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: 
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(ServiceBook);

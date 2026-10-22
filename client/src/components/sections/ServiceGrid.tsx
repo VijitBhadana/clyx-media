@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Megaphone, TrendingUp, Share2, Clapperboard, Code2, ShoppingCart, type LucideIcon } from 'lucide-react';
 import { services } from '../../data/home';
 import { hasRevealed, revealThresholds } from '@/lib/reveal';
@@ -52,7 +52,7 @@ function ServiceCard({ title, text, index }: { title: string; text: string; inde
   );
 }
 
-export default function ServiceGrid() {
+function ServiceGrid() {
   return (
     <div className="service-grid">
       {services.map((service, index) => (
@@ -61,3 +61,6 @@ export default function ServiceGrid() {
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(ServiceGrid);

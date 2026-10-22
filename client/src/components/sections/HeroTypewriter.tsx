@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 const TYPE_MS = 85;
 const DELETE_MS = 45;
@@ -12,7 +12,7 @@ const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion:
  * The highlighted hero phrase: types `base`, deletes it, types the next phrase, forever.
  * Screen readers get the static phrase; the animated text is decorative. Pauses while off screen or in a background tab.
  */
-export default function HeroTypewriter({ base, phrases }: { base: string; phrases: string[] }) {
+function HeroTypewriter({ base, phrases }: { base: string; phrases: string[] }) {
   const phraseKey = phrases.join('\n');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const words = useMemo(() => [base, ...phrases.filter((w) => w && w !== base)], [base, phraseKey]);
@@ -90,3 +90,6 @@ export default function HeroTypewriter({ base, phrases }: { base: string; phrase
     </em>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(HeroTypewriter);

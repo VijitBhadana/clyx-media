@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import '@/styles/creators-hero-art.css';
 
 // How often the camera fires; each shot moves one cloud (they take turns) on to its next note.
@@ -13,7 +13,7 @@ const CLOUD_PATH = 'M52 92C28 94 10 80 12 62C13 48 26 40 40 41C38 24 54 12 72 15
 type Cloud ={ side: 'left' | 'right'; lines: string[]; shown: number };
 
 // Creators hero: a photographer taking pictures, with thought clouds that write short notes on either side.
-export default function CreatorsHeroArt({ left, right }: { left: string[]; right: string[] }) {
+function CreatorsHeroArt({ left, right }: { left: string[]; right: string[] }) {
   const [turn, setTurn] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -138,3 +138,6 @@ export default function CreatorsHeroArt({ left, right }: { left: string[]; right
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CreatorsHeroArt);

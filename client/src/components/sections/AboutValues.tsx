@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { MessagesSquare, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/ui/ScrollMotion';
 import { Lines } from '@/components/ui/Lines';
@@ -9,7 +10,7 @@ import { FormattedText } from '@/components/ui/FormattedText';
 const ICONS: LucideIcon[] = [MessagesSquare, Sparkles, RefreshCw];
 
 // The yellow "principles" band on the About page. It stays yellow in both themes.
-export default function AboutValues({ content = pageDefaults('about') }: { content?: Record<string, string> }) {
+function AboutValues({ content = pageDefaults('about') }: { content?: Record<string, string> }) {
   const c = content;
   const values = ICONS.map((Icon, i) => ({
     Icon,
@@ -59,3 +60,6 @@ export default function AboutValues({ content = pageDefaults('about') }: { conte
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(AboutValues);

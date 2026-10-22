@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ArrowUpRight, Banknote, BriefcaseBusiness, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Compass, Facebook, Instagram,
   IndianRupee, Linkedin, LockOpen, MonitorPlay, Play, Plus, ShoppingCart, Sparkles, TrendingUp, Twitter, UsersRound, X, Youtube, type LucideIcon,
@@ -8,7 +8,7 @@ import { CookieBar, WhatsAppButton } from '@/components/layout/Footer';
 import CoursePeek from '@/components/sections/CoursePeek';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { FormattedText } from '@/components/ui/FormattedText';
-import { usePageTitle } from '@/hooks/usePageMeta';
+import { pageSeo, usePageTitle } from '@/hooks/usePageMeta';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { responsiveImage } from '@/lib/images';
 import { pageDefaults, parsePairs, splitLines, usePageContent } from '@/lib/pageContent';
@@ -40,7 +40,7 @@ const parts = (text: string | undefined) => splitLines(text).map((line) => line.
 export default function Courses() {
   const c = usePageContent('courses');
   const g = usePageContent('global');
-  usePageTitle(c.pageTitle || 'Courses | CLYX Media');
+  usePageTitle(c.pageTitle || pageSeo('/courses').title, { description: pageSeo('/courses').description });
   const courses = useCollection<Course>('courses', defaultCourses, toCourse);
   const [details, setDetails] = useState<Course | null>(null);
   const lastDetails = useRef<Course | null>(null);
@@ -129,9 +129,12 @@ function EnrollButton({ label, onClick, className = '', icon }: { label: string;
 
 /* ---------- Hero ---------- */
 
+// The page's sections are memoized (props: the copy, stable callbacks, the course list), so opening the details
+// popup or the purchase chat re-renders only what changed, not the whole page with its video reel.
+
 const HERO_ICONS: LucideIcon[] = [Compass, TrendingUp, Banknote];
 
-function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
+const Hero = memo(function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
   const points = splitLines(c.heroPoints);
   const stats = parsePairs(c.heroStats);
   return (
@@ -166,11 +169,11 @@ function Hero({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
       </div>
     </section>
   );
-}
+});
 
 /* ---------- 01 The problem ---------- */
 
-function Problem({ n, c }: { n: number; c: Copy }) {
+const Problem = memo(function Problem({ n, c }: { n: number; c: Copy }) {
   const points = splitLines(c.problemPoints);
   return (
     <section className="cr-sec cr-cream">
@@ -196,11 +199,11 @@ function Problem({ n, c }: { n: number; c: Copy }) {
       </Reveal>
     </section>
   );
-}
+});
 
 /* ---------- 02 Courses ---------- */
 
-function CourseList({ n, c, courses, onDetails, onBuy, onEnroll }: { n: number; c: Copy; courses: Course[]; onDetails: (course: Course) => void; onBuy: (course: Course) => void; onEnroll: () => void }) {
+const CourseList = memo(function CourseList({ n, c, courses, onDetails, onBuy, onEnroll }: { n: number; c: Copy; courses: Course[]; onDetails: (course: Course) => void; onBuy: (course: Course) => void; onEnroll: () => void }) {
   return (
     <section id="course-list" className="cr-sec cr-navy scroll-mt-24">
       <Reveal>
@@ -221,7 +224,7 @@ function CourseList({ n, c, courses, onDetails, onBuy, onEnroll }: { n: number; 
       </Reveal>
     </section>
   );
-}
+});
 
 /** A course card: "See more details" opens the details popup, "Buy now" opens the purchase chat with this course picked. */
 function CourseCard({ course, c, onDetails, onBuy }: { course: Course; c: Copy; onDetails: () => void; onBuy: () => void }) {
@@ -286,7 +289,7 @@ function Accordion({ items, numbered, plus }: { items: [string, string][]; numbe
 
 /* ---------- 03 Curriculum ---------- */
 
-function Curriculum({ n, c }: { n: number; c: Copy }) {
+const Curriculum = memo(function Curriculum({ n, c }: { n: number; c: Copy }) {
   return (
     <section className="cr-sec cr-cream">
       <Reveal>
@@ -306,11 +309,11 @@ function Curriculum({ n, c }: { n: number; c: Copy }) {
       </Reveal>
     </section>
   );
-}
+});
 
 /* ---------- 04 Certificate ---------- */
 
-function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: string; onEnroll: () => void }) {
+const Certificate = memo(function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: string; onEnroll: () => void }) {
   const points = splitLines(c.certPoints);
   const tilt = useTilt();
   return (
@@ -332,7 +335,7 @@ function Certificate({ n, c, logo, onEnroll }: { n: number; c: Copy; logo?: stri
       </Reveal>
     </section>
   );
-}
+});
 
 /** 3D tilt that follows the mouse: writes the angles and glare spot as CSS variables on the hovered element. */
 function useTilt() {
@@ -405,7 +408,7 @@ const isVideoFile = (url: string) => /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
 const REEL_SPEED = 28; // px per second
 const REEL_MIN_CARDS = 10; // one loop copy must be wider than the widest screen
 
-function Testimonials({ n, c }: { n: number; c: Copy }) {
+const Testimonials = memo(function Testimonials({ n, c }: { n: number; c: Copy }) {
   const videos: Video[] = parts(c.testimonials).map(([name = '', url = '', thumb = '']) => {
     const youtube = youtubeId(url);
     return { name, url, youtube, thumb: thumb || (youtube ? `https://i.ytimg.com/vi/${youtube}/hqdefault.jpg` : ''), autoThumb: !thumb && !!youtube };
@@ -543,7 +546,7 @@ function Testimonials({ n, c }: { n: number; c: Copy }) {
       {playing && <VideoModal video={playing} onClose={() => setPlaying(null)} />}
     </section>
   );
-}
+});
 
 function VideoModal({ video, onClose }: { video: Video; onClose: () => void }) {
   useEffect(() => {
@@ -647,7 +650,7 @@ function photoFrame(c: Copy): React.CSSProperties {
   return { objectPosition: focus, transformOrigin: focus, transform: `scale(${num(c.mentorImageZoom, 100, 100, 250) / 100})` };
 }
 
-function Mentor({ n, c }: { n: number; c: Copy }) {
+const Mentor = memo(function Mentor({ n, c }: { n: number; c: Copy }) {
   // An empty saved field still shows the built-in numbers; writing "none" hides the row.
   const raw = c.mentorStats?.trim() || pageDefaults('courses').mentorStats;
   const stats = raw.toLowerCase() === 'none' ? [] : parts(raw);
@@ -684,11 +687,11 @@ function Mentor({ n, c }: { n: number; c: Copy }) {
       </Reveal>
     </section>
   );
-}
+});
 
 /* ---------- 07 FAQ ---------- */
 
-function Faq({ n, c }: { n: number; c: Copy }) {
+const Faq = memo(function Faq({ n, c }: { n: number; c: Copy }) {
   return (
     <section className="cr-sec cr-cream">
       <Reveal className="cr-split cr-split-faq">
@@ -700,11 +703,11 @@ function Faq({ n, c }: { n: number; c: Copy }) {
       </Reveal>
     </section>
   );
-}
+});
 
 /* ---------- Closing band + enroll bar ---------- */
 
-function CtaBand({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
+const CtaBand = memo(function CtaBand({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
   if (!c.ctaTitle) return null;
   return (
     <section className="cr-cta">
@@ -716,10 +719,10 @@ function CtaBand({ c, onEnroll }: { c: Copy; onEnroll: () => void }) {
       </Reveal>
     </section>
   );
-}
+});
 
 /** The page's own slim footer (the reference look) instead of the site-wide blue one. */
-function CourseFooter({ c }: { c: Copy }) {
+const CourseFooter = memo(function CourseFooter({ c }: { c: Copy }) {
   const g = usePageContent('global');
   const email = c.footerEmail || g.footerEmail || 'work@clyxmedia.com';
   const copy = (c.footerCopy || '').replace('{year}', String(new Date().getFullYear()));
@@ -732,10 +735,10 @@ function CourseFooter({ c }: { c: Copy }) {
       </div>
     </footer>
   );
-}
+});
 
 /** Pinned to the bottom of the screen from the moment the page loads. */
-function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; onEnroll: () => void; hidden: boolean }) {
+const EnrollBar = memo(function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; onEnroll: () => void; hidden: boolean }) {
   const title = c.barTitle || course?.title || '';
   // A cut-out person (transparent background) that stands up out of the bar.
   const image = c.barImage || '/courses/bar-person.webp';
@@ -757,4 +760,4 @@ function EnrollBar({ c, course, onEnroll, hidden }: { c: Copy; course?: Course; 
       <EnrollButton label={c.barButton} onClick={onEnroll} className="cr-btn-lime cr-bar-btn" />
     </div>
   );
-}
+});

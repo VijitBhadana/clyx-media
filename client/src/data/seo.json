@@ -1,0 +1,92 @@
+{
+  "/": {
+    "name": "Home",
+    "title": "CLYX Media — Performance Creative & Creator Ads",
+    "description": "CLYX Media is a performance-focused digital marketing agency that helps D2C brands scale with creator-led ads, UGC videos, influencer marketing, performance marketing, social media management and Shopify CRO."
+  },
+  "/about": {
+    "name": "About",
+    "title": "About CLYX Media | Performance Creative Studio",
+    "description": "CLYX Media is a performance creative studio for brands that want to move faster than the feed, connecting creator instinct, paid distribution and growth systems."
+  },
+  "/services": {
+    "name": "Services",
+    "title": "Digital Marketing Services | CLYX Media",
+    "description": "Influencer marketing, performance marketing, social media management, UGC videos, website development and Shopify CRO: six disciplines, one growth engine."
+  },
+  "/services/influencer-marketing": {
+    "name": "Influencer Marketing",
+    "title": "Influencer Marketing Services | CLYX Media",
+    "description": "CLYX Media builds and manages a creator bench matched to your category, then negotiates content and usage rights so the best posts can run as paid ads."
+  },
+  "/services/performance-marketing": {
+    "name": "Performance Marketing",
+    "title": "Performance Marketing Services | CLYX Media",
+    "description": "Meta and Google ad campaigns run on data, not guesses. CLYX Media scales spend only behind what is already converting, with ROAS as the scoreboard."
+  },
+  "/services/social-media-management": {
+    "name": "Social Media Management",
+    "title": "Social Media Management Services | CLYX Media",
+    "description": "Monthly content calendars, Reels, channel management and organic strategy from CLYX Media that build a real, returning audience for your brand."
+  },
+  "/services/ugc-videos": {
+    "name": "UGC Videos",
+    "title": "UGC Video Ads | CLYX Media",
+    "description": "Creator-shot UGC ads, hooks and edits built for the feed, not a boardroom. CLYX Media produces UGC videos, product photography and AI-assisted ad assets."
+  },
+  "/services/website-development": {
+    "name": "Website Development",
+    "title": "Website Development Services | CLYX Media",
+    "description": "UI/UX-first, mobile-first websites and landing pages coded fast and built to convert, with tracking set up from day one. Website development by CLYX Media."
+  },
+  "/services/shopify-store-cro": {
+    "name": "Shopify Store CRO",
+    "title": "Shopify Store CRO Services | CLYX Media",
+    "description": "Shopify storefronts tuned for checkout speed, merchandising and AOV. CLYX Media runs store audits and A/B tests on the metrics that actually move revenue."
+  },
+  "/portfolio": {
+    "name": "Portfolio",
+    "title": "Portfolio | CLYX Media",
+    "description": "Campaigns, creators and storefronts built to turn attention into revenue. See CLYX Media's work for D2C brands, each project with the number it moved."
+  },
+  "/case-studies": {
+    "name": "Case Studies",
+    "title": "Case Studies | CLYX Media",
+    "description": "Real brands, real constraints, real growth systems. See how CLYX Media turns creative instinct into measurable growth for D2C brands."
+  },
+  "/creators": {
+    "name": "Creators",
+    "title": "Creators | CLYX Media",
+    "description": "Every campaign needs attention, belief and a reason to buy. See how CLYX Media casts creators for UGC, influencer campaigns and creator-led ads."
+  },
+  "/blog": {
+    "name": "Journal",
+    "title": "Journal | CLYX Media",
+    "description": "The CLYX Journal: what we learn running creator ads, testing hooks and building pages that convert, written down while it is still fresh."
+  },
+  "/careers": {
+    "name": "Careers",
+    "title": "Careers | CLYX Media",
+    "description": "Come build the next edge. See open roles at CLYX Media, the performance creative and creator ads studio for D2C brands, and apply online."
+  },
+  "/courses": {
+    "name": "Courses",
+    "title": "Courses | CLYX Media",
+    "description": "Learn from the team that runs the ads. Live CLYX Media classes on hooks and scripts that stop the scroll, running ads like real brands and turning skills into paid work."
+  },
+  "/contact": {
+    "name": "Contact",
+    "title": "Contact | CLYX Media",
+    "description": "Tell CLYX Media what you are building, what is stuck and where you want to go next. Email work@clyxmedia.com or send an enquiry from this page."
+  },
+  "/privacy": {
+    "name": "Privacy Policy",
+    "title": "Privacy Policy | CLYX Media",
+    "description": "How CLYX Media collects, uses and protects the information you share on clyxmedia.com."
+  },
+  "/terms": {
+    "name": "Terms of Use",
+    "title": "Terms of Use | CLYX Media",
+    "description": "The ground rules for using clyxmedia.com. Work CLYX Media does for clients is covered by a separate written agreement."
+  }
+}

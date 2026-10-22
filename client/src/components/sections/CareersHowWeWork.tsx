@@ -1,4 +1,4 @@
-import { Fragment, useRef, type CSSProperties } from 'react';
+import { memo, Fragment, useRef, type CSSProperties } from 'react';
 import { Sparkles, Target, Users, type LucideIcon } from 'lucide-react';
 import { Label, Section } from '@/components/ui/primitives';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
@@ -10,7 +10,7 @@ const POINT_ICONS: LucideIcon[] = [Users, Target, Sparkles];
 const list = (value?: string) => (value ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
 // "How we work" on Careers: heading with culture chips on the left, copy and a brief → result track on the right.
-export default function CareersHowWeWork({ c }: { c: Record<string, string> }) {
+function CareersHowWeWork({ c }: { c: Record<string, string> }) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useScrollReveal(ref);
   const points = list(c.howPoints);
@@ -65,3 +65,6 @@ export default function CareersHowWeWork({ c }: { c: Record<string, string> }) {
     </Section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CareersHowWeWork);

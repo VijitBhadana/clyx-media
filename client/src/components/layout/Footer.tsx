@@ -1,5 +1,5 @@
 import { Instagram, Linkedin, ArrowUpRight, ArrowUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
 import BrandLogo from '@/components/ui/BrandLogo';
 import '@/styles/site-footer.css';
@@ -8,16 +8,17 @@ import { FormattedText } from '@/components/ui/FormattedText';
 // Opens off-site links in a new tab.
 const targetFor = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noreferrer' } : {});
 
-export function Footer() {
+// Footer, WhatsApp button and cookie bar take no props, so they are memoized: a page re-rendering skips them.
+export const Footer = memo(function Footer() {
   const c = usePageContent('global');
   const year = new Date().getFullYear();
-  const socials = [
+  const socials = useMemo(() => [
     { label: 'Instagram', href: c.instagramUrl, Icon: Instagram },
     { label: 'LinkedIn', href: c.linkedinUrl, Icon: Linkedin },
-  ].filter(s => s.href);
-  const columns = [1, 2, 3]
+  ].filter(s => s.href), [c]);
+  const columns = useMemo(() => [1, 2, 3]
     .map(n => ({ title: c[`footerCol${n}Title`], links: parseLinks(c[`footerCol${n}Links`]) }))
-    .filter(col => col.title || col.links.length);
+    .filter(col => col.title || col.links.length), [c]);
   const primaryHref = safeHref(c.footerPrimaryUrl);
   const secondaryHref = safeHref(c.footerSecondaryUrl);
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -105,25 +106,22 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+});
 
 // Every cycle the bubble surfaces for a few seconds, then hides, so it keeps
 // drawing the eye without permanently covering content.
 const WHATSAPP_POPUP_INTERVAL_MS = 12000;
 const WHATSAPP_POPUP_VISIBLE_MS = 5000;
 
-export function WhatsAppButton() {
+export const WhatsAppButton = memo(function WhatsAppButton() {
   const { whatsappUrl, whatsappPopupText } = usePageContent('global');
   const [showPopup, setShowPopup] = useState(false);
 
+  // The interval's first tick is the first show; a separate timeout for it only fired a duplicate update.
   useEffect(() => {
     if (!whatsappUrl || !whatsappPopupText) return;
     const showTimer = setInterval(() => setShowPopup(true), WHATSAPP_POPUP_INTERVAL_MS);
-    const firstShow = setTimeout(() => setShowPopup(true), WHATSAPP_POPUP_INTERVAL_MS);
-    return () => {
-      clearInterval(showTimer);
-      clearTimeout(firstShow);
-    };
+    return () => clearInterval(showTimer);
   }, [whatsappUrl, whatsappPopupText]);
 
   useEffect(() => {
@@ -166,9 +164,9 @@ export function WhatsAppButton() {
       </a>
     </div>
   );
-}
+});
 
-export function CookieBar() {
+export const CookieBar = memo(function CookieBar() {
   const c = usePageContent('global');
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -203,4 +201,4 @@ export function CookieBar() {
       </div>
     </div>
   );
-}
+});

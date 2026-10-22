@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { memo, Fragment } from 'react';
 import { useCollection } from '@/lib/siteContent';
 import { FormattedText } from '@/components/ui/FormattedText';
 
@@ -32,7 +32,7 @@ const defaultTestimonials: Testimonial[] = [
 const COPIES = 3;
 
 /** The homepage testimonial marquee, fed by the Testimonials list. */
-export default function TestimonialMarquee() {
+function TestimonialMarquee() {
   const items = useCollection<Testimonial>('testimonials', defaultTestimonials, (t) => ({
     quote: t.quote,
     author: t.name,
@@ -63,3 +63,6 @@ export default function TestimonialMarquee() {
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(TestimonialMarquee);

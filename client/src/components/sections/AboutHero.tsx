@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { memo, useEffect, useId, useRef } from 'react';
 import { Megaphone, Repeat, Sparkles, type LucideIcon } from 'lucide-react';
 import { HeroButtons } from '@/components/layout/PageShell';
 import { DirectionalReveal, Reveal } from '@/components/ui/ScrollMotion';
@@ -163,7 +163,7 @@ function useFallingCards(count: number) {
 }
 
 // About hero: copy plus three cards hanging from one screw in their top-left corner (cards sit left of the copy on desktop).
-export default function AboutHero({ content: c }: { content: Record<string, string> }) {
+function AboutHero({ content: c }: { content: Record<string, string> }) {
   const cards = splitLines(c.heroPillars).slice(0, ICONS.length).map((line) => {
     const bar = line.indexOf('|');
     return bar === -1 ? { title: line, text: '' } : { title: line.slice(0, bar).trim(), text: line.slice(bar + 1).trim() };
@@ -209,3 +209,6 @@ export default function AboutHero({ content: c }: { content: Record<string, stri
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(AboutHero);

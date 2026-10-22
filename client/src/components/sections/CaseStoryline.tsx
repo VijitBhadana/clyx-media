@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { pageDefaults, splitLines } from '@/lib/pageContent';
 import '@/styles/case-story.css';
 import { FormattedText } from '@/components/ui/FormattedText';
@@ -81,7 +81,7 @@ const TIP_START = 0.7;
 // "Product storyline" on the Case Studies page. From 768px the dark panel pins below the header and page scroll
 // slides the storyline to the left; the yellow line draws ahead of it and each brand's stem grows up or down
 // as the line reaches it. Below 768px it is a vertical timeline whose chapters appear as they scroll in.
-export default function CaseStoryline({ content: c = pageDefaults('caseStudies') }: { content?: Record<string, string> }) {
+function CaseStoryline({ content: c = pageDefaults('caseStudies') }: { content?: Record<string, string> }) {
   const chapters = useMemo(() => chaptersOf(c.storyItems || ''), [c.storyItems]);
   const lines = (c.storyTitle || '').split('\n').filter(Boolean);
 
@@ -221,3 +221,6 @@ export default function CaseStoryline({ content: c = pageDefaults('caseStudies')
     </section>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CaseStoryline);

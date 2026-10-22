@@ -1,5 +1,5 @@
-import { usePageTitle } from '@/hooks/usePageMeta';
-import React, { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { usePageSeo } from '@/hooks/usePageMeta';
+import React, { memo, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import Header from '../components/layout/Header';
 import { Footer, WhatsAppButton, CookieBar } from '../components/layout/Footer';
 import CoverFlowCarousel, { clyxCampaigns, type CampaignItem } from '../components/sections/CoverFlowCarousel';
@@ -26,7 +26,7 @@ const NUMBER = /^(\D*?)(\d+(?:\.\d+)?)(.*)$/;
 
 // "₹30 Lakh" counts up from zero (prefix "₹", target 30, suffix " Lakh") the first time it scrolls into view.
 // The span is keyed by the value, so edited copy mounts a fresh span and counts again.
-function Counter({ value, className, style }: { value: string; className?: string; style?: React.CSSProperties }) {
+const Counter = memo(function Counter({ value, className, style }: { value: string; className?: string; style?: React.CSSProperties }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isNumber = NUMBER.test(value);
 
@@ -64,7 +64,7 @@ function Counter({ value, className, style }: { value: string; className?: strin
       {value}
     </span>
   );
-}
+});
 
 // Starting height (%) of each day's bar in the laptop chart; the mobile ring uses the same values.
 const CHART_HEIGHTS = [42, 58, 72, 66, 86, 96, 90];
@@ -79,10 +79,12 @@ const RING_HIGH = [255, 222, 89];
 const ringColor = (t: number) => `rgb(${RING_LOW.map((lo, i) => Math.round(lo + (RING_HIGH[i] - lo) * t)).join(',')})`;
 
 type DashStat = { label: string; value: string; note: string };
+// Shared style object, so the memoized Counter sees the same prop on every render.
+const YELLOW_TEXT: React.CSSProperties = { color: "var(--clyx-yellow)" };
 
 // Mobile stand-in for the laptop dashboard: a ring of the week's revenue by day, 30-day revenue in the middle
 // and the other stats below. Segments sweep in the first time the card scrolls into view.
-function EngineRing({ c, days, stats }: { c: Record<string, string>; days: string[]; stats: DashStat[] }) {
+const EngineRing = memo(function EngineRing({ c, days, stats }: { c: Record<string, string>; days: string[]; stats: DashStat[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useScrollReveal(ref);
   const total = CHART_HEIGHTS.reduce((sum, h) => sum + h, 0);
@@ -149,14 +151,14 @@ function EngineRing({ c, days, stats }: { c: Record<string, string>; days: strin
         {rest.filter(Boolean).map((stat, i) => (
           <div key={i} className="dash-stat-box">
             <div className="lbl">{stat.label}</div>
-            <Counter value={stat.value} className="val" style={i === 0 ? { color: "var(--clyx-yellow)" } : undefined} />
+            <Counter value={stat.value} className="val" style={i === 0 ? YELLOW_TEXT : undefined} />
             <div className="change">{stat.note}</div>
           </div>
         ))}
       </div>
     </div>
   );
-}
+});
 
 // Parallax depth of each hero clip card (read by useLandingMotion).
 const CLIP_DEPTHS = ['0.04', '0.07', '0.10', '0.06', '0.09'];
@@ -165,7 +167,7 @@ const LOADER_MS = 1450;
 const HERO_DEFAULTS = sectionDefaults('home', 'hero');
 
 export default function LandingV1() {
-  usePageTitle('CLYX Media — Performance Creative & Creator Ads');
+  usePageSeo('/');
   const rootRef = useRef<HTMLDivElement>(null);
   const [showLoader] = useState(shouldPlayIntroLoader);
   const [loaderDone, setLoaderDone] = useState(false);
@@ -176,15 +178,20 @@ export default function LandingV1() {
   const [heroLine1, ...heroRest] = String(hero.headline || '').split(/\s+into\s+/i);
   const heroLine2 = heroRest.join(' into ');
   const heroPhrases = useMemo(() => splitLines(c.heroRotating), [c.heroRotating]);
-  const marquee = splitLines(c.marqueeItems);
-  const clips = CLIP_DEPTHS.map((depth, i) => ({
+  // Derived once per content change, so the loader finishing or the newsletter form updating does not rebuild
+  // them, and the memoized sections below (EngineRing, ServiceBook, …) see the same props and skip re-rendering.
+  const marquee = useMemo(() => splitLines(c.marqueeItems), [c.marqueeItems]);
+  const clips = useMemo(() => CLIP_DEPTHS.map((depth, i) => ({
     depth,
     image: c[`clip${i + 1}Image`],
     label: c[`clip${i + 1}Label`],
     metric: c[`clip${i + 1}Metric`],
-  }));
-  const dashStats = [1, 2, 3, 4].map((n) => ({ label: c[`dashStat${n}Label`], value: c[`dashStat${n}Value`], note: c[`dashStat${n}Note`] }));
-  const chartDays = splitLines(c.dashChartDays);
+  })), [c]);
+  const dashStats = useMemo(
+    () => [1, 2, 3, 4].map((n) => ({ label: c[`dashStat${n}Label`], value: c[`dashStat${n}Value`], note: c[`dashStat${n}Note`] })),
+    [c],
+  );
+  const chartDays = useMemo(() => splitLines(c.dashChartDays), [c.dashChartDays]);
 
   const campaigns = useCollection<CampaignItem>('campaigns', clyxCampaigns, (item) => ({
     tag: item.category ? `#${String(item.category).toUpperCase()}` : '',
@@ -336,7 +343,7 @@ export default function LandingV1() {
                   {dashStats.map((stat, i) => (
                     <div key={i} className="dash-stat-box">
                       <div className="lbl">{stat.label}</div>
-                      <Counter value={stat.value} className="val" style={i === 0 ? { color: "var(--clyx-yellow)" } : undefined} />
+                      <Counter value={stat.value} className="val" style={i === 0 ? YELLOW_TEXT : undefined} />
                       <div className="change">{stat.note}</div>
                     </div>
                   ))}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react';
 import { isExternalHref, parseLinks, safeHref, usePageContent } from '@/lib/pageContent';
@@ -12,7 +12,8 @@ const EASE = 'cubic-bezier(.23,1,.32,1)';
 // A slight overshoot, like the spring the hover pill used to have.
 const PILL_EASE = 'cubic-bezier(.34,1.25,.64,1)';
 
-export default function Header() {
+// Memoized: it takes no props, so a page re-rendering (loader done, form state, filters) never re-renders the header.
+export default memo(function Header() {
   const [location] = useLocation();
   const c = usePageContent('global');
   const [open, setOpen] = useState(false);
@@ -66,13 +67,14 @@ export default function Header() {
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
-  const toggle = () => setDark(prev => !prev);
-  const showPill = (e: MouseEvent<HTMLAnchorElement>) => setPill({ left: e.currentTarget.offsetLeft, width: e.currentTarget.offsetWidth });
+  const toggle = useCallback(() => setDark(prev => !prev), []);
+  const showPill = useCallback((e: MouseEvent<HTMLAnchorElement>) => setPill({ left: e.currentTarget.offsetLeft, width: e.currentTarget.offsetWidth }), []);
 
-  const nav = parseLinks(c.navLinks);
+  // Parsed once per edit of the menu, not on every hover / scroll state change.
+  const nav = useMemo(() => parseLinks(c.navLinks), [c.navLinks]);
   // A sub-page such as /blog/some-article keeps its section (Blog) highlighted.
-  const activeHref = (nav.find(item => pathOf(item.href) === location)
-    ?? nav.find(item => pathOf(item.href) !== '/' && location.startsWith(`${pathOf(item.href)}/`)))?.href;
+  const activeHref = useMemo(() => (nav.find(item => pathOf(item.href) === location)
+    ?? nav.find(item => pathOf(item.href) !== '/' && location.startsWith(`${pathOf(item.href)}/`)))?.href, [nav, location]);
   const ctaHref = safeHref(c.headerCtaUrl || '/contact');
   const linkTarget = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noreferrer' } : {});
 
@@ -238,7 +240,7 @@ export default function Header() {
     </header>
     </>
   );
-}
+});
 
 // Keyed by theme, so switching remounts the icon and its drop-in animation plays again.
 function ThemeIcon({ dark, size }: { dark: boolean; size: number }) {

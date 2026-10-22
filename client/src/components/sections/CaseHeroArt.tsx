@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import base from '@/assets/case-hero/base.webp';
 import glass from '@/assets/case-hero/glass.webp';
 import hand from '@/assets/case-hero/hand.webp';
@@ -36,7 +36,7 @@ const icons = [
   { src: icon8, x: 3280, y: 1261, w: 284, h: 291 },
 ];
 
-export default function CaseHeroArt() {
+function CaseHeroArt() {
   return (
     <div className="csi" aria-hidden="true">
       <img className="csi-base" src={base} alt="" width={1600} height={908} decoding="async" />
@@ -59,3 +59,6 @@ export default function CaseHeroArt() {
     </div>
   );
 }
+
+// Memoized: re-renders only when its props change, not on every parent render.
+export default memo(CaseHeroArt);

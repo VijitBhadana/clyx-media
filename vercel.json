@@ -1,5 +1,25 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/about", "destination": "/_seo/about.html" },
+    { "source": "/services", "destination": "/_seo/services.html" },
+    { "source": "/services/influencer-marketing", "destination": "/_seo/services/influencer-marketing.html" },
+    { "source": "/services/performance-marketing", "destination": "/_seo/services/performance-marketing.html" },
+    { "source": "/services/social-media-management", "destination": "/_seo/services/social-media-management.html" },
+    { "source": "/services/ugc-videos", "destination": "/_seo/services/ugc-videos.html" },
+    { "source": "/services/website-development", "destination": "/_seo/services/website-development.html" },
+    { "source": "/services/shopify-store-cro", "destination": "/_seo/services/shopify-store-cro.html" },
+    { "source": "/portfolio", "destination": "/_seo/portfolio.html" },
+    { "source": "/case-studies", "destination": "/_seo/case-studies.html" },
+    { "source": "/creators", "destination": "/_seo/creators.html" },
+    { "source": "/blog", "destination": "/_seo/blog.html" },
+    { "source": "/careers", "destination": "/_seo/careers.html" },
+    { "source": "/courses", "destination": "/_seo/courses.html" },
+    { "source": "/contact", "destination": "/_seo/contact.html" },
+    { "source": "/privacy", "destination": "/_seo/privacy.html" },
+    { "source": "/terms", "destination": "/_seo/terms.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

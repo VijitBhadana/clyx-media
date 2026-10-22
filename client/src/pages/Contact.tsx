@@ -1,4 +1,4 @@
-import { usePageTitle } from '@/hooks/usePageMeta';
+import { usePageSeo } from '@/hooks/usePageMeta';
 import { useState, type FormEvent } from 'react';
 import { ArrowUpRight, Mail, MessageCircle, CalendarDays, CheckCircle2, Loader2 } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
@@ -12,7 +12,7 @@ type Status = { kind: 'idle' | 'sending' | 'done' } | { kind: 'error'; message: 
 const field = 'w-full border-b border-grid bg-transparent px-0 py-4 text-lg outline-none focus:border-blue';
 const labelCls = 'block text-[10px] font-semibold uppercase tracking-[.16em] text-muted';
 
-export default function Contact(){usePageTitle('Contact | CLYX Media');
+export default function Contact(){usePageSeo('/contact');
   const c=usePageContent('contact');
   const [status,setStatus]=useState<Status>({kind:'idle'});
   const sending=status.kind==='sending';
