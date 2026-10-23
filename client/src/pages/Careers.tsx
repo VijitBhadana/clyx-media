@@ -104,9 +104,9 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-white/80 transition-transform duration-300 group-hover:scale-x-100"/>
       <span aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"/>
       <div className="flex items-center justify-between">
-        <span className="display grid h-8 w-8 place-items-center rounded-lg border border-white/30 bg-white/10 text-xs font-semibold tabular-nums text-white transition-colors duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#0B6B5C]">{String(i+1).padStart(2,'0')}</span>
+        <span className="display grid h-8 w-8 place-items-center rounded-lg border border-white/30 bg-white/10 text-xs font-semibold tabular-nums text-white transition-colors duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#013AA3]">{String(i+1).padStart(2,'0')}</span>
         {role.status&&role.status!=='Open'&&(urgent?<span className="role-urgent-badge ml-2 mr-auto"><span className="role-urgent-dot" aria-hidden/><Flame size={11}/>{role.status}</span>:<span className="ml-2 mr-auto rounded-full bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.14em] text-[#1A1A1D]">{role.status}</span>)}
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white transition-colors duration-300 group-hover:bg-white group-hover:text-[#0B6B5C]" aria-hidden><ArrowUpRight size={14} className="transition-transform duration-300 group-hover:rotate-45"/></span>
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white transition-colors duration-300 group-hover:bg-white group-hover:text-[#013AA3]" aria-hidden><ArrowUpRight size={14} className="transition-transform duration-300 group-hover:rotate-45"/></span>
       </div>
       {role.department&&<p className="mt-4 text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">{role.department}</p>}
       <h3 className={`display ${role.department?'mt-1':'mt-4'} text-lg font-semibold md:text-xl`}>{role.title}</h3>
@@ -117,7 +117,7 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-transparent whitespace-nowrap px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-white"><Briefcase size={12}/>{kind}</span>
           {places.map(place=><span key={place} className="inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-transparent whitespace-nowrap px-3 py-1 text-[10px] font-semibold uppercase tracking-[.14em] text-white/90"><MapPin size={12}/>{place}</span>)}
         </div>:<span/>}
-        <button type="button" onClick={()=>setDescRole(role)} onFocus={loadDescDialog} className="relative z-[2] inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/30 bg-white/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-white transition-colors hover:bg-white hover:text-[#0B6B5C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><FileText size={12}/>{c.rolesDescButton}</button>
+        <button type="button" onClick={()=>setDescRole(role)} onFocus={loadDescDialog} className="relative z-[2] inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/30 bg-white/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-white transition-colors hover:bg-white hover:text-[#013AA3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><FileText size={12}/>{c.rolesDescButton}</button>
       </div>
     </div>})}</div>
       </div>)}

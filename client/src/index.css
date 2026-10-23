@@ -753,11 +753,11 @@ button:active,a:active{transform:scale(.97)}
 /* Dark mode turns inner-page sections into frosted dark panels; keep this one sage green with its dot grid (it keeps the panel's rounded inset shape). */
 .dark .inner-page-shell .page-content-reveal > section.roles-band:not(.bg-blue):not(.bg-yellow) { background: linear-gradient(160deg, #D3E6D3 0%, #C2DCC5 45%, #B3D2BB 100%) !important; border-color: rgba(23,58,51,0.15); }
 .dark .inner-page-shell .page-content-reveal > section.roles-band:not(.bg-blue):not(.bg-yellow)::before { background: radial-gradient(rgba(23,58,51,0.2) 1px, transparent 1px) 0 0 / 26px 26px; }
-/* Role cards on the band: emerald-teal gradient (brighter top, deeper bottom) with a soft white glow in the top corner; white ink. */
-.role-card-dark { background: radial-gradient(120% 80% at 100% 0%, rgba(255,255,255,0.16), transparent 55%), linear-gradient(175deg, #20A38C 0%, #138A77 50%, #0B6B5C 100%); border-color: rgba(255,255,255,0.18) !important; box-shadow: 0 18px 40px -24px rgba(6,70,58,0.75) !important; }
-.role-card-dark:hover { box-shadow: 0 28px 56px -22px rgba(6,70,58,0.8) !important; }
+/* Role cards on the band: brand-blue gradient (brighter top, deeper bottom) with a soft white glow in the top corner; white ink. */
+.role-card-dark { background: radial-gradient(120% 80% at 100% 0%, rgba(255,255,255,0.16), transparent 55%), linear-gradient(175deg, #2563D9 0%, #0B47B8 50%, #013AA3 100%); border-color: rgba(255,255,255,0.18) !important; box-shadow: 0 18px 40px -24px rgba(0,35,102,0.75) !important; }
+.role-card-dark:hover { box-shadow: 0 28px 56px -22px rgba(0,35,102,0.8) !important; }
 /* "Hiring urgently" roles: coral corner glow, a pulsing coral ring and a coral badge so they stand out from the rest. */
-.role-card-dark.role-card-urgent { background: radial-gradient(120% 80% at 100% 0%, rgba(255,112,84,0.30), transparent 55%), linear-gradient(175deg, #20A38C 0%, #138A77 50%, #0B6B5C 100%); }
+.role-card-dark.role-card-urgent { background: radial-gradient(120% 80% at 100% 0%, rgba(255,112,84,0.30), transparent 55%), linear-gradient(175deg, #2563D9 0%, #0B47B8 50%, #013AA3 100%); }
 .role-cards .role-card.role-card-urgent { border-color: rgba(255,122,92,0.8) !important; box-shadow: 0 0 0 1px rgba(255,122,92,0.6), 0 18px 44px -18px rgba(255,98,66,0.6) !important; }
 .role-cards .role-card.role-card-urgent:hover { border-color: #FF7A5C !important; box-shadow: 0 0 0 1px #FF7A5C, 0 28px 56px -18px rgba(255,98,66,0.75) !important; }
 .role-card-urgent::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 2px rgba(255,122,92,0.9); animation: role-urgent-ring 2.2s ease-in-out infinite; }
@@ -766,35 +766,35 @@ button:active,a:active{transform:scale(.97)}
 .role-urgent-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: role-urgent-dot 1.6s infinite; }
 @keyframes role-urgent-dot { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 70% { box-shadow: 0 0 0 6px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
 @media (prefers-reduced-motion: reduce) { .role-card-urgent::after, .role-urgent-dot { animation: none; } .role-card-urgent::after { opacity: .8; } }
-/* Open-roles board: frosted search + filter bar, team chips, and a heading per team group. Active states use the cards' teal. */
-.roles-toolbar { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 20px; background: rgba(255,255,255,0.62); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(23,58,51,0.06), 0 18px 40px -28px rgba(23,58,51,0.45); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); }
+/* Open-roles board: frosted search + filter bar, team chips, and a heading per team group. Active states use the cards' brand blue. */
+.roles-toolbar { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 20px; background: rgba(255,255,255,0.62); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(1,35,102,0.06), 0 18px 40px -28px rgba(1,35,102,0.45); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); }
 @media (min-width: 768px) { .roles-toolbar { padding: 14px 16px; } }
-.roles-search { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-width: 0; height: 46px; padding: 0 8px 0 16px; border-radius: 999px; background: #EEF5F0; border: 1px solid rgba(23,58,51,0.12); color: #173A33; cursor: text; transition: border-color .2s, box-shadow .2s; }
-.roles-search:focus-within { border-color: #0E7A68; box-shadow: 0 0 0 4px rgba(14,122,104,0.18); }
+.roles-search { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-width: 0; height: 46px; padding: 0 8px 0 16px; border-radius: 999px; background: #EEF3FC; border: 1px solid rgba(1,35,102,0.12); color: #0B2A66; cursor: text; transition: border-color .2s, box-shadow .2s; }
+.roles-search:focus-within { border-color: #013AA3; box-shadow: 0 0 0 4px rgba(1,58,163,0.18); }
 .roles-search input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; font-size: 14px; color: inherit; }
-.roles-search input::placeholder { color: rgba(23,58,51,0.45); }
+.roles-search input::placeholder { color: rgba(1,35,102,0.45); }
 .roles-search input::-webkit-search-cancel-button { display: none; }
-.roles-search-clear { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(23,58,51,0.07); color: #173A33; transition: background .2s; }
-.roles-search-clear:hover { background: rgba(23,58,51,0.14); }
-.roles-kbd { display: none; min-width: 26px; height: 26px; place-items: center; padding: 0 6px; border-radius: 8px; border: 1px solid rgba(23,58,51,0.15); background: rgba(23,58,51,0.04); font-family: inherit; font-size: 12px; font-weight: 600; color: rgba(23,58,51,0.55); }
+.roles-search-clear { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(1,35,102,0.07); color: #0B2A66; transition: background .2s; }
+.roles-search-clear:hover { background: rgba(1,35,102,0.14); }
+.roles-kbd { display: none; min-width: 26px; height: 26px; place-items: center; padding: 0 6px; border-radius: 8px; border: 1px solid rgba(1,35,102,0.15); background: rgba(1,35,102,0.04); font-family: inherit; font-size: 12px; font-weight: 600; color: rgba(1,35,102,0.55); }
 @media (hover: hover) and (min-width: 768px) { .roles-kbd { display: grid; } }
-.roles-select { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 14px; border-radius: 999px; background: #EEF5F0; border: 1px solid rgba(23,58,51,0.12); color: #173A33; font-size: 13px; font-weight: 600; transition: border-color .2s, box-shadow .2s; }
-.roles-select:focus-within { border-color: #0E7A68; box-shadow: 0 0 0 4px rgba(14,122,104,0.18); }
+.roles-select { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 14px; border-radius: 999px; background: #EEF3FC; border: 1px solid rgba(1,35,102,0.12); color: #0B2A66; font-size: 13px; font-weight: 600; transition: border-color .2s, box-shadow .2s; }
+.roles-select:focus-within { border-color: #013AA3; box-shadow: 0 0 0 4px rgba(1,58,163,0.18); }
 .roles-select select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; outline: 0; padding-right: 2px; font: inherit; color: inherit; cursor: pointer; }
 .roles-select > svg { opacity: .6; flex-shrink: 0; pointer-events: none; }
-.roles-urgent-toggle { display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 16px; border-radius: 999px; background: #6DB5A3; border: 1px solid rgba(255,255,255,0.45); color: #123A32; font-size: 13px; font-weight: 600; transition: background .2s, color .2s, box-shadow .2s; }
-.roles-urgent-toggle:hover { background: #5EA894; }
-.roles-urgent-toggle.is-on { background: linear-gradient(150deg, #0B6B5C, #1A9A84); border-color: transparent; color: #fff; box-shadow: 0 8px 20px -10px rgba(11,107,92,0.9); }
+.roles-urgent-toggle { display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 16px; border-radius: 999px; background: #7FA0E0; border: 1px solid rgba(255,255,255,0.45); color: #0B2A66; font-size: 13px; font-weight: 600; transition: background .2s, color .2s, box-shadow .2s; }
+.roles-urgent-toggle:hover { background: #6B90D8; }
+.roles-urgent-toggle.is-on { background: linear-gradient(150deg, #013AA3, #2563D9); border-color: transparent; color: #fff; box-shadow: 0 8px 20px -10px rgba(1,58,163,0.9); }
 @media (max-width: 767px) { .roles-search { height: 44px; } .roles-select, .roles-urgent-toggle { height: 38px; padding: 0 12px; font-size: 12px; } }
 .roles-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; padding: 2px 4px; }
 .roles-chips::-webkit-scrollbar { display: none; }
-.roles-chip { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 6px 0 14px; border-radius: 999px; background: linear-gradient(175deg, #6CB3A2, #529B8A); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 6px 14px -10px rgba(6,70,58,0.8); white-space: nowrap; transition: background .2s, color .2s, border-color .2s, box-shadow .2s; }
-.roles-chip:hover { background: linear-gradient(175deg, #5FA897, #468F7E); color: #fff; }
-.roles-chip.is-on { background: linear-gradient(175deg, #2E8F7D, #0E6B5B); border-color: rgba(255,255,255,0.55); color: #fff; box-shadow: 0 0 0 2px rgba(14,107,91,0.25), 0 8px 20px -10px rgba(6,70,58,0.9); }
+.roles-chip { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 6px 0 14px; border-radius: 999px; background: linear-gradient(175deg, #6E93DB, #4F78C9); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 6px 14px -10px rgba(0,35,102,0.8); white-space: nowrap; transition: background .2s, color .2s, border-color .2s, box-shadow .2s; }
+.roles-chip:hover { background: linear-gradient(175deg, #5F86D3, #3F69BD); color: #fff; }
+.roles-chip.is-on { background: linear-gradient(175deg, #1F5BD1, #013AA3); border-color: rgba(255,255,255,0.55); color: #fff; box-shadow: 0 0 0 2px rgba(1,58,163,0.25), 0 8px 20px -10px rgba(0,35,102,0.9); }
 .roles-empty .roles-chip { padding: 0 16px; }
 .roles-chip-count { display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: rgba(255,255,255,0.22); font-size: 11px; font-variant-numeric: tabular-nums; }
 .roles-chip.is-on .roles-chip-count { background: rgba(255,255,255,0.28); }
-.roles-chip:focus-visible, .roles-urgent-toggle:focus-visible, .roles-search-clear:focus-visible { outline: 2px solid #0E7A68; outline-offset: 2px; }
+.roles-chip:focus-visible, .roles-urgent-toggle:focus-visible, .roles-search-clear:focus-visible { outline: 2px solid #013AA3; outline-offset: 2px; }
 .roles-group + .roles-group { margin-top: 28px; }
 .roles-group-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .roles-group-head h3 { font-size: 18px; font-weight: 600; color: #173A33; }
