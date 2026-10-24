@@ -245,12 +245,15 @@ function FlipBook({ c, items, logoSrc }: { c: Copy; items: Service[]; logoSrc?: 
         const t = i < TURNS ? easeInOut(clamp01((progress - i - TURN_START) / TURN_LENGTH)) : 0;
         if (i === 0) open = t;
         if (t >= 0.5) turned += 1;
-        const key = t.toFixed(4);
+        // Right pile: earlier leaves on top. Left pile: later leaves on top. A leaf mid-turn sits above both.
+        const z = t > 0 && t < 1 ? LEAVES + 1 : t >= 0.5 ? i + 1 : LEAVES - i;
+        // The stacking order is part of the key: a leaf a hair off 0 or 1 rounds to the same t as at rest, and without
+        // z it would keep its mid-turn z-index and cover the open spread with the wrong chapter.
+        const key = `${t.toFixed(4)}|${z}`;
         if (last[i] === key) return;
         last[i] = key;
         leaf.style.transform = `rotateY(${(-180 * t).toFixed(2)}deg)`;
-        // Right pile: earlier leaves on top. Left pile: later leaves on top. A leaf mid-turn sits above both.
-        leaf.style.zIndex = String(t > 0 && t < 1 ? LEAVES + 1 : t >= 0.5 ? i + 1 : LEAVES - i);
+        leaf.style.zIndex = String(z);
         leaf.style.setProperty('--front-shade', (Math.min(t * 2, 1) * 0.5).toFixed(3));
         leaf.style.setProperty('--back-shade', (Math.min((1 - t) * 2, 1) * 0.5).toFixed(3));
       });

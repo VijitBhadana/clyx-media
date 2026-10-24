@@ -1,6 +1,6 @@
 import { usePageSeo } from '@/hooks/usePageMeta';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Briefcase, ChevronDown, Clock, FileText, Flame, IndianRupee, MapPin, Rocket, Search, X } from 'lucide-react';
+import { ArrowUpRight, Briefcase, Clock, FileText, Flame, IndianRupee, MapPin, Rocket } from 'lucide-react';
 import PageShell from '@/components/layout/PageShell';
 import { RevealWords } from '@/components/ui/ScrollMotion';
 import CareersValuesFlow from '@/components/sections/CareersValuesFlow';
@@ -60,41 +60,15 @@ const roleGroup=(r:Role)=>r.department?.trim()||(/business|sales|client|partners
 const roleParts=(r:Role)=>{const [kind='',...places]=(r.type||'').split('/').map(x=>x.trim()).filter(Boolean);return {kind,places};};
 const uniq=(xs:string[])=>[...new Set(xs.filter(Boolean))];
 function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [applyRole,setApplyRole]=useState<string|null>(null);const lastRole=useRef<string|null>(null);if(applyRole)lastRole.current=applyRole;const [descRole,setDescRole]=useState<Role|null>(null);const lastDesc=useRef<Role|null>(null);if(descRole)lastDesc.current=descRole;const preload=()=>{loadDescDialog();loadApplyDialog();};const gridRef=useRef<HTMLDivElement>(null);const gridInView=useScrollReveal(gridRef);const gridShown=useRef(false);if(gridInView)gridShown.current=true;
-  // Search + filters over the open roles; results are shown grouped by team.
-  const [query,setQuery]=useState('');const [team,setTeam]=useState('All');const [kindF,setKindF]=useState('All');const [placeF,setPlaceF]=useState('All');const [urgentOnly,setUrgentOnly]=useState(false);const searchRef=useRef<HTMLInputElement>(null);
+  // Open roles, shown grouped by team.
   const meta=useMemo(()=>roles.map((role,n)=>({role,n,group:roleGroup(role),...roleParts(role),urgent:/urgent/i.test(role.status||'')})),[roles]);
-  const teamOrder=useMemo(()=>(c.rolesTeamOrder||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean),[c.rolesTeamOrder]);const teams=useMemo(()=>{const rank=(t:string)=>{const i=teamOrder.indexOf(t.toLowerCase());return i<0?teamOrder.length:i;};return uniq(meta.map(m=>m.group)).sort((a,b)=>rank(a)-rank(b));},[meta,teamOrder]);const kinds=useMemo(()=>uniq(meta.map(m=>m.kind)),[meta]);const places=useMemo(()=>uniq(meta.flatMap(m=>m.places)),[meta]);const anyUrgent=meta.some(m=>m.urgent);
-  // Which parts of the search & filters bar the admin panel has switched on.
-  const on=(k:string)=>c[k]!=='Hide';const showBar=on('rolesSearchShow'),showBox=showBar&&on('rolesSearchBox'),showKinds=showBar&&on('rolesTypeFilter')&&kinds.length>1,showPlaces=showBar&&on('rolesPlaceFilter')&&places.length>1,showUrgent=showBar&&on('rolesUrgentFilter')&&anyUrgent,showChips=showBar&&on('rolesTeamChips');
-  const q=query.trim().toLowerCase();
-  const passes=(m:typeof meta[number],skipTeam=false)=>(skipTeam||team==='All'||m.group===team)&&(kindF==='All'||m.kind===kindF)&&(placeF==='All'||m.places.includes(placeF))&&(!urgentOnly||m.urgent)&&(!q||[m.role.title,m.role.detail,m.role.skills,m.role.department,m.group,m.role.type,m.role.experience].join(' ').toLowerCase().includes(q));
-  const shown=meta.filter(m=>passes(m));const teamCount=(t:string)=>meta.filter(m=>passes(m,true)&&(t==='All'||m.group===t)).length;
-  const groups=teams.map(t=>({name:t,items:shown.filter(m=>m.group===t)})).filter(g=>g.items.length);
-  const filtered=!!q||team!=='All'||kindF!=='All'||placeF!=='All'||urgentOnly;const clearAll=()=>{setQuery('');setTeam('All');setKindF('All');setPlaceF('All');setUrgentOnly(false);};
-  // "/" jumps to the search box (unless the visitor is already typing somewhere).
-  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{const t=e.target as HTMLElement;if(e.key!=='/'||e.ctrlKey||e.metaKey||e.altKey||t.closest?.('input,textarea,select,[contenteditable="true"]'))return;const box=searchRef.current;if(!box||!box.getClientRects().length)return;e.preventDefault();box.focus();};window.addEventListener('keydown',onKey);return ()=>window.removeEventListener('keydown',onKey);},[]);
+  const teamOrder=useMemo(()=>(c.rolesTeamOrder||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean),[c.rolesTeamOrder]);const teams=useMemo(()=>{const rank=(t:string)=>{const i=teamOrder.indexOf(t.toLowerCase());return i<0?teamOrder.length:i;};return uniq(meta.map(m=>m.group)).sort((a,b)=>rank(a)-rank(b));},[meta,teamOrder]);
+  const groups=teams.map(t=>({name:t,items:meta.filter(m=>m.group===t)})).filter(g=>g.items.length);
   let pos=0;
   return <section id="open-roles" className="relative scroll-mt-20 overflow-hidden roles-band text-[#173A33]">
   <div className="container relative py-10 md:py-12">
     <div className="mb-5 md:mb-6">{c.rolesLabel&&<span className="roles-eyebrow"><span className="roles-eyebrow-dot" aria-hidden/>{c.rolesLabel}</span>}{c.rolesTitle&&<h2 className="display vf-heading text-2xl font-bold md:text-3xl">{c.rolesTitle}{c.rolesHighlight&&<> <AnimatedHighlight text={c.rolesHighlight}/></>}</h2>}</div>
-    {roles.length>0&&showBar&&(showBox||showKinds||showPlaces||showUrgent||showChips)&&<div className="roles-toolbar" role="search">
-      {(showBox||showKinds||showPlaces||showUrgent)&&<div className="flex flex-col gap-2.5 md:flex-row md:items-center">
-        {showBox&&<label className="roles-search">
-          <Search size={17} className="shrink-0 opacity-55" aria-hidden/>
-          <input ref={searchRef} type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={c.rolesSearchPlaceholder||'Search roles, skills or teams'} aria-label="Search open roles"/>
-          {query?<button type="button" onClick={()=>{setQuery('');searchRef.current?.focus();}} className="roles-search-clear" aria-label="Clear search"><X size={14}/></button>:<kbd className="roles-kbd" aria-hidden>/</kbd>}
-        </label>}
-        <div className="flex flex-wrap items-center gap-2">
-          {showKinds&&<label className="roles-select"><Briefcase size={14} aria-hidden/><select value={kindF} onChange={e=>setKindF(e.target.value)} aria-label="Job type"><option value="All">{c.rolesTypeAll||'All types'}</option>{kinds.map(k=><option key={k} value={k}>{k}</option>)}</select><ChevronDown size={14} aria-hidden/></label>}
-          {showPlaces&&<label className="roles-select"><MapPin size={14} aria-hidden/><select value={placeF} onChange={e=>setPlaceF(e.target.value)} aria-label="Location"><option value="All">{c.rolesPlaceAll||'All locations'}</option>{places.map(p=><option key={p} value={p}>{p}</option>)}</select><ChevronDown size={14} aria-hidden/></label>}
-          {showUrgent&&<button type="button" aria-pressed={urgentOnly} onClick={()=>setUrgentOnly(v=>!v)} className={`roles-urgent-toggle${urgentOnly?' is-on':''}`}><Flame size={13}/>{c.rolesUrgentLabel||'Hiring urgently'}</button>}
-        </div>
-      </div>}
-      {showChips&&<div className="roles-chips" aria-label="Filter by team">
-        {['All',...teams].map(t=>{const on=team===t;return <button key={t} type="button" aria-pressed={on} onClick={()=>setTeam(t)} className={`roles-chip${on?' is-on':''}`}>{t==='All'?(c.rolesAllChip||'All roles'):t}<span className="roles-chip-count">{teamCount(t)}</span></button>})}
-      </div>}
-    </div>}
-    {roles.length>0&&(on('rolesCountShow')||filtered)&&<div className="mb-3 mt-4 flex items-center justify-between gap-3 text-xs font-medium text-[#173A33]/65" aria-live="polite">{on('rolesCountShow')?<span>Showing <b className="font-semibold text-[#173A33]">{shown.length}</b> of {roles.length} open {roles.length===1?'role':'roles'}</span>:<span/>}{filtered&&<button type="button" onClick={clearAll} className="inline-flex items-center gap-1 font-semibold text-[#173A33] underline-offset-4 hover:underline"><X size={12}/>{c.rolesClearLabel||'Clear filters'}</button>}</div>}
+    {roles.length>0&&c.rolesCountShow!=='Hide'&&<p className="mb-3 text-xs font-medium text-[#173A33]/65"><b className="font-semibold text-[#173A33]">{roles.length}</b> open {roles.length===1?'role':'roles'}</p>}
     <div ref={gridRef} className={`role-cards${gridShown.current?' is-in':''}`}>
       {groups.map(g=><div key={g.name} className="roles-group">
         <div className="roles-group-head"><h3 className="display">{g.name}</h3><span className="roles-group-count">{g.items.length} {g.items.length===1?'opening':'openings'}</span><span className="roles-group-line" aria-hidden/></div>
@@ -121,7 +95,6 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
       </div>
     </div>})}</div>
       </div>)}
-      {roles.length>0&&!shown.length&&<div className="roles-empty"><Search size={22} aria-hidden/><p className="font-semibold">{c.rolesEmptyTitle||'No roles match your search.'}</p>{c.rolesEmptyText&&<p className="text-sm text-[#173A33]/65"><FormattedText text={c.rolesEmptyText}/></p>}<button type="button" onClick={clearAll} className="roles-chip is-on mt-1">{c.rolesClearLabel||'Clear filters'}</button></div>}
     </div>
     {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-[#173A33]/70"><FormattedText text={c.rolesNote} /></p><a href={safeHref(c.applyUrl||'mailto:hr@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-[#0E7A68] hover:text-[#173A33] md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
   </div>
