@@ -1323,6 +1323,7 @@ export const PAGES: PageDef[] = [
           t('chatWhatsappButton', 'WhatsApp button', 'Connect on WhatsApp'),
           long('chatWhatsappMessage', 'Prefilled WhatsApp message', 'Hi CLYX! I have paid for {course}.\nName: {name}\nAmount: {amount}\nUTR / Transaction ID: {utr}\nPlease share my course link.'),
           t('chatNoPayment', 'When no UPI ID or QR is set', 'Online payment is being set up right now. Connect with us on WhatsApp and our team will help you pay and join.'),
+          t('chatNoPrice', 'When the picked course has no price', 'The price for this course is not live yet. Connect with us on WhatsApp and our team will help you join.'),
           t('chatSaveError', 'When saving fails', 'We could not save your details just now, but your payment is safe. Send them to us on WhatsApp and the team will take it from here.'),
           t('chatDuplicate', 'When the UTR was already used', 'This UTR / transaction ID has already been submitted. Please check it in your UPI app and send it again.'),
           t('chatBadName', 'Name too short', 'Please type your name (at least 2 letters).'),

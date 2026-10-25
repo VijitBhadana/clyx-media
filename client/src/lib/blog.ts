@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { defaultArticles, type BlogArticle } from '@/data/blog';
 import { useCollection } from '@/lib/siteContent';
+import { withUniqueSlugs } from '@/lib/slugs';
 
 export type BlogPost = BlogArticle & { slug: string };
 
@@ -17,9 +19,12 @@ const withSlug = (a: BlogArticle): BlogPost => ({ ...a, slug: slugify(a.title) }
 const builtIn = defaultArticles.map(withSlug);
 const builtInBySlug = new Map(builtIn.map((p) => [p.slug, p]));
 
-/** Journal posts from the CMS; an empty excerpt/body falls back to the built-in article with the same slug. */
+/**
+ * Journal posts from the CMS; an empty excerpt/body falls back to the built-in article with the same slug.
+ * Two posts with the same title get different addresses ("-2", "-3"…).
+ */
 export function useBlogPosts(): BlogPost[] {
-  return useCollection('blog', builtIn, (item) => {
+  const posts = useCollection('blog', builtIn, (item) => {
     const slug = slugify(String(item.title ?? ''));
     const known = builtInBySlug.get(slug);
     return {
@@ -34,6 +39,7 @@ export function useBlogPosts(): BlogPost[] {
       image: item.image || known?.image || '',
     };
   });
+  return useMemo(() => (posts === builtIn ? posts : withUniqueSlugs(posts)), [posts]);
 }
 
 export type BodyBlock =

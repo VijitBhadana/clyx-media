@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useCollection } from '@/lib/siteContent';
 import { slugify } from '@/data/caseStudies';
+import { withUniqueSlugs } from '@/lib/slugs';
 
 /** One project card on /portfolio, which opens its own page at /portfolio/<slug>. */
 export interface PortfolioItem {
@@ -92,16 +93,7 @@ function toItem(item: Record<string, any>, i: number): PortfolioItem {
   };
 }
 
-// Two projects with the same name would share an address, so later ones get "-2", "-3"…
-function withUniqueSlugs(items: PortfolioItem[]): PortfolioItem[] {
-  const seen = new Map<string, number>();
-  return items.map((item) => {
-    const n = (seen.get(item.slug) ?? 0) + 1;
-    seen.set(item.slug, n);
-    return n === 1 ? item : { ...item, slug: `${item.slug}-${n}` };
-  });
-}
-
+// Two projects with the same name would share an address, so later ones get "-2", "-3"… (see withUniqueSlugs).
 const defaultPortfolio = withUniqueSlugs(defaultRaw.map(toItem));
 
 /** The portfolio projects from the CMS, shared by the Portfolio page and each project's own page. */

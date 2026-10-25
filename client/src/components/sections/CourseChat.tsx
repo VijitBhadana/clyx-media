@@ -121,7 +121,8 @@ function upiLink(upiId: string, payee: string, amount: number, ref?: string) {
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-type SaveResult = { ok: true } | { ok: false; status: number; error?: string };
+// `field` is the order field the backend refused (newer backends only), e.g. "paymentRef" or "phone".
+type SaveResult = { ok: true } | { ok: false; status: number; error?: string; field?: string };
 
 /** Saves the order, retrying network failures and server errors (a sleeping free backend can take ~50s to wake). */
 async function postOrder(body: Record<string, unknown>): Promise<SaveResult> {
@@ -136,7 +137,7 @@ async function postOrder(body: Record<string, unknown>): Promise<SaveResult> {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) return { ok: true };
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) return { ok: false, status: res.status, error: data.error };
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) return { ok: false, status: res.status, error: data.error, field: data.field };
     } catch {
       // network error or timeout: retry
     }
@@ -389,9 +390,13 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
         say([text(fill(withoutOrderId(c.chatSaved), values)), text(c.chatDone), whatsapp(values)], 'done');
       } else if (result.status === 409) {
         say([text(c.chatDuplicate)], 'utr');
-      } else if (result.status === 400) {
+      } else if (result.status === 400 && result.field === 'phone') {
+        say([text(result.error || c.chatBadPhone)], 'phone');
+      } else if (result.status === 400 && (result.field ?? 'paymentRef') === 'paymentRef') {
+        // Only a wrong UTR is asked again (an older backend sends no `field`; its 400s were about the UTR).
         say([text(result.error || c.chatBadUtrLength), text(c.chatAskUtr)], 'utr');
       } else {
+        // Anything else the buyer cannot fix by retyping: hand over to the team instead of looping.
         say([text(c.chatSaveError), whatsapp(values)], 'failed');
       }
     },
@@ -407,8 +412,10 @@ export default function CourseChat({ open, onClose, courses, preferredId, conten
     // One order ID per purchase; changing the course keeps it. It rides along in the QR's payment note.
     const ref = orderRef || newOrderRef();
     setOrderRef(ref);
-    if (!hasPayment) {
-      say([text(c.chatNoPayment), whatsapp({ name, course: picked.title, amount: formatRupees(picked.price), utr: '' })], 'nopay');
+    // No UPI set up, or a course saved without a price: never show a ₹0 QR the backend would refuse after paying.
+    if (!hasPayment || picked.price <= 0) {
+      const message = hasPayment ? c.chatNoPrice || c.chatNoPayment : c.chatNoPayment;
+      say([text(message), whatsapp({ name, course: picked.title, amount: picked.price > 0 ? formatRupees(picked.price) : '', utr: '' })], 'nopay');
       return;
     }
     say(

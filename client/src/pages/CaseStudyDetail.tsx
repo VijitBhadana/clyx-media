@@ -29,7 +29,8 @@ const FACTS: [CaseFactKey, string][] = [
 
 /** One case study's own page (/case-studies/<slug>), opened from a card on the Case Studies page. */
 export default function CaseStudyDetail() {
-  const { slug = '' } = useParams<{ slug: string }>();
+  // Slugs are lower case; the route also matches "/case-studies/Kulture-Skin", so compare case-insensitively.
+  const slug = (useParams<{ slug: string }>().slug ?? '').toLowerCase();
   const c = usePageContent('caseStudies');
   const services = usePageContent('services');
   const items = useCaseStudies();

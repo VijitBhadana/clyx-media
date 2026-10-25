@@ -15,7 +15,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 /** One service's own page (/services/<slug>), opened from the Services page list. */
 export default function ServiceDetail() {
-  const { slug = '' } = useParams<{ slug: string }>();
+  // Slugs are lower case; the route also matches "/services/UGC-Videos", so compare case-insensitively.
+  const slug = (useParams<{ slug: string }>().slug ?? '').toLowerCase();
   const c = usePageContent('services');
   const rows = useServices();
   const at = rows.findIndex((s) => s.slug === slug);

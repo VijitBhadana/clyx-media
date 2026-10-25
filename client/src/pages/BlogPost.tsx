@@ -61,7 +61,8 @@ function ReadingProgress({ target }: { target: React.RefObject<HTMLElement | nul
 }
 
 export default function BlogPost() {
-  const { slug = '' } = useParams<{ slug: string }>();
+  // Slugs are lower case; the route also matches "/blog/My-Post", so compare case-insensitively.
+  const slug = (useParams<{ slug: string }>().slug ?? '').toLowerCase();
   const posts = useBlogPosts();
   const { data, isFetching } = useSiteContent();
   const c = usePageContent('blog');

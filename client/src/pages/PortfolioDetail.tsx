@@ -20,7 +20,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 /** One project's own page (/portfolio/<slug>), opened from a card on the Portfolio page. */
 export default function PortfolioDetail() {
-  const { slug = '' } = useParams<{ slug: string }>();
+  // Slugs are lower case; the route also matches "/portfolio/Halo-Goods", so compare case-insensitively.
+  const slug = (useParams<{ slug: string }>().slug ?? '').toLowerCase();
   const c = usePageContent('portfolio');
   const services = usePageContent('services');
   const items = usePortfolio();

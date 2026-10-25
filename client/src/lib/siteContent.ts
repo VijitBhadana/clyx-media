@@ -54,9 +54,12 @@ const SCOPES: Record<string, Scope> = {
   other: { blocks: GLOBAL, collections: {} },
 };
 
-/** The content scope of a URL path, e.g. "/blog/some-post" -> the article page's scope. */
+/**
+ * The content scope of a URL path, e.g. "/blog/some-post" -> the article page's scope. Case-insensitive, like the
+ * routes in App.tsx (wouter matches "/About" to the About page, so it must load About's content too).
+ */
 export function scopeForPath(path: string): Scope {
-  const [, first = '', second] = path.split(/[?#]/)[0].split('/');
+  const [, first = '', second] = path.split(/[?#]/)[0].toLowerCase().split('/');
   switch (first) {
     case '': return SCOPES.home;
     case 'about': return SCOPES.about;

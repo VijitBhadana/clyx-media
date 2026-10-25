@@ -65,10 +65,10 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
   const teamOrder=useMemo(()=>(c.rolesTeamOrder||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean),[c.rolesTeamOrder]);const teams=useMemo(()=>{const rank=(t:string)=>{const i=teamOrder.indexOf(t.toLowerCase());return i<0?teamOrder.length:i;};return uniq(meta.map(m=>m.group)).sort((a,b)=>rank(a)-rank(b));},[meta,teamOrder]);
   const groups=teams.map(t=>({name:t,items:meta.filter(m=>m.group===t)})).filter(g=>g.items.length);
   let pos=0;
-  return <section id="open-roles" className="relative scroll-mt-20 overflow-hidden roles-band text-[#173A33]">
+  return <section id="open-roles" className="relative scroll-mt-20 overflow-hidden roles-band text-[#101010]">
   <div className="container relative py-10 md:py-12">
     <div className="mb-5 md:mb-6">{c.rolesLabel&&<span className="roles-eyebrow"><span className="roles-eyebrow-dot" aria-hidden/>{c.rolesLabel}</span>}{c.rolesTitle&&<h2 className="display vf-heading text-2xl font-bold md:text-3xl">{c.rolesTitle}{c.rolesHighlight&&<> <AnimatedHighlight text={c.rolesHighlight}/></>}</h2>}</div>
-    {roles.length>0&&c.rolesCountShow!=='Hide'&&<p className="mb-3 text-xs font-medium text-[#173A33]/65"><b className="font-semibold text-[#173A33]">{roles.length}</b> open {roles.length===1?'role':'roles'}</p>}
+    {roles.length>0&&c.rolesCountShow!=='Hide'&&<p className="mb-3 text-xs font-medium text-[#101010]/65"><b className="font-semibold text-[#101010]">{roles.length}</b> open {roles.length===1?'role':'roles'}</p>}
     <div ref={gridRef} className={`role-cards${gridShown.current?' is-in':''}`}>
       {groups.map(g=><div key={g.name} className="roles-group">
         <div className="roles-group-head"><h3 className="display">{g.name}</h3><span className="roles-group-count">{g.items.length} {g.items.length===1?'opening':'openings'}</span><span className="roles-group-line" aria-hidden/></div>
@@ -96,7 +96,7 @@ function RolesSection({c,roles}:{c:Record<string,string>;roles:Role[]}){const [a
     </div>})}</div>
       </div>)}
     </div>
-    {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-[#173A33]/70"><FormattedText text={c.rolesNote} /></p><a href={safeHref(c.applyUrl||'mailto:hr@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-[#0E7A68] hover:text-[#173A33] md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
+    {c.rolesNote&&<div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><p className="text-sm text-[#101010]/70"><FormattedText text={c.rolesNote} /></p><a href={safeHref(c.applyUrl||'mailto:hr@clyxmedia.com?subject=Careers')} className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[.12em] text-[#0E7A68] hover:text-[#101010] md:self-auto">{c.rolesNoteLink||'Get in touch'}<ArrowUpRight size={14}/></a></div>}
   </div>
   {lastDesc.current&&<Suspense fallback={null}><RoleDescriptionDialog open={descRole!==null} onOpenChange={o=>!o&&setDescRole(null)} role={lastDesc.current} onApply={()=>{const title=lastDesc.current!.title;setDescRole(null);setApplyRole(title);}} content={c}/></Suspense>}
   {lastRole.current&&<Suspense fallback={null}><ApplyDialog open={applyRole!==null} onOpenChange={o=>!o&&setApplyRole(null)} roles={roles.map(r=>r.title)} initialRole={lastRole.current} content={c}/></Suspense>}
