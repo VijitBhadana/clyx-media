@@ -2,7 +2,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { primeFirstPage } from "./lib/siteContent";
+import NotFound from "./pages/NotFound";
 import "./index.css";
+
+// Temporary: every address on the site, /admin included, shows the 404 page. Set to false to bring the site back.
+const SITE_OFFLINE = true;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,12 +32,12 @@ queryClient.getMutationCache().subscribe(event => {
 });
 
 // The first page's content starts downloading now, in parallel with the page's code.
-primeFirstPage(queryClient);
+if (!SITE_OFFLINE) primeFirstPage(queryClient);
 
 // The tRPC client (and superjson) is only needed by the admin panel, so it is created in admin/AdminApp.tsx
 // and downloaded with that page instead of with every visitor's first page load.
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    {SITE_OFFLINE ? <NotFound showHomeButton={false} /> : <App />}
   </QueryClientProvider>
 );
